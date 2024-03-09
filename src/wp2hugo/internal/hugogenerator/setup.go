@@ -27,6 +27,9 @@ func (g Generator) Generate(info *wpparser.WebsiteInfo, outputDirPath string) er
 	if err = updateConfig(*siteDir, info); err != nil {
 		return err
 	}
+	if err = writePages(*siteDir, info); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -75,6 +78,10 @@ func updateConfig(siteDir string, info *wpparser.WebsiteInfo) error {
 		LanguageCode string `yaml:"languageCode"`
 		Title        string `yaml:"title"`
 		Theme        string `yaml:"theme"`
+		// These will be used for OpenGraph information
+		Params struct {
+			Description string `yaml:"description"`
+		} `yaml:"params"`
 	}
 
 	var config Config
@@ -84,6 +91,7 @@ func updateConfig(siteDir string, info *wpparser.WebsiteInfo) error {
 	config.Title = info.Title
 	config.BaseURL = info.Link
 	config.LanguageCode = info.Language
+	config.Params.Description = info.Description
 
 	if err = r.Close(); err != nil {
 		return fmt.Errorf("error closing config file: %s", err)
@@ -102,4 +110,51 @@ func updateConfig(siteDir string, info *wpparser.WebsiteInfo) error {
 	defer w.Close()
 	log.Info().Msgf("Updating config file: %s", configPath)
 	return w.Close()
+}
+
+func writePages(outputDirPath string, info *wpparser.WebsiteInfo) error {
+	// Create content directory
+	contentDir := path.Join(outputDirPath, "content")
+	if err := os.Mkdir(contentDir, 0755); err != nil && !os.IsExist(err) {
+		return fmt.Errorf("error creating content directory: %s", err)
+	}
+
+	// Write pages
+	for _, page := range info.Pages {
+		pagePath := path.Join(contentDir, fmt.Sprintf("%s.md", page.Title))
+		if err := writePage(pagePath, page); err != nil {
+			return err
+		}
+	}
+
+	//// Write posts
+	//for _, post := range info.Posts {
+	//	postPath := path.Join(postsDir, fmt.Sprintf("%s.md", post.Slug))
+	//	if err := writePost(postPath, post); err != nil {
+	//		return err
+	//	}
+	//}
+	return nil
+}
+
+func writePage(pagePath string, page wpparser.PageInfo) error {
+	w, err := os.OpenFile(pagePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		return fmt.Errorf("error opening page file: %s", err)
+	}
+	defer w.Close()
+
+	p := _Page{
+		Title:       page.Title,
+		PublishDate: *page.PublishDate,
+		Draft:       page.PublishStatus == wpparser.PublishStatusDraft,
+		Categories:  page.Categories,
+		Tags:        page.Tags,
+		HTMLContent: page.Content,
+	}
+	if err = p.Write(w); err != nil {
+		return err
+	}
+	log.Info().Msgf("Page written: %s", pagePath)
+	return nil
 }

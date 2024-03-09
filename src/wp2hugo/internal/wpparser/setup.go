@@ -2,8 +2,8 @@ package wpparser
 
 import (
 	"fmt"
-	"github.com/mmcdole/gofeed"
 	"github.com/mmcdole/gofeed/extensions"
+	"github.com/mmcdole/gofeed/rss"
 	"github.com/rs/zerolog/log"
 	"io"
 	"time"
@@ -66,7 +66,10 @@ type _CommonFields struct {
 	PublishStatus    PublishStatus // "publish", "draft", "pending" etc. may be make this a custom type
 	Content          string
 	Excerpt          string // may be empty
-	// TODO: may be add author some day
+
+	Categories []string
+	Tags       []string
+	// TODO: may be add author
 }
 
 type PageInfo struct {
@@ -82,7 +85,7 @@ type AttachmentInfo struct {
 }
 
 func (p *Parser) Parse(xmlData io.Reader) (*WebsiteInfo, error) {
-	fp := gofeed.NewParser()
+	fp := rss.Parser{}
 	feed, err := fp.Parse(InvalidatorCharacterRemover{reader: xmlData})
 	if err != nil {
 		return nil, fmt.Errorf("error parsing XML: %s", err)
@@ -90,15 +93,18 @@ func (p *Parser) Parse(xmlData io.Reader) (*WebsiteInfo, error) {
 	return p.getWebsiteInfo(feed)
 }
 
-func (p *Parser) getWebsiteInfo(feed *gofeed.Feed) (*WebsiteInfo, error) {
-	if feed.PublishedParsed == nil {
-		log.Warn().Msgf("error parsing published date: %s", feed.Published)
+func (p *Parser) getWebsiteInfo(feed *rss.Feed) (*WebsiteInfo, error) {
+	if feed.PubDateParsed == nil {
+		log.Warn().Msgf("error parsing published date: %s", feed.PubDateParsed)
 	}
 
 	log.Trace().
 		Any("WordPress specific keys", keys(feed.Extensions["wp"])).
 		Any("Term", feed.Extensions["wp"]["term"]).
 		Msg("feed.Custom")
+
+	categories := getCategories(feed.Extensions["wp"]["category"])
+	tags := getTags(feed.Extensions["wp"]["tag"])
 
 	attachments := make([]AttachmentInfo, 0)
 	pages := make([]PageInfo, 0)
@@ -140,11 +146,11 @@ func (p *Parser) getWebsiteInfo(feed *gofeed.Feed) (*WebsiteInfo, error) {
 		Title:       feed.Title,
 		Link:        feed.Link,
 		Description: feed.Description,
-		PubDate:     feed.PublishedParsed,
+		PubDate:     feed.PubDateParsed,
 		Language:    feed.Language,
 
-		Categories: getCategories(feed.Extensions["wp"]["category"]),
-		Tags:       getTags(feed.Extensions["wp"]["tag"]),
+		Categories: categories,
+		Tags:       tags,
 
 		Attachments: attachments,
 		Pages:       pages,
@@ -154,24 +160,30 @@ func (p *Parser) getWebsiteInfo(feed *gofeed.Feed) (*WebsiteInfo, error) {
 		Int("numAttachments", len(websiteInfo.Attachments)).
 		Int("numPages", len(websiteInfo.Pages)).
 		Int("numPosts", len(websiteInfo.Posts)).
-		Int("numCategories", len(getCategories(feed.Extensions["wp"]["category"]))).
+		Int("numCategories", len(categories)).
+		Int("numTags", len(tags)).
 		Msgf("WebsiteInfo: %s", websiteInfo.Title)
 	return &websiteInfo, nil
 }
 
-func getAttachmentInfo(item *gofeed.Item) (*AttachmentInfo, error) {
-	lastModifiedDate, err := parseTime(item.Extensions["wp"]["post_modified_gmt"][0].Value)
+func getAttachmentInfo(item *rss.Item) (*AttachmentInfo, error) {
+	fields, err := getCommonFields(item)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing last modified date: %w", err)
+		return nil, fmt.Errorf("error getting common fields: %w", err)
 	}
-	attachment := AttachmentInfo{getCommonFields(item, lastModifiedDate)}
+	attachment := AttachmentInfo{*fields}
 	log.Trace().
 		Any("attachment", attachment).
 		Msg("Attachment")
 	return &attachment, nil
 }
 
-func getCommonFields(item *gofeed.Item, lastModifiedDate *time.Time) _CommonFields {
+func getCommonFields(item *rss.Item) (*_CommonFields, error) {
+	lastModifiedDate, err := parseTime(item.Extensions["wp"]["post_modified_gmt"][0].Value)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing last modified date: %w", err)
+	}
+
 	publishStatus := item.Extensions["wp"]["status"][0].Value
 	switch publishStatus {
 	case "publish", "draft", "pending", "inherit", "future":
@@ -179,36 +191,62 @@ func getCommonFields(item *gofeed.Item, lastModifiedDate *time.Time) _CommonFiel
 	default:
 		log.Fatal().Msgf("Unknown publish status: %s", publishStatus)
 	}
+	pageCategories := make([]string, 0, len(item.Categories))
+	pageTags := make([]string, 0, len(item.Categories))
 
-	return _CommonFields{
+	for _, category := range item.Categories {
+		if isCategory(category) {
+			pageCategories = append(pageTags, category.Value)
+		} else if isTag(category) {
+			pageTags = append(pageTags, category.Value)
+		} else {
+			log.Fatal().
+				Str("link", item.Link).
+				Any("categories", item.Categories).
+				Msgf("Unknown category: %s", category)
+		}
+	}
+
+	return &_CommonFields{
 		PostID:           item.Extensions["wp"]["post_id"][0].Value,
 		Title:            item.Title,
 		Link:             item.Link,
-		PublishDate:      item.PublishedParsed,
+		PublishDate:      item.PubDateParsed,
 		LastModifiedDate: lastModifiedDate,
 		PublishStatus:    PublishStatus(publishStatus),
 		Excerpt:          item.Extensions["excerpt"]["encoded"][0].Value,
-	}
+
+		Categories: pageCategories,
+		Tags:       pageTags,
+	}, nil
 }
 
-func getPageInfo(item *gofeed.Item) (*PageInfo, error) {
-	lastModifiedDate, err := parseTime(item.Extensions["wp"]["post_modified_gmt"][0].Value)
+func isCategory(category *rss.Category) bool {
+	return category.Domain == "category"
+}
+
+func isTag(tag *rss.Category) bool {
+	return tag.Domain == "post_tag"
+}
+
+func getPageInfo(item *rss.Item) (*PageInfo, error) {
+	fields, err := getCommonFields(item)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing last modified date: %w", err)
+		return nil, fmt.Errorf("error getting common fields: %w", err)
 	}
-	page := PageInfo{getCommonFields(item, lastModifiedDate)}
+	page := PageInfo{*fields}
 	log.Trace().
 		Any("page", page).
 		Msg("Page")
 	return &page, nil
 }
 
-func getPostInfo(item *gofeed.Item) (*PostInfo, error) {
-	lastModifiedDate, err := parseTime(item.Extensions["wp"]["post_modified_gmt"][0].Value)
+func getPostInfo(item *rss.Item) (*PostInfo, error) {
+	fields, err := getCommonFields(item)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing last modified date: %w", err)
+		return nil, fmt.Errorf("error getting common fields: %w", err)
 	}
-	post := PostInfo{getCommonFields(item, lastModifiedDate)}
+	post := PostInfo{*fields}
 	log.Trace().
 		Any("post", post).
 		Msg("Post")
