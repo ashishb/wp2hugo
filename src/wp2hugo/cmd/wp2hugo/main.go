@@ -33,5 +33,9 @@ func handle(filePath string) error {
 	if err != nil {
 		return err
 	}
-	return parser.Parse(file)
+	_, err = parser.Parse(file)
+	if err != nil {
+		return err
+	}
+	return nil
 }

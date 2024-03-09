@@ -81,16 +81,16 @@ type AttachmentInfo struct {
 	_CommonFields
 }
 
-func (p *Parser) Parse(xmlData io.Reader) error {
+func (p *Parser) Parse(xmlData io.Reader) (*WebsiteInfo, error) {
 	fp := gofeed.NewParser()
 	feed, err := fp.Parse(InvalidatorCharacterRemover{reader: xmlData})
 	if err != nil {
-		return fmt.Errorf("error parsing XML: %s", err)
+		return nil, fmt.Errorf("error parsing XML: %s", err)
 	}
 	return p.getWebsiteInfo(feed)
 }
 
-func (p *Parser) getWebsiteInfo(feed *gofeed.Feed) error {
+func (p *Parser) getWebsiteInfo(feed *gofeed.Feed) (*WebsiteInfo, error) {
 	if feed.PublishedParsed == nil {
 		log.Warn().Msgf("error parsing published date: %s", feed.Published)
 	}
@@ -109,19 +109,19 @@ func (p *Parser) getWebsiteInfo(feed *gofeed.Feed) error {
 		switch wpPostType {
 		case "attachment":
 			if attachment, err := getAttachmentInfo(item); err != nil {
-				return err
+				return nil, err
 			} else {
 				attachments = append(attachments, *attachment)
 			}
 		case "page":
 			if page, err := getPageInfo(item); err != nil {
-				return err
+				return nil, err
 			} else {
 				pages = append(pages, *page)
 			}
 		case "post":
 			if post, err := getPostInfo(item); err != nil {
-				return err
+				return nil, err
 			} else {
 				posts = append(posts, *post)
 			}
@@ -156,7 +156,7 @@ func (p *Parser) getWebsiteInfo(feed *gofeed.Feed) error {
 		Int("numPosts", len(websiteInfo.Posts)).
 		Int("numCategories", len(getCategories(feed.Extensions["wp"]["category"]))).
 		Msgf("WebsiteInfo: %s", websiteInfo.Title)
-	return nil
+	return &websiteInfo, nil
 }
 
 func getAttachmentInfo(item *gofeed.Item) (*AttachmentInfo, error) {
