@@ -6,13 +6,20 @@ Written in Go.
 
 ## Goals
 
-1. [] Migrate posts
-1. [] Migrate pages
-1. [] Migrate tags
-1. [] Migrate categories
-1. [] Migrate URLs correctly
-1. [] Migrate iframe(s) like YouTube embeds
-1. [] Migrate "Show more..."
+### Parser
+
+1. [x] Migrate posts
+1. [x] Migrate pages
+1. [x] Migrate tags
+1. [x] Migrate categories
+1. [x] Migrate URLs correctly
+1. [ ] Migrate iframe(s) like YouTube embeds
+1. [x] Migrate "Excerpt"
+1. [ ] Migrate "Show more..."
+
+### Renderer
+
+Pending
 
 Various options can be seen [here](https://gohugo.io/tools/migrations/) that are partially good.
 
