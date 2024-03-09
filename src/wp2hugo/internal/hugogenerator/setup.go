@@ -5,6 +5,7 @@ import (
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
+	"net/url"
 	"os"
 	"os/exec"
 	"path"
@@ -160,7 +161,13 @@ func writePage(pagePath string, page wpparser.PageInfo) error {
 	}
 	defer w.Close()
 
+	pageURL, err := url.Parse(page.Link)
+	if err != nil {
+		return fmt.Errorf("error parsing page URL: %s", err)
+	}
+
 	p := _Page{
+		AbsoluteURL: *pageURL,
 		Title:       page.Title,
 		PublishDate: *page.PublishDate,
 		Draft:       page.PublishStatus == wpparser.PublishStatusDraft,

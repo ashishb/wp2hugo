@@ -209,6 +209,13 @@ func getCommonFields(item *rss.Item) (*_CommonFields, error) {
 				Msgf("Unknown category: %s", category)
 		}
 	}
+	if len(item.Links) > 1 {
+		log.Warn().
+			Str("link", item.Link).
+			Any("links", item.Links).
+			Msg("Multiple links are not handled right now")
+
+	}
 
 	return &_CommonFields{
 		PostID:           item.Extensions["wp"]["post_id"][0].Value,
