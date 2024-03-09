@@ -21,6 +21,7 @@ Written in Go.
 1. [ ] Migrate iframe(s) like YouTube embeds
 1. [x] Migrate "Excerpt"
 1. [ ] Migrate "Show more..."
+1. [ ] Migrate "catlist"
 
 ### Renderer
 

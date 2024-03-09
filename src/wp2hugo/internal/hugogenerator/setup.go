@@ -30,6 +30,9 @@ func (g Generator) Generate(info *wpparser.WebsiteInfo, outputDirPath string) er
 	if err = writePages(*siteDir, info); err != nil {
 		return err
 	}
+	log.Debug().
+		Str("cmd", fmt.Sprintf("cd %s && hugo serve", *siteDir)).
+		Msg("Hugo site has been generated")
 	return nil
 }
 
@@ -50,6 +53,8 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 		"git init",
 		"git submodule add https://github.com/theNewDynamic/gohugo-theme-ananke.git themes/ananke",
 		`echo "theme: 'ananke'" >> hugo.yaml`,
+		// Verify that the site is setup correctly
+		"hugo",
 	}
 	combinedCommand := strings.Join(commands, " && ")
 	log.Debug().Msg("Running Hugo setup commands")
@@ -115,13 +120,17 @@ func updateConfig(siteDir string, info *wpparser.WebsiteInfo) error {
 func writePages(outputDirPath string, info *wpparser.WebsiteInfo) error {
 	// Create content directory
 	contentDir := path.Join(outputDirPath, "content")
-	if err := os.Mkdir(contentDir, 0755); err != nil && !os.IsExist(err) {
-		return fmt.Errorf("error creating content directory: %s", err)
+	if err := createDirIfNotExist(contentDir); err != nil {
+		return err
+	}
+	pagesDir := path.Join(contentDir, "pages")
+	if err := createDirIfNotExist(pagesDir); err != nil {
+		return err
 	}
 
 	// Write pages
 	for _, page := range info.Pages {
-		pagePath := path.Join(contentDir, fmt.Sprintf("%s.md", page.Title))
+		pagePath := path.Join(pagesDir, fmt.Sprintf("%s.md", page.Title))
 		if err := writePage(pagePath, page); err != nil {
 			return err
 		}
@@ -134,6 +143,13 @@ func writePages(outputDirPath string, info *wpparser.WebsiteInfo) error {
 	//		return err
 	//	}
 	//}
+	return nil
+}
+
+func createDirIfNotExist(dirPath string) error {
+	if err := os.Mkdir(dirPath, 0755); err != nil && !os.IsExist(err) {
+		return fmt.Errorf("error creating directory: %s", err)
+	}
 	return nil
 }
 

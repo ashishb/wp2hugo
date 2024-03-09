@@ -64,11 +64,14 @@ type _CommonFields struct {
 	PublishDate      *time.Time // This can be nil since an item might have never been published
 	LastModifiedDate *time.Time
 	PublishStatus    PublishStatus // "publish", "draft", "pending" etc. may be make this a custom type
-	Content          string
-	Excerpt          string // may be empty
+
+	Description string // how to use this?
+	Content     string
+	Excerpt     string // may be empty
 
 	Categories []string
 	Tags       []string
+
 	// TODO: may be add author
 }
 
@@ -216,8 +219,10 @@ func getCommonFields(item *rss.Item) (*_CommonFields, error) {
 		PublishStatus:    PublishStatus(publishStatus),
 		Excerpt:          item.Extensions["excerpt"]["encoded"][0].Value,
 
-		Categories: pageCategories,
-		Tags:       pageTags,
+		Description: item.Description,
+		Content:     item.Content,
+		Categories:  pageCategories,
+		Tags:        pageTags,
 	}, nil
 }
 

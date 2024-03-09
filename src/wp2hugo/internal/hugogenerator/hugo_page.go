@@ -2,10 +2,14 @@ package hugogenerator
 
 import (
 	"fmt"
+	md "github.com/JohannesKaufmann/html-to-markdown"
 	"io"
 	"strings"
 	"time"
 )
+
+// Seems to be undocumented, but this is the date format used by Hugo
+const _hugoDateFormat = "2006-01-02T15:04:05-07:00"
 
 type _Page struct {
 	Title       string
@@ -31,8 +35,8 @@ func (page _Page) Write(w io.Writer) error {
 
 func (page _Page) writeMetadata(w io.Writer) error {
 	metadata := make(map[string]string)
-	metadata["title"] = page.Title
-	metadata["date"] = page.PublishDate.Format(time.RFC3339)
+	metadata["title"] = fmt.Sprintf(`"%s"`, page.Title)
+	metadata["date"] = page.PublishDate.Format(_hugoDateFormat)
 	if page.Draft {
 		metadata["draft"] = "true"
 	}
@@ -47,7 +51,7 @@ func (page _Page) writeMetadata(w io.Writer) error {
 
 	combinedMetadata := "+++\n"
 	for k, v := range metadata {
-		combinedMetadata += fmt.Sprintf("%s= %s\n", k, v)
+		combinedMetadata += fmt.Sprintf("%s = %s\n", k, v)
 	}
 	combinedMetadata += "+++\n"
 	if _, err := w.Write([]byte(combinedMetadata)); err != nil {
@@ -57,8 +61,19 @@ func (page _Page) writeMetadata(w io.Writer) error {
 }
 
 func (page _Page) writeContent(w io.Writer) error {
-	data := fmt.Sprintf("## %s\n", page.Title)
-	if _, err := w.Write([]byte(data)); err != nil {
+	if page.HTMLContent == "" {
+		return fmt.Errorf("empty HTML content")
+	}
+	converter := md.NewConverter("", true, nil)
+	markdown, err := converter.ConvertString(page.HTMLContent)
+	if err != nil {
+		return fmt.Errorf("error converting HTML to Markdown: %s", err)
+	}
+	if len(strings.TrimSpace(markdown)) == 0 {
+		return fmt.Errorf("empty markdown")
+	}
+
+	if _, err := w.Write([]byte(markdown)); err != nil {
 		return fmt.Errorf("error writing to page file: %s", err)
 	}
 	return nil
