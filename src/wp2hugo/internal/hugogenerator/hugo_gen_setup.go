@@ -63,6 +63,9 @@ func (g Generator) Generate(info wpparser.WebsiteInfo, outputDirPath string) err
 	if err = setupSearchPage(*siteDir); err != nil {
 		return err
 	}
+	if err = writeCustomShortCodes(*siteDir); err != nil {
+		return err
+	}
 	log.Debug().
 		Str("cmd", fmt.Sprintf("cd %s && hugo serve", *siteDir)).
 		Msg("Hugo site has been generated")

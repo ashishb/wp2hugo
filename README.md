@@ -27,6 +27,7 @@ Written in Go.
 1. [ ] Migrate code blocks correctly
 1. [ ] favicon.ico
 1. [x] YouTube embeds
+1. [x] Google Map embed via a custom short code `googlemaps`
 
 ### Renderer
 
