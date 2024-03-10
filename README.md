@@ -26,6 +26,7 @@ Written in Go.
 1. [ ] Migrate RSS feed correctly and in the same location
 1. [ ] Migrate code blocks correctly
 1. [ ] favicon.ico
+1. [x] YouTube embeds
 
 ### Renderer
 

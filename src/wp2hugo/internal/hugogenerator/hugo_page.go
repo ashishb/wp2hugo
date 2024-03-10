@@ -2,7 +2,6 @@ package hugogenerator
 
 import (
 	"fmt"
-	md "github.com/JohannesKaufmann/html-to-markdown"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
 	"io"
@@ -83,7 +82,7 @@ func (page _Page) writeContent(w io.Writer) error {
 	if page.HTMLContent == "" {
 		return fmt.Errorf("empty HTML content")
 	}
-	converter := md.NewConverter("", true, nil)
+	converter := getMarkdownConverter()
 	markdown, err := converter.ConvertString(page.HTMLContent)
 	if err != nil {
 		return fmt.Errorf("error converting HTML to Markdown: %s", err)
