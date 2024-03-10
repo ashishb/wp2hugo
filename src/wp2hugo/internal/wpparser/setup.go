@@ -1,12 +1,18 @@
 package wpparser
 
 import (
+	"errors"
 	"fmt"
 	"github.com/mmcdole/gofeed/extensions"
 	"github.com/mmcdole/gofeed/rss"
 	"github.com/rs/zerolog/log"
 	"io"
+	"strings"
 	"time"
+)
+
+var (
+	errTrashItem = fmt.Errorf("item is in trash")
 )
 
 type Parser struct {
@@ -56,7 +62,7 @@ const (
 	PublishStatusFuture  PublishStatus = "future"
 )
 
-type _CommonFields struct {
+type CommonFields struct {
 	PostID string
 
 	Title            string
@@ -75,16 +81,24 @@ type _CommonFields struct {
 	// TODO: may be add author
 }
 
+func (i CommonFields) Filename() string {
+	str1 := strings.ToLower(i.Title)
+	for _, chars := range []string{" ", "/", ":", ";", "?"} {
+		str1 = strings.ReplaceAll(str1, chars, "_")
+	}
+	return str1
+}
+
 type PageInfo struct {
-	_CommonFields
+	CommonFields
 }
 
 type PostInfo struct {
-	_CommonFields
+	CommonFields
 }
 
 type AttachmentInfo struct {
-	_CommonFields
+	CommonFields
 }
 
 func (p *Parser) Parse(xmlData io.Reader) (*WebsiteInfo, error) {
@@ -117,21 +131,31 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed) (*WebsiteInfo, error) {
 		wpPostType := item.Extensions["wp"]["post_type"][0].Value
 		switch wpPostType {
 		case "attachment":
-			if attachment, err := getAttachmentInfo(item); err != nil {
+			if attachment, err := getAttachmentInfo(item); err != nil && !errors.Is(err, errTrashItem) {
 				return nil, err
-			} else {
+			} else if attachment != nil {
 				attachments = append(attachments, *attachment)
 			}
 		case "page":
-			if page, err := getPageInfo(item); err != nil {
+			if page, err := getPageInfo(item); err != nil && !errors.Is(err, errTrashItem) {
 				return nil, err
-			} else {
+			} else if page != nil {
+				if page.Content == "" {
+					log.Warn().
+						Str("title", page.Title).
+						Msg("Empty content")
+				}
 				pages = append(pages, *page)
 			}
 		case "post":
-			if post, err := getPostInfo(item); err != nil {
+			if post, err := getPostInfo(item); err != nil && !errors.Is(err, errTrashItem) {
 				return nil, err
-			} else {
+			} else if post != nil {
+				if post.Content == "" {
+					log.Warn().
+						Str("title", post.Title).
+						Msg("Empty content")
+				}
 				posts = append(posts, *post)
 			}
 		case "amp_validated_url", "nav_menu_item", "custom_css", "wp_global_styles", "wp_navigation":
@@ -181,7 +205,7 @@ func getAttachmentInfo(item *rss.Item) (*AttachmentInfo, error) {
 	return &attachment, nil
 }
 
-func getCommonFields(item *rss.Item) (*_CommonFields, error) {
+func getCommonFields(item *rss.Item) (*CommonFields, error) {
 	lastModifiedDate, err := parseTime(item.Extensions["wp"]["post_modified_gmt"][0].Value)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing last modified date: %w", err)
@@ -191,8 +215,10 @@ func getCommonFields(item *rss.Item) (*_CommonFields, error) {
 	switch publishStatus {
 	case "publish", "draft", "pending", "inherit", "future":
 		// OK
+	case "trash":
+		return nil, fmt.Errorf("%w, ignored: %s", errTrashItem, item.Title)
 	default:
-		log.Fatal().Msgf("Unknown publish status: %s", publishStatus)
+		log.Fatal().Msgf("Unknown publish status: %s for %s", publishStatus, item.Title)
 	}
 	pageCategories := make([]string, 0, len(item.Categories))
 	pageTags := make([]string, 0, len(item.Categories))
@@ -214,10 +240,9 @@ func getCommonFields(item *rss.Item) (*_CommonFields, error) {
 			Str("link", item.Link).
 			Any("links", item.Links).
 			Msg("Multiple links are not handled right now")
-
 	}
 
-	return &_CommonFields{
+	return &CommonFields{
 		PostID:           item.Extensions["wp"]["post_id"][0].Value,
 		Title:            item.Title,
 		Link:             item.Link,

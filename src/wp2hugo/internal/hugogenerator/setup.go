@@ -31,6 +31,9 @@ func (g Generator) Generate(info *wpparser.WebsiteInfo, outputDirPath string) er
 	if err = writePages(*siteDir, info); err != nil {
 		return err
 	}
+	if err = writePosts(*siteDir, info); err != nil {
+		return err
+	}
 	log.Debug().
 		Str("cmd", fmt.Sprintf("cd %s && hugo serve", *siteDir)).
 		Msg("Hugo site has been generated")
@@ -119,11 +122,17 @@ func updateConfig(siteDir string, info *wpparser.WebsiteInfo) error {
 }
 
 func writePages(outputDirPath string, info *wpparser.WebsiteInfo) error {
+	if len(info.Pages) == 0 {
+		log.Info().Msg("No pages to write")
+		return nil
+	}
+
 	// Create content directory
 	contentDir := path.Join(outputDirPath, "content")
 	if err := createDirIfNotExist(contentDir); err != nil {
 		return err
 	}
+
 	pagesDir := path.Join(contentDir, "pages")
 	if err := createDirIfNotExist(pagesDir); err != nil {
 		return err
@@ -131,19 +140,38 @@ func writePages(outputDirPath string, info *wpparser.WebsiteInfo) error {
 
 	// Write pages
 	for _, page := range info.Pages {
-		pagePath := path.Join(pagesDir, fmt.Sprintf("%s.md", page.Title))
-		if err := writePage(pagePath, page); err != nil {
+		pagePath := path.Join(pagesDir, fmt.Sprintf("%s.md", page.Filename()))
+		if err := writePage(pagePath, page.CommonFields); err != nil {
 			return err
 		}
 	}
 
-	//// Write posts
-	//for _, post := range info.Posts {
-	//	postPath := path.Join(postsDir, fmt.Sprintf("%s.md", post.Slug))
-	//	if err := writePost(postPath, post); err != nil {
-	//		return err
-	//	}
-	//}
+	return nil
+}
+
+func writePosts(outputDirPath string, info *wpparser.WebsiteInfo) error {
+	if len(info.Posts) == 0 {
+		log.Info().Msg("No posts to write")
+		return nil
+	}
+	// Create content directory
+	contentDir := path.Join(outputDirPath, "content")
+	if err := createDirIfNotExist(contentDir); err != nil {
+		return err
+	}
+
+	postsDir := path.Join(contentDir, "posts")
+	if err := createDirIfNotExist(postsDir); err != nil {
+		return err
+	}
+
+	// Write posts
+	for _, post := range info.Posts {
+		postPath := path.Join(postsDir, fmt.Sprintf("%s.md", post.Filename()))
+		if err := writePage(postPath, post.CommonFields); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -154,7 +182,7 @@ func createDirIfNotExist(dirPath string) error {
 	return nil
 }
 
-func writePage(pagePath string, page wpparser.PageInfo) error {
+func writePage(pagePath string, page wpparser.CommonFields) error {
 	w, err := os.OpenFile(pagePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return fmt.Errorf("error opening page file: %s", err)
@@ -169,7 +197,7 @@ func writePage(pagePath string, page wpparser.PageInfo) error {
 	p := _Page{
 		AbsoluteURL: *pageURL,
 		Title:       page.Title,
-		PublishDate: *page.PublishDate,
+		PublishDate: page.PublishDate,
 		Draft:       page.PublishStatus == wpparser.PublishStatusDraft,
 		Categories:  page.Categories,
 		Tags:        page.Tags,

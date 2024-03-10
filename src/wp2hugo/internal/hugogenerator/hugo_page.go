@@ -20,7 +20,7 @@ type _Page struct {
 	AbsoluteURL url.URL
 
 	Title       string
-	PublishDate time.Time
+	PublishDate *time.Time
 	Draft       bool
 	Categories  []string
 	Tags        []string
@@ -45,20 +45,22 @@ func (page _Page) Write(w io.Writer) error {
 }
 
 func (page _Page) writeMetadata(w io.Writer) error {
-	metadata := make(map[string]string)
+	metadata := make(map[string]any)
 	metadata["url"] = page.getRelativeURL()
 	metadata["title"] = page.Title
-	metadata["date"] = page.PublishDate.Format(_hugoDateFormat)
+	if page.PublishDate != nil {
+		metadata["date"] = page.PublishDate.Format(_hugoDateFormat)
+	}
 	if page.Draft {
 		metadata["draft"] = "true"
 	}
 
 	if len(page.Categories) > 0 {
-		metadata["categories"] = fmt.Sprintf("[%s]", strings.Join(page.Categories, ","))
+		metadata["categories"] = page.Categories
 	}
 
 	if len(page.Tags) > 0 {
-		metadata["tags"] = fmt.Sprintf("[%s]", strings.Join(page.Tags, ","))
+		metadata["tags"] = page.Tags
 	}
 
 	combinedMetadata, err := yaml.Marshal(metadata)
