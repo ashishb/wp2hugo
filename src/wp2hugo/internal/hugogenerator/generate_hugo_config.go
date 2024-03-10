@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"strings"
 )
 
 type _HugoNavMenu struct {
@@ -99,22 +100,11 @@ func updateConfig(siteDir string, info wpparser.WebsiteInfo) error {
 	// https://adityatelange.github.io/hugo-PaperMod/posts/papermod/papermod-features/#search-page
 	config.Outputs.Home = []string{"HTML", "RSS", "JSON"}
 
-	if len(info.NavigationLinks) > 0 {
-		hostName, err := url.Parse(info.Link)
-		if err != nil {
-			return fmt.Errorf("error parsing host name: %s", err)
-		}
-
-		for i, link := range info.NavigationLinks {
-			config.Menu.Main = append(config.Menu.Main, _HugoNavMenu{
-				Name:   link.Title,
-				URL:    replaceAbsoluteLinksWithRelative(hostName.Host, link.URL),
-				Weight: i + 1,
-			})
-		}
+	if err := addNavigationLinks(info, &config); err != nil {
+		return err
 	}
 
-	if err = r.Close(); err != nil {
+	if err := r.Close(); err != nil {
 		return fmt.Errorf("error closing config file: %s", err)
 	}
 	data, err := yaml.Marshal(config)
@@ -123,4 +113,37 @@ func updateConfig(siteDir string, info wpparser.WebsiteInfo) error {
 	}
 	log.Info().Msgf("Updating config file: %s", configPath)
 	return writeFile(configPath, data)
+}
+
+func addNavigationLinks(info wpparser.WebsiteInfo, config *_HugoConfig) error {
+	if len(info.NavigationLinks) <= 0 {
+		return nil
+	}
+	hostName, err := url.Parse(info.Link)
+	if err != nil {
+		return fmt.Errorf("error parsing host name: %s", err)
+	}
+
+	searchPresent := false
+
+	for i, link := range info.NavigationLinks {
+		config.Menu.Main = append(config.Menu.Main, _HugoNavMenu{
+			Name:   link.Title,
+			URL:    replaceAbsoluteLinksWithRelative(hostName.Host, link.URL),
+			Weight: i + 1,
+		})
+		if strings.HasSuffix(link.URL, "/search/") {
+			searchPresent = true
+		}
+	}
+
+	// add search at the end of the menu
+	if !searchPresent {
+		config.Menu.Main = append(config.Menu.Main, _HugoNavMenu{
+			Name:   "🔍",
+			URL:    "/search/",
+			Weight: len(info.NavigationLinks) + 1,
+		})
+	}
+	return nil
 }
