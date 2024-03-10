@@ -1,18 +1,21 @@
 package wpparser
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/mmcdole/gofeed/extensions"
 	"github.com/mmcdole/gofeed/rss"
 	"github.com/rs/zerolog/log"
 	"io"
+	"regexp"
 	"strings"
 	"time"
 )
 
 var (
-	errTrashItem = fmt.Errorf("item is in trash")
+	errTrashItem         = fmt.Errorf("item is in trash")
+	nonAlphanumericRegex = regexp.MustCompile(`[^a-zA-Z0-9 ]+`)
 )
 
 type Parser struct {
@@ -35,9 +38,17 @@ type WebsiteInfo struct {
 
 	// Collecting attachments is mostly useless but we are doing it for completeness
 	// Only the ones that are actually used in posts/pages are useful
-	Attachments []AttachmentInfo
-	Pages       []PageInfo
-	Posts       []PostInfo
+	Attachments     []AttachmentInfo
+	Pages           []PageInfo
+	Posts           []PostInfo
+	NavigationLinks []NavigationLink
+}
+
+type NavigationLink struct {
+	// Fallback to Label if title is empty
+	Title string
+	URL   string
+	Type  string
 }
 
 type CategoryInfo struct {
@@ -83,8 +94,9 @@ type CommonFields struct {
 
 func (i CommonFields) Filename() string {
 	str1 := strings.ToLower(i.Title)
-	for _, chars := range []string{" ", "/", ":", ";", "?"} {
-		str1 = strings.ReplaceAll(str1, chars, "_")
+	str1 = nonAlphanumericRegex.ReplaceAllString(str1, "_")
+	for strings.Contains(str1, "__") {
+		str1 = strings.ReplaceAll(str1, "__", "_")
 	}
 	return str1
 }
@@ -126,6 +138,7 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed) (*WebsiteInfo, error) {
 	attachments := make([]AttachmentInfo, 0)
 	pages := make([]PageInfo, 0)
 	posts := make([]PostInfo, 0)
+	var navigationLinks []NavigationLink
 
 	for _, item := range feed.Items {
 		wpPostType := item.Extensions["wp"]["post_type"][0].Value
@@ -158,7 +171,13 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed) (*WebsiteInfo, error) {
 				}
 				posts = append(posts, *post)
 			}
-		case "amp_validated_url", "nav_menu_item", "custom_css", "wp_global_styles", "wp_navigation":
+		case "wp_navigation":
+			var err error
+			navigationLinks, err = getNavigationLinks(item.Content)
+			if err != nil {
+				return nil, fmt.Errorf("error getting navigation links: %w", err)
+			}
+		case "amp_validated_url", "nav_menu_item", "custom_css", "wp_global_styles":
 			// Ignoring these for now
 			continue
 		default:
@@ -179,9 +198,10 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed) (*WebsiteInfo, error) {
 		Categories: categories,
 		Tags:       tags,
 
-		Attachments: attachments,
-		Pages:       pages,
-		Posts:       posts,
+		Attachments:     attachments,
+		Pages:           pages,
+		Posts:           posts,
+		NavigationLinks: navigationLinks,
 	}
 	log.Info().
 		Int("numAttachments", len(websiteInfo.Attachments)).
@@ -255,6 +275,77 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 		Content:     item.Content,
 		Categories:  pageCategories,
 		Tags:        pageTags,
+	}, nil
+}
+
+func getNavigationLinks(content string) ([]NavigationLink, error) {
+	// Extract all HTML comments
+	var htmlCommentExtractor = regexp.MustCompile(`<!--(.*?)-->`)
+	comments := htmlCommentExtractor.FindAllString(content, -1)
+	log.Debug().
+		Int("navigationLinks", len(comments)).
+		Msg("getNavigationLinks")
+	results := make([]NavigationLink, 0, len(comments))
+	for _, comment := range comments {
+		log.Trace().Msgf("comment: %s", comment)
+		var navigationLinkExtractor = regexp.MustCompile(`{.*}`)
+		match := navigationLinkExtractor.FindString(comment)
+		if match == "" {
+			continue
+		}
+		link, err := getNavigationLink(match)
+		if err != nil {
+			return nil, fmt.Errorf("error getting navigation link: %w", err)
+		}
+		log.Debug().
+			Any("link", link).
+			Msg("Navigation link")
+		results = append(results, *link)
+	}
+	return results, nil
+}
+
+/*
+*
+  - Example:
+    {
+    "className": " menu-item menu-item-type-taxonomy menu-item-object-category",
+    "description": "",
+    "id": "113",
+    "kind": "taxonomy",
+    "label": "Tech thoughts",
+    "opensInNewTab": false,
+    "rel": null,
+    "title": "",
+    "type": "category",
+    "url": "https://ashishb.net/category/tech-thoughts/"
+    }
+*/
+func getNavigationLink(match string) (*NavigationLink, error) {
+	type _NavigationLink struct {
+		ClassName     string `json:"className"`
+		Description   string `json:"description"`
+		ID            string `json:"id"`
+		Kind          string `json:"kind"`
+		Label         string `json:"label"`
+		OpensInNewTab bool   `json:"opensInNewTab"`
+		Rel           string `json:"rel"`
+		Title         string `json:"title"`
+		Type          string `json:"type"`
+		URL           string `json:"url"`
+	}
+	var navLink _NavigationLink
+	if err := json.Unmarshal([]byte(match), &navLink); err != nil {
+		return nil, fmt.Errorf("error unmarshalling navigation link: %w", err)
+	}
+	title := navLink.Title
+	if title == "" {
+		title = navLink.Label
+	}
+	return &NavigationLink{
+		Title: title,
+		URL:   navLink.URL,
+		Type:  navLink.Type,
 	}, nil
 }
 
