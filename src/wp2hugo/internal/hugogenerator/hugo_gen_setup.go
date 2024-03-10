@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
 	"github.com/rs/zerolog/log"
-	"gopkg.in/yaml.v3"
 	"net/url"
 	"os"
 	"os/exec"
@@ -13,6 +12,25 @@ import (
 	"time"
 )
 
+const _archiveContent = `
+---
+title: "All"
+layout: "archives"
+url: "/all/"
+summary: archives
+---
+`
+
+const _searchContent = `
+---
+title: "Search" # in any language you want
+layout: "search" # necessary for search
+summary: "Search"
+url: "/search/"
+placeholder: "placeholder text in search input box"
+---
+`
+
 type Generator struct {
 }
 
@@ -20,7 +38,7 @@ func NewGenerator() *Generator {
 	return &Generator{}
 }
 
-func (g Generator) Generate(info *wpparser.WebsiteInfo, outputDirPath string) error {
+func (g Generator) Generate(info wpparser.WebsiteInfo, outputDirPath string) error {
 	siteDir, err := g.setupHugo(outputDirPath)
 	if err != nil {
 		return err
@@ -32,6 +50,17 @@ func (g Generator) Generate(info *wpparser.WebsiteInfo, outputDirPath string) er
 		return err
 	}
 	if err = writePosts(*siteDir, info); err != nil {
+		return err
+	}
+
+	//// TODO: this is ashishb.net specific, do not commit
+	//if err = setupHomepage(*siteDir, "/pages/selected_posts"); err != nil {
+	//	return err
+	//}
+	if err = setupArchivePage(*siteDir); err != nil {
+		return err
+	}
+	if err = setupSearchPage(*siteDir); err != nil {
 		return err
 	}
 	log.Debug().
@@ -55,8 +84,9 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 		fmt.Sprintf("hugo new site %s --format yaml", siteName),
 		"cd " + siteName,
 		"git init",
-		"git submodule add https://github.com/theNewDynamic/gohugo-theme-ananke.git themes/ananke",
-		`echo "theme: 'ananke'" >> hugo.yaml`,
+		"git submodule add --depth=1 https://github.com/adityatelange/hugo-PaperMod.git themes/PaperMod",
+		"git submodule update --init --recursive",
+		`echo "theme: 'PaperMod'">> hugo.yaml`,
 		// Verify that the site is setup correctly
 		"hugo",
 	}
@@ -74,54 +104,7 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 	return &siteDir, nil
 }
 
-func updateConfig(siteDir string, info *wpparser.WebsiteInfo) error {
-	configPath := path.Join(siteDir, "hugo.yaml")
-	r, err := os.OpenFile(configPath, os.O_RDONLY, 0644)
-	if err != nil {
-		return fmt.Errorf("error opening config file: %s", err)
-	}
-	defer r.Close()
-
-	type Config struct {
-		BaseURL      string `yaml:"baseURL"`
-		LanguageCode string `yaml:"languageCode"`
-		Title        string `yaml:"title"`
-		Theme        string `yaml:"theme"`
-		// These will be used for OpenGraph information
-		Params struct {
-			Description string `yaml:"description"`
-		} `yaml:"params"`
-	}
-
-	var config Config
-	if err := yaml.NewDecoder(r).Decode(&config); err != nil {
-		return fmt.Errorf("error unmarshalling config: %s", err)
-	}
-	config.Title = info.Title
-	config.BaseURL = info.Link
-	config.LanguageCode = info.Language
-	config.Params.Description = info.Description
-
-	if err = r.Close(); err != nil {
-		return fmt.Errorf("error closing config file: %s", err)
-	}
-	data, err := yaml.Marshal(config)
-	if err != nil {
-		return fmt.Errorf("error marshalling config: %s", err)
-	}
-	w, err := os.OpenFile(configPath, os.O_WRONLY|os.O_TRUNC, 0644)
-	if err != nil {
-		return fmt.Errorf("error opening config file: %s", err)
-	}
-	if _, err := w.Write(data); err != nil {
-		return fmt.Errorf("error writing to config file: %s", err)
-	}
-	defer w.Close()
-	log.Info().Msgf("Updating config file: %s", configPath)
-	return w.Close()
-}
-
-func writePages(outputDirPath string, info *wpparser.WebsiteInfo) error {
+func writePages(outputDirPath string, info wpparser.WebsiteInfo) error {
 	if len(info.Pages) == 0 {
 		log.Info().Msg("No pages to write")
 		return nil
@@ -149,7 +132,7 @@ func writePages(outputDirPath string, info *wpparser.WebsiteInfo) error {
 	return nil
 }
 
-func writePosts(outputDirPath string, info *wpparser.WebsiteInfo) error {
+func writePosts(outputDirPath string, info wpparser.WebsiteInfo) error {
 	if len(info.Posts) == 0 {
 		log.Info().Msg("No posts to write")
 		return nil
@@ -171,6 +154,32 @@ func writePosts(outputDirPath string, info *wpparser.WebsiteInfo) error {
 		if err := writePage(postPath, post.CommonFields); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+// Ref: https://adityatelange.github.io/hugo-PaperMod/posts/papermod/papermod-features/#archives-layout
+func setupArchivePage(siteDir string) error {
+	filePath := path.Join(siteDir, "content", "archives.md")
+	content := _archiveContent
+	return writeFile(filePath, []byte(content))
+}
+
+// Ref: https://adityatelange.github.io/hugo-PaperMod/posts/papermod/papermod-features/#search-page
+func setupSearchPage(siteDir string) error {
+	filePath := path.Join(siteDir, "content", "search.md")
+	content := _searchContent
+	return writeFile(filePath, []byte(content))
+}
+
+func writeFile(filePath string, content []byte) error {
+	w, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		return fmt.Errorf("error opening archive file: %s", err)
+	}
+	defer w.Close()
+	if _, err := w.Write(content); err != nil {
+		return fmt.Errorf("error writing to archive file: %s", err)
 	}
 	return nil
 }
@@ -198,7 +207,7 @@ func writePage(pagePath string, page wpparser.CommonFields) error {
 		AbsoluteURL: *pageURL,
 		Title:       page.Title,
 		PublishDate: page.PublishDate,
-		Draft:       page.PublishStatus == wpparser.PublishStatusDraft,
+		Draft:       page.PublishStatus == wpparser.PublishStatusDraft || page.PublishStatus == wpparser.PublishStatusPending,
 		Categories:  page.Categories,
 		Tags:        page.Tags,
 		HTMLContent: page.Content,

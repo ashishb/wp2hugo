@@ -11,7 +11,7 @@ Written in Go.
 
 ## Goals
 
-### Parser
+### Parse and generate
 
 1. [x] Migrate posts
 1. [x] Migrate pages
@@ -22,6 +22,10 @@ Written in Go.
 1. [x] Migrate "Excerpt"
 1. [ ] Migrate "Show more..."
 1. [ ] Migrate "catlist"
+1. [ ] Set WordPress homepage correctly - I am unable to find that being exported
+1. [ ] Migrate RSS feed correctly and in the same location
+1. [ ] Migrate code blocks correctly
+1. [ ] favicon.ico
 
 ### Renderer
 

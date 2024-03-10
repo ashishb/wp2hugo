@@ -37,7 +37,7 @@ func handle(filePath string) error {
 	if err != nil {
 		return err
 	}
-	return generate(websiteInfo, *outputDir)
+	return generate(*websiteInfo, *outputDir)
 }
 
 func getWebsiteInfo(filePath string) (*wpparser.WebsiteInfo, error) {
@@ -49,7 +49,7 @@ func getWebsiteInfo(filePath string) (*wpparser.WebsiteInfo, error) {
 	return parser.Parse(file)
 }
 
-func generate(info *wpparser.WebsiteInfo, outputDirPath string) error {
+func generate(info wpparser.WebsiteInfo, outputDirPath string) error {
 	log.Debug().Msgf("Output: %s", outputDirPath)
 	generator := hugogenerator.NewGenerator()
 	return generator.Generate(info, outputDirPath)

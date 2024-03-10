@@ -12,8 +12,13 @@ import (
 	"time"
 )
 
-// Seems to be undocumented, but this is the date format used by Hugo
-const _hugoDateFormat = "2006-01-02T15:04:05-07:00"
+const (
+	// Seems to be undocumented, but this is the date format used by Hugo
+	_hugoDateFormat = "2006-01-02T15:04:05-07:00"
+
+	_CategoryName = "category"
+	_TagName      = "tag"
+)
 
 type _Page struct {
 	// This is the original URL of the page from the WordPress site
@@ -56,11 +61,11 @@ func (page _Page) writeMetadata(w io.Writer) error {
 	}
 
 	if len(page.Categories) > 0 {
-		metadata["categories"] = page.Categories
+		metadata[_CategoryName] = page.Categories
 	}
 
 	if len(page.Tags) > 0 {
-		metadata["tags"] = page.Tags
+		metadata[_TagName] = page.Tags
 	}
 
 	combinedMetadata, err := yaml.Marshal(metadata)
@@ -86,11 +91,7 @@ func (page _Page) writeContent(w io.Writer) error {
 	if len(strings.TrimSpace(markdown)) == 0 {
 		return fmt.Errorf("empty markdown")
 	}
-	markdown, err = replaceAbsoluteLinksWithRelative(page.AbsoluteURL.Host, markdown)
-	if err != nil {
-		return fmt.Errorf("error replacing absolute links with relative: %s", err)
-
-	}
+	markdown = replaceAbsoluteLinksWithRelative(page.AbsoluteURL.Host, markdown)
 
 	if _, err := w.Write([]byte(markdown)); err != nil {
 		return fmt.Errorf("error writing to page file: %s", err)
@@ -98,7 +99,7 @@ func (page _Page) writeContent(w io.Writer) error {
 	return nil
 }
 
-func replaceAbsoluteLinksWithRelative(hostName string, markdownData string) (string, error) {
+func replaceAbsoluteLinksWithRelative(hostName string, markdownData string) string {
 	log.Debug().
 		Str("hostName", hostName).
 		Msg("Replacing absolute links with relative links")
@@ -106,5 +107,5 @@ func replaceAbsoluteLinksWithRelative(hostName string, markdownData string) (str
 	re2 := regexp.MustCompile("http://" + hostName + "/")
 	markdownData = re1.ReplaceAllString(markdownData, "/")
 	markdownData = re2.ReplaceAllString(markdownData, "/")
-	return markdownData, nil
+	return markdownData
 }

@@ -15,7 +15,7 @@ import (
 
 var (
 	errTrashItem         = fmt.Errorf("item is in trash")
-	nonAlphanumericRegex = regexp.MustCompile(`[^a-zA-Z0-9 ]+`)
+	nonAlphanumericRegex = regexp.MustCompile(`[^a-zA-Z0-9]+`)
 )
 
 type Parser struct {
@@ -97,6 +97,7 @@ func (i CommonFields) Filename() string {
 	str1 = nonAlphanumericRegex.ReplaceAllString(str1, "_")
 	for strings.Contains(str1, "__") {
 		str1 = strings.ReplaceAll(str1, "__", "_")
+		str1 = strings.ReplaceAll(str1, "_.", ".")
 	}
 	return str1
 }
