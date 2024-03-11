@@ -10,6 +10,8 @@ import (
 // Example: "[catlist name="programming" catlink=yes date=yes date\_tag=p excerpt=no numberposts=5 date=no thumbnail=no]"
 var _CatlistRegEx = regexp.MustCompile(`\\\[catlist name="([^"]+)" catlink=(yes|no) .* numberposts=([0-9]+).*]`)
 
+// Converts the catlist shortcode to Hugo shortcode using our custom
+// shortcode _selectedPostsShortCode
 func replaceCatlistWithShortcode(markdownData string) string {
 	log.Debug().
 		Msg("Replacing catlist with shortcode")
