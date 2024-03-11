@@ -99,7 +99,10 @@ func (i CommonFields) Filename() string {
 		str1 = strings.ReplaceAll(str1, "--", "-")
 		str1 = strings.ReplaceAll(str1, "-.", ".")
 	}
-	// Remove trailing "-"
+	// Remove leading and trailing "-"
+	if len(str1) > 1 {
+		str1 = strings.TrimPrefix(str1, "-")
+	}
 	if len(str1) > 1 {
 		str1 = strings.TrimSuffix(str1, "-")
 	}
