@@ -25,7 +25,7 @@ Written in Go.
 1. [x] Set WordPress homepage correctly
 1. [ ] Migrate RSS feed correctly and in the same location
 1. [ ] Migrate code blocks correctly
-1. [ ] favicon.ico
+1. [x] favicon.ico
 1. [x] YouTube embeds
 1. [x] Google Map embed via a custom short code `googlemaps`
 
