@@ -25,11 +25,14 @@ const _selectedPostsShortCode = `
 {{ $p := where site.RegularPages "Type" "posts" }}
 {{ $p = where $p "Params.category" "intersect" (slice $category) }}
 
+{{ $categoryTitle := title $category }}
+{{ $categoryTitle = strings.Replace $categoryTitle "-" " " }}
+
 <h3>
   {{ if $catLink }}
-    <a href="/category/{{ urlquery $category }}"> {{title $category }} </a>
+    <a href="/category/{{ urlquery $category }}"> {{$categoryTitle }} </a>
   {{ else }}
-    {{ title $category }}
+    {{ $categoryTitle }}
   {{ end }}
 
 </h3>

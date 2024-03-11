@@ -246,9 +246,9 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 
 	for _, category := range item.Categories {
 		if isCategory(category) {
-			pageCategories = append(pageTags, category.Value)
+			pageCategories = append(pageTags, NormalizeCategoryName(category.Value))
 		} else if isTag(category) {
-			pageTags = append(pageTags, category.Value)
+			pageTags = append(pageTags, NormalizeCategoryName(category.Value))
 		} else {
 			log.Fatal().
 				Str("link", item.Link).
@@ -358,6 +358,11 @@ func isTag(tag *rss.Category) bool {
 	return tag.Domain == "post_tag"
 }
 
+// NormalizeCategoryName removes space from the category name and converts it to lowercase
+func NormalizeCategoryName(name string) string {
+	return strings.ToLower(strings.ReplaceAll(name, " ", "-"))
+}
+
 func getPageInfo(item *rss.Item) (*PageInfo, error) {
 	fields, err := getCommonFields(item)
 	if err != nil {
@@ -388,7 +393,7 @@ func getCategories(inputs []ext.Extension) []CategoryInfo {
 		category := CategoryInfo{
 			// ID is usually int but for safety let's assume string
 			ID:       input.Children["term_id"][0].Value,
-			Name:     input.Children["cat_name"][0].Value,
+			Name:     NormalizeCategoryName(input.Children["cat_name"][0].Value),
 			NiceName: input.Children["category_nicename"][0].Value,
 			// We are ignoring "category_parent" for now as I have never used it
 		}
@@ -404,7 +409,7 @@ func getTags(inputs []ext.Extension) []TagInfo {
 		tag := TagInfo{
 			// ID is usually int but for safety let's assume string
 			ID:   input.Children["term_id"][0].Value,
-			Name: input.Children["tag_name"][0].Value,
+			Name: NormalizeCategoryName(input.Children["tag_name"][0].Value),
 			Slug: input.Children["tag_slug"][0].Value,
 		}
 		log.Trace().Msgf("tag: %+v", tag)
