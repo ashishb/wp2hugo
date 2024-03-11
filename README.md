@@ -18,11 +18,11 @@ Written in Go.
 1. [x] Migrate tags
 1. [x] Migrate categories
 1. [x] Migrate URLs correctly
-1. [ ] Migrate iframe(s) like YouTube embeds
+1. [x] Migrate iframe(s) like YouTube embeds
 1. [x] Migrate "Excerpt"
 1. [ ] Migrate "Show more..."
-1. [ ] Migrate "catlist"
-1. [ ] Set WordPress homepage correctly - I am unable to find that being exported
+1. [x] Migrate "catlist"
+1. [x] Set WordPress homepage correctly
 1. [ ] Migrate RSS feed correctly and in the same location
 1. [ ] Migrate code blocks correctly
 1. [ ] favicon.ico
