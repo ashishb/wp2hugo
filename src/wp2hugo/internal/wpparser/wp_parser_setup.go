@@ -94,14 +94,14 @@ type CommonFields struct {
 
 func (i CommonFields) Filename() string {
 	str1 := strings.ToLower(i.Title)
-	str1 = nonAlphanumericRegex.ReplaceAllString(str1, "_")
-	for strings.Contains(str1, "__") {
-		str1 = strings.ReplaceAll(str1, "__", "_")
-		str1 = strings.ReplaceAll(str1, "_.", ".")
+	str1 = nonAlphanumericRegex.ReplaceAllString(str1, "-")
+	for strings.Contains(str1, "--") {
+		str1 = strings.ReplaceAll(str1, "--", "-")
+		str1 = strings.ReplaceAll(str1, "-.", ".")
 	}
-	// Remove trailing "_"
+	// Remove trailing "-"
 	if len(str1) > 1 {
-		str1 = strings.TrimSuffix(str1, "_")
+		str1 = strings.TrimSuffix(str1, "-")
 	}
 	return str1
 }
