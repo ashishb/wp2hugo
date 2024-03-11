@@ -99,6 +99,10 @@ func (i CommonFields) Filename() string {
 		str1 = strings.ReplaceAll(str1, "__", "_")
 		str1 = strings.ReplaceAll(str1, "_.", ".")
 	}
+	// Remove trailing "_"
+	if len(str1) > 1 {
+		str1 = strings.TrimSuffix(str1, "_")
+	}
 	return str1
 }
 
