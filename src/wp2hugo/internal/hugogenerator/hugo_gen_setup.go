@@ -112,13 +112,7 @@ func writePages(outputDirPath string, info wpparser.WebsiteInfo) error {
 		return nil
 	}
 
-	// Create content directory
-	contentDir := path.Join(outputDirPath, "content")
-	if err := createDirIfNotExist(contentDir); err != nil {
-		return err
-	}
-
-	pagesDir := path.Join(contentDir, "pages")
+	pagesDir := path.Join(outputDirPath, "content", "pages")
 	if err := createDirIfNotExist(pagesDir); err != nil {
 		return err
 	}
@@ -139,13 +133,8 @@ func writePosts(outputDirPath string, info wpparser.WebsiteInfo) error {
 		log.Info().Msg("No posts to write")
 		return nil
 	}
-	// Create content directory
-	contentDir := path.Join(outputDirPath, "content")
-	if err := createDirIfNotExist(contentDir); err != nil {
-		return err
-	}
 
-	postsDir := path.Join(contentDir, "posts")
+	postsDir := path.Join(outputDirPath, "content", "posts")
 	if err := createDirIfNotExist(postsDir); err != nil {
 		return err
 	}
@@ -213,7 +202,7 @@ func writeFile(filePath string, content []byte) error {
 }
 
 func createDirIfNotExist(dirPath string) error {
-	if err := os.Mkdir(dirPath, 0755); err != nil && !os.IsExist(err) {
+	if err := os.MkdirAll(dirPath, 0755); err != nil && !os.IsExist(err) {
 		return fmt.Errorf("error creating directory: %s", err)
 	}
 	return nil

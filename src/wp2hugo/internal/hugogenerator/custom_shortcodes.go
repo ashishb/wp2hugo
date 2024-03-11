@@ -63,9 +63,6 @@ func writeShortCode(siteDir string, shortCodeName string, fileContent string) er
 		Str("shortcode", shortCodeName).
 		Msg("Writing shortcode")
 	shortCodeDir := path.Join(siteDir, "layouts", "shortcodes")
-	if err := createDirIfNotExist(path.Join(siteDir, "layouts")); err != nil {
-		return err
-	}
 	if err := createDirIfNotExist(path.Join(siteDir, "layouts", "shortcodes")); err != nil {
 		return err
 	}
