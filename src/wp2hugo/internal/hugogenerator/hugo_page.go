@@ -91,6 +91,7 @@ func (page _Page) writeContent(w io.Writer) error {
 		return fmt.Errorf("empty markdown")
 	}
 	markdown = replaceAbsoluteLinksWithRelative(page.AbsoluteURL.Host, markdown)
+	markdown = replaceCatlistWithShortcode(markdown)
 
 	if _, err := w.Write([]byte(markdown)); err != nil {
 		return fmt.Errorf("error writing to page file: %s", err)

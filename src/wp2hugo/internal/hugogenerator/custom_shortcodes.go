@@ -1,6 +1,8 @@
 package hugogenerator
 
 import (
+	"errors"
+	"fmt"
 	"github.com/rs/zerolog/log"
 	"path"
 )
@@ -15,12 +17,48 @@ const _googleMapsShortCode = `
 </iframe>
 `
 
+const _selectedPostsShortCode = `
+{{ $category := .Get "category" }}
+{{ $catLink := .Get "catlink" | default true }}
+{{ $count := .Get "count" | default 5 }}
+
+{{ $p := where site.RegularPages "Type" "posts" }}
+{{ $p = where $p "Params.category" "intersect" (slice $category) }}
+
+<h3>
+  {{ if $catLink }}
+    <a href="/category/{{ urlquery $category }}"> {{title $category }} </a>
+  {{ else }}
+    {{ title $category }}
+  {{ end }}
+
+</h3>
+<ul>
+  {{ range first $count $p}}
+      <li><a href="{{ .RelPermalink }}">{{ .Title }}</a>
+      </li>
+  {{ end }}
+</ul>
+`
+
 func writeCustomShortCodes(siteDir string) error {
-	return writeGoogleMapsShortCode(siteDir)
+	err1 := writeGoogleMapsShortCode(siteDir)
+	err2 := writeSelectedPostsShortCode(siteDir)
+	return errors.Join(err1, err2)
 }
 
 func writeGoogleMapsShortCode(siteDir string) error {
-	log.Debug().Msg("Writing googlemaps shortcode")
+	return writeShortCode(siteDir, "googlemaps", _googleMapsShortCode)
+}
+
+func writeSelectedPostsShortCode(siteDir string) error {
+	return writeShortCode(siteDir, "catlist", _selectedPostsShortCode)
+}
+
+func writeShortCode(siteDir string, shortCodeName string, fileContent string) error {
+	log.Debug().
+		Str("shortcode", shortCodeName).
+		Msg("Writing shortcode")
 	shortCodeDir := path.Join(siteDir, "layouts", "shortcodes")
 	if err := createDirIfNotExist(path.Join(siteDir, "layouts")); err != nil {
 		return err
@@ -28,6 +66,6 @@ func writeGoogleMapsShortCode(siteDir string) error {
 	if err := createDirIfNotExist(path.Join(siteDir, "layouts", "shortcodes")); err != nil {
 		return err
 	}
-	googleMapsFile := path.Join(shortCodeDir, "googlemaps.html")
-	return writeFile(googleMapsFile, []byte(_googleMapsShortCode))
+	googleMapsFile := path.Join(shortCodeDir, fmt.Sprintf("%s.html", shortCodeName))
+	return writeFile(googleMapsFile, []byte(fileContent))
 }
