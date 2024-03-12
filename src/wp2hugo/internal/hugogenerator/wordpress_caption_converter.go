@@ -15,9 +15,17 @@ import (
 //	[/caption]
 //
 // the important fields to extract are "align", "width", "src", "alt"
-var _CaptionRegEx = regexp.MustCompile(`\[caption [^ ]* align="([^"]+)" width="([^"]+)"\]` +
-	`<img class="[^"]+" src="([^"]+)" alt="([^"]+)" width="([^"]+)" height="([^"]+)" />` +
-	`([^<]+)` +
+var _CaptionRegEx1 = regexp.MustCompile(`\[caption [^ ]* align="([^"]+)" width="([^"]+)"\]` +
+	`.*?` +
+	`<img class="[^"]*?" src="([^"]+)" alt="([^"]*?)" width="([^"]*?)" height="([^"]*?)" />` +
+	`.+?` +
+	`\[/caption\]`)
+
+// No alt
+var _CaptionRegEx2 = regexp.MustCompile(`\[caption [^ ]* align="([^"]+)" width="([^"]+)"\]` +
+	`.*?` +
+	`<img class="[^"]*?" src="([^"]+)" width="([^"]*?)" height="([^"]*?)" />` +
+	`.+?` +
 	`\[/caption\]`)
 
 // Converts the WordPress's caption shortcode to Hugo shortcode "figure"
@@ -26,17 +34,24 @@ func replaceCaptionWithFigure(htmlData string) string {
 	log.Debug().
 		Msg("Replacing caption with figure")
 
-	return replaceAllStringSubmatchFunc(_CaptionRegEx, htmlData, func(groups []string) string {
-		const replacementQuote = "'"
-		src := groups[3]
-		// These character creates problem in Hugo's markdown
-		src = strings.ReplaceAll(src, " ", "%20")
-		src = strings.ReplaceAll(src, "_", "%5F")
+	htmlData = replaceAllStringSubmatchFunc(_CaptionRegEx1, htmlData, captionReplacementFunction)
+	htmlData = replaceAllStringSubmatchFunc(_CaptionRegEx2, htmlData, captionReplacementFunction)
+	return htmlData
+}
+
+func captionReplacementFunction(groups []string) string {
+	const replacementQuote = "'"
+	src := groups[3]
+	// These character creates problem in Hugo's markdown
+	src = strings.ReplaceAll(src, " ", "%20")
+	src = strings.ReplaceAll(src, "_", "%5F")
+	alt := ""
+	if len(groups) > 4 {
 		alt := groups[4]
 		for _, s := range []string{"\"", "“", "”", "&quot;"} {
 			alt = strings.ReplaceAll(alt, s, replacementQuote)
 		}
-		return fmt.Sprintf(`{{< figure align=%s width=%s src="%s" alt="%s" >}}`,
-			groups[1], groups[2], src, alt)
-	})
+	}
+	return fmt.Sprintf(`{{< figure align=%s width=%s src="%s" alt="%s" >}}`,
+		groups[1], groups[2], src, alt)
 }

@@ -36,6 +36,8 @@ type _Page struct {
 	HTMLContent string
 }
 
+var _wpContentRegEx = regexp.MustCompile(`/wp-content/uploads/[^"]+`)
+
 func (page _Page) getRelativeURL() string {
 	return page.AbsoluteURL.Path
 }
@@ -48,6 +50,14 @@ func (page _Page) Write(w io.Writer) error {
 		return err
 	}
 	return nil
+}
+
+func (page _Page) GetWPContentLinks() ([]string, error) {
+	markdown, err := page.getMarkdown()
+	if err != nil {
+		return nil, err
+	}
+	return _wpContentRegEx.FindAllString(*markdown, -1), nil
 }
 
 func (page _Page) writeMetadata(w io.Writer) error {
@@ -83,23 +93,31 @@ func (page _Page) writeMetadata(w io.Writer) error {
 	return nil
 }
 
-func (page _Page) writeContent(w io.Writer) error {
+func (page _Page) getMarkdown() (*string, error) {
 	if page.HTMLContent == "" {
-		return fmt.Errorf("empty HTML content")
+		return nil, fmt.Errorf("empty HTML content")
 	}
 	converter := getMarkdownConverter()
 	htmlContent := replaceCaptionWithFigure(page.HTMLContent)
 	markdown, err := converter.ConvertString(htmlContent)
 	if err != nil {
-		return fmt.Errorf("error converting HTML to Markdown: %s", err)
+		return nil, fmt.Errorf("error converting HTML to Markdown: %s", err)
 	}
 	if len(strings.TrimSpace(markdown)) == 0 {
-		return fmt.Errorf("empty markdown")
+		return nil, fmt.Errorf("empty markdown")
 	}
 	markdown = replaceAbsoluteLinksWithRelative(page.AbsoluteURL.Host, markdown)
 	markdown = replaceCatlistWithShortcode(markdown)
+	return &markdown, nil
+}
 
-	if _, err := w.Write([]byte(markdown)); err != nil {
+func (page _Page) writeContent(w io.Writer) error {
+	markdown, err := page.getMarkdown()
+	if err != nil {
+		return err
+	}
+
+	if _, err := w.Write([]byte(*markdown)); err != nil {
 		return fmt.Errorf("error writing to page file: %s", err)
 	}
 	return nil
