@@ -28,6 +28,7 @@ Written in Go.
 1. [x] favicon.ico
 1. [x] YouTube embeds
 1. [x] Google Map embed via a custom short code `googlemaps`
+1. [x] Migrate `caption` (WordPress) to `figure` (Hugo)
 
 Various options can be seen [here](https://gohugo.io/tools/migrations/)
 that are partially good.

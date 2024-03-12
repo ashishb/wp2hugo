@@ -83,7 +83,8 @@ func (page _Page) writeContent(w io.Writer) error {
 		return fmt.Errorf("empty HTML content")
 	}
 	converter := getMarkdownConverter()
-	markdown, err := converter.ConvertString(page.HTMLContent)
+	htmlContent := replaceCaptionWithFigure(page.HTMLContent)
+	markdown, err := converter.ConvertString(htmlContent)
 	if err != nil {
 		return fmt.Errorf("error converting HTML to Markdown: %s", err)
 	}
