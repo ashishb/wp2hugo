@@ -23,7 +23,7 @@ Written in Go.
 1. [ ] Migrate "Show more..."
 1. [x] Migrate "catlist"
 1. [x] Set WordPress homepage correctly
-1. [ ] Migrate RSS feed correctly and in the same location
+1. [x] Migrate RSS feed with existing UUIDs, so that entries appear the same
 1. [ ] Migrate code blocks correctly
 1. [x] favicon.ico
 1. [x] YouTube embeds

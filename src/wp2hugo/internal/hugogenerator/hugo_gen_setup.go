@@ -63,6 +63,10 @@ func (g Generator) Generate(info wpparser.WebsiteInfo, mediaSourceURL string, ou
 		return err
 	}
 
+	if err = setupRssFeedFormat(*siteDir); err != nil {
+		return err
+	}
+
 	if mediaSourceURL != "" {
 		if err = writeFavicon(*siteDir, mediaSourceURL); err != nil {
 			return err
@@ -231,6 +235,7 @@ func writePage(pagePath string, page wpparser.CommonFields) error {
 		Categories:  page.Categories,
 		Tags:        page.Tags,
 		HTMLContent: page.Content,
+		GUID:        page.GUID,
 	}
 	if err = p.Write(w); err != nil {
 		return err

@@ -2,6 +2,7 @@ package hugogenerator
 
 import (
 	"fmt"
+	"github.com/mmcdole/gofeed/rss"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
 	"io"
@@ -28,6 +29,7 @@ type _Page struct {
 	Draft       bool
 	Categories  []string
 	Tags        []string
+	GUID        *rss.GUID
 
 	// HTMLContent is the HTML content of the page that will be
 	// transformed to Markdown
@@ -65,6 +67,9 @@ func (page _Page) writeMetadata(w io.Writer) error {
 
 	if len(page.Tags) > 0 {
 		metadata[_TagName] = page.Tags
+	}
+	if page.GUID != nil {
+		metadata["GUID"] = page.GUID.Value
 	}
 
 	combinedMetadata, err := yaml.Marshal(metadata)

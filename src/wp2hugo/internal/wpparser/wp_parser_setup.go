@@ -81,6 +81,7 @@ type CommonFields struct {
 	PublishDate      *time.Time // This can be nil since an item might have never been published
 	LastModifiedDate *time.Time
 	PublishStatus    PublishStatus // "publish", "draft", "pending" etc. may be make this a custom type
+	GUID             *rss.GUID
 
 	Description string // how to use this?
 	Content     string
@@ -275,6 +276,7 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 		Title:            item.Title,
 		Link:             item.Link,
 		PublishDate:      item.PubDateParsed,
+		GUID:             item.GUID,
 		LastModifiedDate: lastModifiedDate,
 		PublishStatus:    PublishStatus(publishStatus),
 		Excerpt:          item.Extensions["excerpt"]["encoded"][0].Value,
