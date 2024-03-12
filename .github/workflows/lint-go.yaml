@@ -36,7 +36,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Go ${{ matrix.go-version }}
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go-version }}
 
@@ -55,7 +55,7 @@ jobs:
       - name: Run golangci-lint on src/wp2hugo
         uses: golangci/golangci-lint-action@v4
         with:
-          # We use cache provided by "actions/setup-go@v4"
+          # We use cache provided by "actions/setup-go@v5"
           skip-cache: true
           # Directory containing go.mod file
           working-directory: "src/wp2hugo"
