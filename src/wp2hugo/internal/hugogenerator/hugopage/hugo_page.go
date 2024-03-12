@@ -36,7 +36,7 @@ type Page struct {
 	HTMLContent string
 }
 
-var _wpContentRegEx = regexp.MustCompile(`/wp-content/uploads/[^"]+`)
+var _imageLinks = regexp.MustCompile(`!\[.*?]\((.+?)\)`)
 
 func (page Page) getRelativeURL() string {
 	return page.AbsoluteURL.Path
@@ -52,12 +52,17 @@ func (page Page) Write(w io.Writer) error {
 	return nil
 }
 
-func (page Page) GetWPContentLinks() ([]string, error) {
+func (page Page) WPImageLinks() ([]string, error) {
 	markdown, err := page.getMarkdown()
 	if err != nil {
 		return nil, err
 	}
-	return _wpContentRegEx.FindAllString(*markdown, -1), nil
+	var links []string
+	matches := _imageLinks.FindAllStringSubmatch(*markdown, -1)
+	for _, match := range matches {
+		links = append(links, match[1])
+	}
+	return links, nil
 }
 
 func (page Page) writeMetadata(w io.Writer) error {
