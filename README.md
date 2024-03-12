@@ -39,3 +39,4 @@ that are partially good.
 Note:
 
 1. To migrate comments, use [Remark42](https://remark42.com/docs/backup/migration/)
+2. Font modifications are theme-specific. For PaperMod theme, follow [this](https://forum.wildserver.ru/viewtopic.php?t=18)
