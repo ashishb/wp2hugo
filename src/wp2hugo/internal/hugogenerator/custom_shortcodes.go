@@ -44,7 +44,7 @@ const _selectedPostsShortCode = `
 </ul>
 `
 
-func writeCustomShortCodes(siteDir string) error {
+func WriteCustomShortCodes(siteDir string) error {
 	err1 := writeGoogleMapsShortCode(siteDir)
 	err2 := writeSelectedPostsShortCode(siteDir)
 	return errors.Join(err1, err2)

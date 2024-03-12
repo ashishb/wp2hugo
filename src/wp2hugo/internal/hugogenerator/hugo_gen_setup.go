@@ -5,7 +5,6 @@ import (
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugogenerator/hugopage"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
 	"github.com/rs/zerolog/log"
-	"net/http"
 	"net/url"
 	"os"
 	"os/exec"
@@ -60,7 +59,7 @@ func (g Generator) Generate(info wpparser.WebsiteInfo, mediaSourceURL string, ou
 	if err = setupSearchPage(*siteDir); err != nil {
 		return err
 	}
-	if err = writeCustomShortCodes(*siteDir); err != nil {
+	if err = WriteCustomShortCodes(*siteDir); err != nil {
 		return err
 	}
 
@@ -70,6 +69,9 @@ func (g Generator) Generate(info wpparser.WebsiteInfo, mediaSourceURL string, ou
 
 	if mediaSourceURL != "" {
 		if err = writeFavicon(*siteDir, mediaSourceURL); err != nil {
+			return err
+		}
+		if err = downloadMediaFiles(info, mediaSourceURL, *siteDir); err != nil {
 			return err
 		}
 	}
@@ -169,32 +171,6 @@ func setupSearchPage(siteDir string) error {
 	filePath := path.Join(siteDir, "content", "search.md")
 	content := _searchContent
 	return writeFile(filePath, []byte(content))
-}
-
-func writeFavicon(outputDirPath string, websiteURL string) error {
-	log.Debug().Msg("Fetching and writing favicon")
-	if err := createDirIfNotExist(path.Join(outputDirPath, "static")); err != nil {
-		return err
-	}
-	filePath := path.Join(outputDirPath, "static", "favicon.ico")
-	if !strings.HasPrefix(websiteURL, "http") {
-		websiteURL = "https://" + websiteURL
-	}
-	url1 := fmt.Sprintf("%s/favicon.ico", websiteURL)
-	resp, err := http.Get(url1)
-	if err != nil {
-		return fmt.Errorf("error fetching favicon: %s", err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("error fetching favicon: %s", resp.Status)
-	}
-	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
-	if err != nil {
-		return fmt.Errorf("error opening favicon file: %s", err)
-	}
-	defer file.Close()
-	return resp.Write(file)
 }
 
 func writeFile(filePath string, content []byte) error {
