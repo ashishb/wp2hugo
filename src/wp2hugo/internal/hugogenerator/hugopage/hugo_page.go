@@ -1,4 +1,4 @@
-package hugogenerator
+package hugopage
 
 import (
 	"fmt"
@@ -16,11 +16,11 @@ const (
 	// Seems to be undocumented, but this is the date format used by Hugo
 	_hugoDateFormat = "2006-01-02T15:04:05-07:00"
 
-	_CategoryName = "category"
-	_TagName      = "tag"
+	CategoryName = "category"
+	TagName      = "tag"
 )
 
-type _Page struct {
+type Page struct {
 	// This is the original URL of the page from the WordPress site
 	AbsoluteURL url.URL
 
@@ -38,11 +38,11 @@ type _Page struct {
 
 var _wpContentRegEx = regexp.MustCompile(`/wp-content/uploads/[^"]+`)
 
-func (page _Page) getRelativeURL() string {
+func (page Page) getRelativeURL() string {
 	return page.AbsoluteURL.Path
 }
 
-func (page _Page) Write(w io.Writer) error {
+func (page Page) Write(w io.Writer) error {
 	if err := page.writeMetadata(w); err != nil {
 		return err
 	}
@@ -52,7 +52,7 @@ func (page _Page) Write(w io.Writer) error {
 	return nil
 }
 
-func (page _Page) GetWPContentLinks() ([]string, error) {
+func (page Page) GetWPContentLinks() ([]string, error) {
 	markdown, err := page.getMarkdown()
 	if err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func (page _Page) GetWPContentLinks() ([]string, error) {
 	return _wpContentRegEx.FindAllString(*markdown, -1), nil
 }
 
-func (page _Page) writeMetadata(w io.Writer) error {
+func (page Page) writeMetadata(w io.Writer) error {
 	metadata := make(map[string]any)
 	metadata["url"] = page.getRelativeURL()
 	metadata["title"] = page.Title
@@ -72,11 +72,11 @@ func (page _Page) writeMetadata(w io.Writer) error {
 	}
 
 	if len(page.Categories) > 0 {
-		metadata[_CategoryName] = page.Categories
+		metadata[CategoryName] = page.Categories
 	}
 
 	if len(page.Tags) > 0 {
-		metadata[_TagName] = page.Tags
+		metadata[TagName] = page.Tags
 	}
 	if page.GUID != nil {
 		metadata["GUID"] = page.GUID.Value
@@ -93,7 +93,7 @@ func (page _Page) writeMetadata(w io.Writer) error {
 	return nil
 }
 
-func (page _Page) getMarkdown() (*string, error) {
+func (page Page) getMarkdown() (*string, error) {
 	if page.HTMLContent == "" {
 		return nil, fmt.Errorf("empty HTML content")
 	}
@@ -106,12 +106,12 @@ func (page _Page) getMarkdown() (*string, error) {
 	if len(strings.TrimSpace(markdown)) == 0 {
 		return nil, fmt.Errorf("empty markdown")
 	}
-	markdown = replaceAbsoluteLinksWithRelative(page.AbsoluteURL.Host, markdown)
+	markdown = ReplaceAbsoluteLinksWithRelative(page.AbsoluteURL.Host, markdown)
 	markdown = replaceCatlistWithShortcode(markdown)
 	return &markdown, nil
 }
 
-func (page _Page) writeContent(w io.Writer) error {
+func (page Page) writeContent(w io.Writer) error {
 	markdown, err := page.getMarkdown()
 	if err != nil {
 		return err
@@ -123,7 +123,7 @@ func (page _Page) writeContent(w io.Writer) error {
 	return nil
 }
 
-func replaceAbsoluteLinksWithRelative(hostName string, markdownData string) string {
+func ReplaceAbsoluteLinksWithRelative(hostName string, markdownData string) string {
 	log.Debug().
 		Str("hostName", hostName).
 		Msg("Replacing absolute links with relative links")

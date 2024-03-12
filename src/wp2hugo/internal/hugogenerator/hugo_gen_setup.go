@@ -2,6 +2,7 @@ package hugogenerator
 
 import (
 	"fmt"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugogenerator/hugopage"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
 	"github.com/rs/zerolog/log"
 	"net/http"
@@ -227,7 +228,7 @@ func writePage(pagePath string, page wpparser.CommonFields) error {
 		return fmt.Errorf("error parsing page URL: %s", err)
 	}
 
-	p := _Page{
+	p := hugopage.Page{
 		AbsoluteURL: *pageURL,
 		Title:       page.Title,
 		PublishDate: page.PublishDate,

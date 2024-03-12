@@ -1,4 +1,4 @@
-package hugogenerator
+package hugopage
 
 import (
 	"fmt"

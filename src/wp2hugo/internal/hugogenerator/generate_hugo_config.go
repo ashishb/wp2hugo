@@ -2,6 +2,7 @@ package hugogenerator
 
 import (
 	"fmt"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugogenerator/hugopage"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
@@ -78,8 +79,8 @@ func updateConfig(siteDir string, info wpparser.WebsiteInfo) error {
 	config.Title = info.Title
 	config.BaseURL = info.Link
 	config.LanguageCode = info.Language
-	config.Taxonomies.Category = _CategoryName
-	config.Taxonomies.Tag = _TagName
+	config.Taxonomies.Category = hugopage.CategoryName
+	config.Taxonomies.Tag = hugopage.TagName
 	config.Params.Description = info.Description
 	config.Params.Assets.Favicon = "/favicon.ico"
 	config.Params.Assets.DisableHLJS = true
@@ -129,7 +130,7 @@ func addNavigationLinks(info wpparser.WebsiteInfo, config *_HugoConfig) error {
 	for i, link := range info.NavigationLinks {
 		config.Menu.Main = append(config.Menu.Main, _HugoNavMenu{
 			Name:   link.Title,
-			URL:    replaceAbsoluteLinksWithRelative(hostName.Host, link.URL),
+			URL:    hugopage.ReplaceAbsoluteLinksWithRelative(hostName.Host, link.URL),
 			Weight: i + 1,
 		})
 		if strings.HasSuffix(link.URL, "/search/") {
