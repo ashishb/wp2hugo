@@ -29,12 +29,12 @@ Written in Go.
 1. [x] YouTube embeds
 1. [x] Google Map embed via a custom short code `googlemaps`
 
-### Renderer
-
-Pending
-
 Various options can be seen [here](https://gohugo.io/tools/migrations/)
 that are partially good.
 
 1. Export via `https://<website>/wp-admin/export.php`
 1. The problem is that there is no good tool to perform the next import into Hugo
+
+Note:
+
+1. To migrate comments, use [Remark42](https://remark42.com/docs/backup/migration/)
