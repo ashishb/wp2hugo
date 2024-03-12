@@ -39,7 +39,7 @@ func NewGenerator() *Generator {
 	return &Generator{}
 }
 
-func (g Generator) Generate(info wpparser.WebsiteInfo, outputDirPath string) error {
+func (g Generator) Generate(info wpparser.WebsiteInfo, mediaSourceURL string, outputDirPath string) error {
 	siteDir, err := g.setupHugo(outputDirPath)
 	if err != nil {
 		return err
@@ -62,8 +62,11 @@ func (g Generator) Generate(info wpparser.WebsiteInfo, outputDirPath string) err
 	if err = writeCustomShortCodes(*siteDir); err != nil {
 		return err
 	}
-	if err = writeFavicon(*siteDir, info.Link); err != nil {
-		return err
+
+	if mediaSourceURL != "" {
+		if err = writeFavicon(*siteDir, mediaSourceURL); err != nil {
+			return err
+		}
 	}
 	log.Debug().
 		Str("cmd", fmt.Sprintf("cd %s && hugo serve", *siteDir)).

@@ -10,8 +10,9 @@ import (
 )
 
 var (
-	sourceFile = flag.String("source", "", "file path to the source WordPress XML file")
-	outputDir  = flag.String("output", "/tmp", "dir path to the write the Hugo generated data to")
+	sourceFile     = flag.String("source", "", "file path to the source WordPress XML file")
+	mediaSourceURL = flag.String("media-source", "", "URL to WordPress website to download media files")
+	outputDir      = flag.String("output", "/tmp", "dir path to the write the Hugo generated data to")
 )
 
 func main() {
@@ -25,19 +26,22 @@ func main() {
 	if len(*outputDir) == 0 {
 		log.Fatal().Msg("Output directory is required")
 	}
-	err := handle(*sourceFile)
+	if len(*mediaSourceURL) == 0 {
+		log.Warn().Msg("Media source is not provided. Media files will not be downloaded")
+	}
+	err := handle(*sourceFile, *mediaSourceURL)
 	if err != nil {
 		log.Fatal().Msgf("Error: %s", err)
 	}
 }
 
-func handle(filePath string) error {
+func handle(filePath string, mediaSourceURL string) error {
 	log.Debug().Msgf("Source: %s", filePath)
 	websiteInfo, err := getWebsiteInfo(filePath)
 	if err != nil {
 		return err
 	}
-	return generate(*websiteInfo, *outputDir)
+	return generate(*websiteInfo, mediaSourceURL, *outputDir)
 }
 
 func getWebsiteInfo(filePath string) (*wpparser.WebsiteInfo, error) {
@@ -49,8 +53,8 @@ func getWebsiteInfo(filePath string) (*wpparser.WebsiteInfo, error) {
 	return parser.Parse(file)
 }
 
-func generate(info wpparser.WebsiteInfo, outputDirPath string) error {
+func generate(info wpparser.WebsiteInfo, mediaSourceURL string, outputDirPath string) error {
 	log.Debug().Msgf("Output: %s", outputDirPath)
 	generator := hugogenerator.NewGenerator()
-	return generator.Generate(info, outputDirPath)
+	return generator.Generate(info, mediaSourceURL, outputDirPath)
 }
