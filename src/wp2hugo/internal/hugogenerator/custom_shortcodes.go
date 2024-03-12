@@ -22,7 +22,7 @@ const _selectedPostsShortCode = `
 {{ $catLink := .Get "catlink" | default true }}
 {{ $count := .Get "count" | default 5 }}
 
-{{ $p := where site.RegularPages "Type" "posts" }}
+{{ $p := site.AllPages }}
 {{ $p = where $p "Params.category" "intersect" (slice $category) }}
 
 {{ $categoryTitle := title $category }}
