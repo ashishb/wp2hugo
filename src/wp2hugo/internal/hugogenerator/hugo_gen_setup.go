@@ -33,24 +33,29 @@ placeholder: "placeholder text in search input box"
 `
 
 type Generator struct {
+	outputDirPath string
+	downloadMedia bool
 }
 
-func NewGenerator() *Generator {
-	return &Generator{}
+func NewGenerator(outputDirPath string, downloadMedia bool) *Generator {
+	return &Generator{
+		outputDirPath: outputDirPath,
+		downloadMedia: downloadMedia,
+	}
 }
 
-func (g Generator) Generate(info wpparser.WebsiteInfo, mediaSourceURL string, outputDirPath string) error {
-	siteDir, err := g.setupHugo(outputDirPath)
+func (g Generator) Generate(info wpparser.WebsiteInfo) error {
+	siteDir, err := g.setupHugo(g.outputDirPath)
 	if err != nil {
 		return err
 	}
 	if err = updateConfig(*siteDir, info); err != nil {
 		return err
 	}
-	if err = writePages(*siteDir, info); err != nil {
+	if err = g.writePages(*siteDir, info); err != nil {
 		return err
 	}
-	if err = writePosts(*siteDir, info); err != nil {
+	if err = g.writePosts(*siteDir, info); err != nil {
 		return err
 	}
 	if err = setupArchivePage(*siteDir); err != nil {
@@ -67,11 +72,8 @@ func (g Generator) Generate(info wpparser.WebsiteInfo, mediaSourceURL string, ou
 		return err
 	}
 
-	if mediaSourceURL != "" {
-		if err = writeFavicon(*siteDir, mediaSourceURL); err != nil {
-			return err
-		}
-		if err = downloadMediaFiles(info, mediaSourceURL, *siteDir); err != nil {
+	if g.downloadMedia {
+		if err = writeFavicon(*siteDir, info.Link); err != nil {
 			return err
 		}
 	}
@@ -116,7 +118,7 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 	return &siteDir, nil
 }
 
-func writePages(outputDirPath string, info wpparser.WebsiteInfo) error {
+func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) error {
 	if len(info.Pages) == 0 {
 		log.Info().Msg("No pages to write")
 		return nil
@@ -130,7 +132,7 @@ func writePages(outputDirPath string, info wpparser.WebsiteInfo) error {
 	// Write pages
 	for _, page := range info.Pages {
 		pagePath := path.Join(pagesDir, fmt.Sprintf("%s.md", page.Filename()))
-		if err := writePage(pagePath, page.CommonFields); err != nil {
+		if err := writePage(outputDirPath, pagePath, page.CommonFields, g.downloadMedia); err != nil {
 			return err
 		}
 	}
@@ -138,7 +140,7 @@ func writePages(outputDirPath string, info wpparser.WebsiteInfo) error {
 	return nil
 }
 
-func writePosts(outputDirPath string, info wpparser.WebsiteInfo) error {
+func (g Generator) writePosts(outputDirPath string, info wpparser.WebsiteInfo) error {
 	if len(info.Posts) == 0 {
 		log.Info().Msg("No posts to write")
 		return nil
@@ -152,7 +154,7 @@ func writePosts(outputDirPath string, info wpparser.WebsiteInfo) error {
 	// Write posts
 	for _, post := range info.Posts {
 		postPath := path.Join(postsDir, fmt.Sprintf("%s.md", post.Filename()))
-		if err := writePage(postPath, post.CommonFields); err != nil {
+		if err := writePage(outputDirPath, postPath, post.CommonFields, g.downloadMedia); err != nil {
 			return err
 		}
 	}
@@ -192,7 +194,7 @@ func createDirIfNotExist(dirPath string) error {
 	return nil
 }
 
-func writePage(pagePath string, page wpparser.CommonFields) error {
+func writePage(outputMediaDirPath string, pagePath string, page wpparser.CommonFields, downloadMedia bool) error {
 	w, err := os.OpenFile(pagePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return fmt.Errorf("error opening page file: %s", err)
@@ -218,5 +220,41 @@ func writePage(pagePath string, page wpparser.CommonFields) error {
 		return err
 	}
 	log.Info().Msgf("Page written: %s", pagePath)
+
+	links, err := p.WPImageLinks()
+	if err != nil {
+		return fmt.Errorf("error getting WordPress content links: %s", err)
+	}
+	log.Debug().
+		Str("page", page.Title).
+		Int("links", len(links)).
+		Msgf("Embedded media links")
+	prefixes := make([]string, 0)
+	pageURL.Host = strings.TrimPrefix(pageURL.Host, "www.")
+	prefixes = append(prefixes, fmt.Sprintf("https://%s", pageURL.Host))
+	prefixes = append(prefixes, fmt.Sprintf("http://%s", pageURL.Host))
+	prefixes = append(prefixes, fmt.Sprintf("https://www.%s", pageURL.Host))
+	prefixes = append(prefixes, fmt.Sprintf("http://www.%s", pageURL.Host))
+
+	if downloadMedia {
+		for _, link := range links {
+			for _, prefix := range prefixes {
+				link = strings.TrimPrefix(link, prefix)
+			}
+			if !strings.HasPrefix(link, "/") {
+				log.Warn().
+					Str("link", link).
+					Str("source", page.Link).
+					Msg("non-relative link")
+			}
+			outputFilePath := fmt.Sprintf("%s/static/%s", outputMediaDirPath, strings.TrimSuffix(link, "/"))
+			if !strings.HasPrefix(link, "http") {
+				link = "https://ashishb.net/" + link
+			}
+			if err = downloadFromURL(link, outputFilePath); err != nil {
+				return fmt.Errorf("error downloading media file: %s", err)
+			}
+		}
+	}
 	return nil
 }

@@ -2,7 +2,6 @@ package hugogenerator
 
 import (
 	"fmt"
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
 	"github.com/rs/zerolog/log"
 	"net/http"
 	"os"
@@ -39,13 +38,8 @@ func downloadFromURL(srcURL string, destFilePath string) error {
 	}
 	file, err := os.OpenFile(destFilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
-		return fmt.Errorf("error opening file %s: %s", file, err)
+		return fmt.Errorf("error opening file %s: %s", file.Name(), err)
 	}
 	defer file.Close()
 	return resp.Write(file)
-}
-
-func downloadMediaFiles(info wpparser.WebsiteInfo, sourceWebsiteURL string, outputDir string) error {
-	log.Warn().Msg("Media files download is not implemented yet")
-	return nil
 }
