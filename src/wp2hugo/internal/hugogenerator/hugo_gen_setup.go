@@ -237,6 +237,9 @@ func writePage(outputMediaDirPath string, pagePath string, page wpparser.CommonF
 	prefixes = append(prefixes, fmt.Sprintf("http://www.%s", pageURL.Host))
 
 	if downloadMedia {
+		log.Debug().
+			Int("links", len(links)).
+			Msg("Downloading media files")
 		for _, link := range links {
 			for _, prefix := range prefixes {
 				link = strings.TrimPrefix(link, prefix)

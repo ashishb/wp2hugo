@@ -36,7 +36,11 @@ type Page struct {
 	HTMLContent string
 }
 
-var _imageLinks = regexp.MustCompile(`!\[.*?]\((.+?)\)`)
+var _markdownImageLinks = regexp.MustCompile(`!\[.*?]\((.+?)\)`)
+
+// Extracts "src" from Hugo figure shortcode
+// {{< figure align=aligncenter width=905 src="/wp-content/uploads/2023/01/Stollemeyer-castle-1024x768.jpg" alt="" >}}
+var _hugoFigureLinks = regexp.MustCompile(`{{< figure.*?src="(.+?)".*? >}}`)
 
 func (page Page) getRelativeURL() string {
 	return page.AbsoluteURL.Path
@@ -57,12 +61,18 @@ func (page Page) WPImageLinks() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	arr1 := getMarkdownLinks(_markdownImageLinks, *markdown)
+	arr2 := getMarkdownLinks(_hugoFigureLinks, *markdown)
+	return append(arr1, arr2...), nil
+}
+
+func getMarkdownLinks(regex *regexp.Regexp, markdown string) []string {
 	var links []string
-	matches := _imageLinks.FindAllStringSubmatch(*markdown, -1)
+	matches := regex.FindAllStringSubmatch(markdown, -1)
 	for _, match := range matches {
 		links = append(links, match[1])
 	}
-	return links, nil
+	return links
 }
 
 func (page Page) writeMetadata(w io.Writer) error {
