@@ -20,15 +20,16 @@ Written in Go.
 1. [x] Migrate URLs correctly
 1. [x] Migrate iframe(s) like YouTube embeds
 1. [x] Migrate "Excerpt"
-1. [ ] Migrate "Show more..."
 1. [x] Migrate "catlist"
 1. [x] Set WordPress homepage correctly
 1. [x] Migrate RSS feed with existing UUIDs, so that entries appear the same
-1. [ ] Migrate code blocks correctly
 1. [x] favicon.ico
 1. [x] YouTube embeds
 1. [x] Google Map embed via a custom short code `googlemaps`
 1. [x] Migrate `caption` (WordPress) to `figure` (Hugo)
+1. [ ] Migrate code blocks correctly - syntax highlighting is not working right now
+1. [ ] Migrate "Show more..."
+1. [ ] Featured images - I tried this [WordPress plugin](https://wordpress.org/plugins/export-media-with-selected-content/) but featured images are simply not exported
 
 
 ## Why existing tools don't work
