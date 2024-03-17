@@ -255,7 +255,7 @@ func writePage(outputMediaDirPath string, pagePath string, page wpparser.CommonF
 				link = "https://ashishb.net/" + link
 			}
 			if err = downloadFromURL(link, outputFilePath); err != nil {
-				return fmt.Errorf("error downloading media file: %s", err)
+				return fmt.Errorf("error downloading media file: %s embedded in %s", err, page.Link)
 			}
 		}
 	}
