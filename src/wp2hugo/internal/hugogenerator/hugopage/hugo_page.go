@@ -2,12 +2,14 @@ package hugopage
 
 import (
 	"fmt"
+	"github.com/go-enry/go-enry/v2"
 	"github.com/mmcdole/gofeed/rss"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
 	"io"
 	"net/url"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 )
@@ -123,7 +125,73 @@ func (page Page) getMarkdown() (*string, error) {
 	}
 	markdown = ReplaceAbsoluteLinksWithRelative(page.AbsoluteURL.Host, markdown)
 	markdown = replaceCatlistWithShortcode(markdown)
+	// Disabled for now, as it does not work well
+	if false {
+		markdown = highlightCode(markdown)
+	} else {
+		log.Warn().Msg("Auto-detecting languages of code blocks is disabled for now")
+	}
 	return &markdown, nil
+}
+
+// Mark code blocks with auto-detected language
+// Note: https://github.com/alecthomas/chroma is fairly inaccurate in detecting languages
+func highlightCode(markdown string) string {
+	var _codeBlocExtractor = regexp.MustCompile("\\`\\`\\`(.*)?\\n([.\\s\\S]*)?\\`\\`\\`")
+	matches := _codeBlocExtractor.FindAllStringSubmatch(markdown, -1)
+	if len(matches) == 0 {
+		log.Debug().
+			Msg("[highlightCode]No code blocks found")
+	}
+	for _, match := range matches {
+		language := match[1]
+		code := match[2]
+		// Some WordPress code blocks have language set as "none"!
+		if language != "" && language != "none" {
+			log.Debug().
+				Str("language", language).
+				Msg("Code block already has a language")
+			continue
+		}
+		language = getLanguageCode(code)
+		if language == "" {
+			continue
+		}
+		code = fmt.Sprintf("```%s\n%s\n```", language, code)
+		markdown = strings.Replace(markdown, match[0], code, 1)
+	}
+	return markdown
+}
+
+func getLanguageCode(code string) string {
+	possibleLanguages := []string{"Go", "Python", "Java", "C", "Shell", "HTML", "JSON", "YAML"}
+	languageCodes := []string{"go", "py", "js", "ts", "java", "c", "sh", "html", "json", "yaml"}
+
+	// enry cannot detect Go language by content!
+	if strings.Contains(code, "go.mod") ||
+		strings.Contains(code, "go.sum") ||
+		strings.Contains(code, "go run") {
+		return "go"
+	}
+
+	language, onlyOne := enry.GetLanguageByClassifier([]byte(code), possibleLanguages)
+	if language == "" {
+		log.Warn().
+			Str("code", code).
+			Msg("No language detected for code block")
+		return ""
+	}
+	if !onlyOne {
+		log.Warn().
+			Str("code", code).
+			Str("language", language).
+			Msg("Multiple languages detected for code block")
+	}
+	log.Debug().
+		Str("code", code).
+		Str("language", language).
+		Msg("Detected language for code block")
+	return languageCodes[slices.Index(possibleLanguages, language)]
 }
 
 func (page Page) writeContent(w io.Writer) error {

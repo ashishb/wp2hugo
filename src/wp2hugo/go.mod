@@ -5,6 +5,7 @@ go 1.22.1
 require (
 	github.com/JohannesKaufmann/html-to-markdown v1.5.0
 	github.com/PuerkitoBio/goquery v1.9.1
+	github.com/go-enry/go-enry/v2 v2.8.7
 	github.com/mmcdole/gofeed v1.3.0
 	github.com/rs/zerolog v1.32.0
 	github.com/stretchr/testify v1.8.1
@@ -14,6 +15,7 @@ require (
 require (
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/go-enry/go-oniguruma v1.2.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mmcdole/goxpp v1.1.1 // indirect
