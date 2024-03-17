@@ -30,11 +30,13 @@ Written in Go.
 1. [x] Google Map embed via a custom short code `googlemaps`
 1. [x] Migrate `caption` (WordPress) to `figure` (Hugo)
 
-Various options can be seen [here](https://gohugo.io/tools/migrations/)
-that are partially good.
 
-1. Export via `https://<website>/wp-admin/export.php`
-1. The problem is that there is no good tool to perform the next import into Hugo
+## Why existing tools don't work
+
+- [Jekyll Exporter](https://github.com/benbalter/wordpress-to-jekyll-exporter/) always times out for me
+- Various options can be seen [here](https://gohugo.io/tools/migrations/) that are partially good.
+  1. Export via `https://<website>/wp-admin/export.php`
+  1. The problem is that there is no good tool to perform the next import into Hugo
 
 Note:
 
