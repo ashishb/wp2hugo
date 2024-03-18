@@ -31,7 +31,6 @@ Written in Go.
 1. [ ] Migrate code blocks correctly - syntax highlighting is not working right now
 1. [ ] Featured images - I tried this [WordPress plugin](https://wordpress.org/plugins/export-media-with-selected-content/) but featured images are simply not exported
 
-
 ## Why existing tools don't work
 
 - [Jekyll Exporter](https://github.com/benbalter/wordpress-to-jekyll-exporter/) always times out for me
@@ -42,4 +41,4 @@ Written in Go.
 Note:
 
 1. To migrate comments, use [Remark42](https://remark42.com/docs/backup/migration/)
-2. Font modifications are theme-specific. For PaperMod theme, follow [this](https://forum.wildserver.ru/viewtopic.php?t=18)
+1. Font modifications are theme-specific. For PaperMod theme, follow [this](https://forum.wildserver.ru/viewtopic.php?t=18)
