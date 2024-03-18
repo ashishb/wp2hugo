@@ -34,6 +34,7 @@ const _WordPressMoreTag = "<!--more-->"
 
 // In the next step, we will replace this as well
 const _customMoreTag = "{{< more >}}"
+const _wordPressTocTag = "[toc]"
 
 var _markdownImageLinks = regexp.MustCompile(`!\[.*?]\((.+?)\)`)
 
@@ -130,6 +131,13 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string) (*s
 	htmlContent = replaceAWBWithParallaxBlur(provider, htmlContent)
 
 	htmlContent = strings.Replace(htmlContent, _WordPressMoreTag, _customMoreTag, 1)
+	// This handling is specific to paperMod theme
+	// Ref: https://adityatelange.github.io/hugo-PaperMod/posts/papermod/papermod-features/#show-table-of-contents-toc-on-blog-post
+	if strings.Contains(htmlContent, _wordPressTocTag) {
+		htmlContent = strings.Replace(htmlContent, _wordPressTocTag, "", 1)
+		page.metadata["ShowToc"] = true
+		page.metadata["TocOpen"] = true
+	}
 	markdown, err := converter.ConvertString(htmlContent)
 	if err != nil {
 		return nil, fmt.Errorf("error converting HTML to Markdown: %s", err)
