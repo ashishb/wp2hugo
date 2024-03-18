@@ -284,11 +284,24 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 			Msg("Attachment URL")
 	}
 
+	pubDate := item.PubDateParsed
+	if pubDate == nil && len(item.Extensions["wp"]["post_date"]) > 0 {
+		tmp, err := time.Parse("2006-01-02 15:04:05", item.Extensions["wp"]["post_date"][0].Value)
+		if err != nil {
+			log.Warn().
+				Str("link", item.Link).
+				Str("date", item.Extensions["wp"]["post_date"][0].Value).
+				Msg("Error parsing date")
+		} else {
+			pubDate = &tmp
+		}
+	}
+
 	return &CommonFields{
 		PostID:           item.Extensions["wp"]["post_id"][0].Value,
 		Title:            item.Title,
 		Link:             item.Link,
-		PublishDate:      item.PubDateParsed,
+		PublishDate:      pubDate,
 		GUID:             item.GUID,
 		LastModifiedDate: lastModifiedDate,
 		PublishStatus:    PublishStatus(publishStatus),

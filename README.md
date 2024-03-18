@@ -31,6 +31,8 @@ Written in Go.
 1. [x] Support for parallax blur (similar to [WordPress Advanced Backgrounds](https://wordpress.org/plugins/advanced-backgrounds/))
 1. [x] Migrate WordPress table of content -> Hugo
 1. [x] Custom font - defaults to Lexend
+1. [x] Use draft date as a fallback date for draft posts
+1. [x] Maintain the draft status for draft and pending posts
 1. [ ] Migrate code blocks correctly - syntax highlighting is not working right now
 1. [ ] Featured images - I tried this [WordPress plugin](https://wordpress.org/plugins/export-media-with-selected-content/) but featured images are simply not exported
 
