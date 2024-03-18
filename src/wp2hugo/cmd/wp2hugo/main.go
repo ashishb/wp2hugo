@@ -52,6 +52,6 @@ func getWebsiteInfo(filePath string) (*wpparser.WebsiteInfo, error) {
 
 func generate(info wpparser.WebsiteInfo, outputDirPath string, downloadMedia bool) error {
 	log.Debug().Msgf("Output: %s", outputDirPath)
-	generator := hugogenerator.NewGenerator(outputDirPath, downloadMedia)
-	return generator.Generate(info)
+	generator := hugogenerator.NewGenerator(outputDirPath, downloadMedia, info)
+	return generator.Generate()
 }

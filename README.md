@@ -28,6 +28,7 @@ Written in Go.
 1. [x] Google Map embed via a custom short code `googlemaps`
 1. [x] Migrate `caption` (WordPress) to `figure` (Hugo)
 1. [x] Migrate "Show more..." of WordPress -> `Summary` in Hugo
+1. [x] Support for parallax blur (similar to [WordPress Advanced Backgrounds](https://wordpress.org/plugins/advanced-backgrounds/))
 1. [ ] Migrate code blocks correctly - syntax highlighting is not working right now
 1. [ ] Featured images - I tried this [WordPress plugin](https://wordpress.org/plugins/export-media-with-selected-content/) but featured images are simply not exported
 

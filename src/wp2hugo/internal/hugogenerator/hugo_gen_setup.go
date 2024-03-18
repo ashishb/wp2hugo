@@ -33,18 +33,23 @@ placeholder: "placeholder text in search input box"
 `
 
 type Generator struct {
-	outputDirPath string
-	downloadMedia bool
+	imageURLProvider hugopage.ImageURLProvider
+	outputDirPath    string
+	downloadMedia    bool
+	wpInfo           wpparser.WebsiteInfo
 }
 
-func NewGenerator(outputDirPath string, downloadMedia bool) *Generator {
+func NewGenerator(outputDirPath string, downloadMedia bool, info wpparser.WebsiteInfo) *Generator {
 	return &Generator{
-		outputDirPath: outputDirPath,
-		downloadMedia: downloadMedia,
+		imageURLProvider: newImageURLProvider(info),
+		outputDirPath:    outputDirPath,
+		downloadMedia:    downloadMedia,
+		wpInfo:           info,
 	}
 }
 
-func (g Generator) Generate(info wpparser.WebsiteInfo) error {
+func (g Generator) Generate() error {
+	info := g.wpInfo
 	siteDir, err := g.setupHugo(g.outputDirPath)
 	if err != nil {
 		return err
@@ -132,7 +137,7 @@ func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) e
 	// Write pages
 	for _, page := range info.Pages {
 		pagePath := path.Join(pagesDir, fmt.Sprintf("%s.md", page.Filename()))
-		if err := writePage(outputDirPath, pagePath, page.CommonFields, g.downloadMedia); err != nil {
+		if err := g.writePage(outputDirPath, pagePath, page.CommonFields); err != nil {
 			return err
 		}
 	}
@@ -154,7 +159,7 @@ func (g Generator) writePosts(outputDirPath string, info wpparser.WebsiteInfo) e
 	// Write posts
 	for _, post := range info.Posts {
 		postPath := path.Join(postsDir, fmt.Sprintf("%s.md", post.Filename()))
-		if err := writePage(outputDirPath, postPath, post.CommonFields, g.downloadMedia); err != nil {
+		if err := g.writePage(outputDirPath, postPath, post.CommonFields); err != nil {
 			return err
 		}
 	}
@@ -194,7 +199,7 @@ func createDirIfNotExist(dirPath string) error {
 	return nil
 }
 
-func writePage(outputMediaDirPath string, pagePath string, page wpparser.CommonFields, downloadMedia bool) error {
+func (g Generator) writePage(outputMediaDirPath string, pagePath string, page wpparser.CommonFields) error {
 	w, err := os.OpenFile(pagePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return fmt.Errorf("error opening page file: %s", err)
@@ -207,6 +212,7 @@ func writePage(outputMediaDirPath string, pagePath string, page wpparser.CommonF
 	}
 
 	p, err := hugopage.NewPage(
+		g.imageURLProvider,
 		*pageURL, page.Title, page.PublishDate,
 		page.PublishStatus == wpparser.PublishStatusDraft || page.PublishStatus == wpparser.PublishStatusPending,
 		page.Categories, page.Tags, page.Content, page.GUID)
@@ -230,7 +236,7 @@ func writePage(outputMediaDirPath string, pagePath string, page wpparser.CommonF
 	prefixes = append(prefixes, fmt.Sprintf("https://www.%s", pageURL.Host))
 	prefixes = append(prefixes, fmt.Sprintf("http://www.%s", pageURL.Host))
 
-	if downloadMedia {
+	if g.downloadMedia {
 		log.Debug().
 			Int("links", len(links)).
 			Msg("Downloading media files")

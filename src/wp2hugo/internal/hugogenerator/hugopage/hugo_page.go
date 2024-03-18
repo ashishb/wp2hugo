@@ -41,7 +41,7 @@ var _markdownImageLinks = regexp.MustCompile(`!\[.*?]\((.+?)\)`)
 // {{< figure align=aligncenter width=905 src="/wp-content/uploads/2023/01/Stollemeyer-castle-1024x768.jpg" alt="" >}}
 var _hugoFigureLinks = regexp.MustCompile(`{{< figure.*?src="(.+?)".*? >}}`)
 
-func NewPage(pageURL url.URL, title string, publishDate *time.Time, isDraft bool,
+func NewPage(provider ImageURLProvider, pageURL url.URL, title string, publishDate *time.Time, isDraft bool,
 	categories []string, tags []string, htmlContent string, guid *rss.GUID) (*Page, error) {
 	page := Page{
 		absoluteURL: pageURL,
@@ -49,7 +49,7 @@ func NewPage(pageURL url.URL, title string, publishDate *time.Time, isDraft bool
 	}
 	// htmlContent is the HTML content of the page that will be
 	// transformed to Markdown
-	markdown, err := page.getMarkdown(htmlContent)
+	markdown, err := page.getMarkdown(provider, htmlContent)
 	if err != nil {
 		return nil, err
 	}
@@ -117,12 +117,13 @@ func (page *Page) writeMetadata(w io.Writer) error {
 	return nil
 }
 
-func (page *Page) getMarkdown(htmlContent string) (*string, error) {
+func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string) (*string, error) {
 	if htmlContent == "" {
 		return nil, fmt.Errorf("empty HTML content")
 	}
 	converter := getMarkdownConverter()
 	htmlContent = replaceCaptionWithFigure(htmlContent)
+	htmlContent = replaceAWBWithParallaxBlur(provider, htmlContent)
 
 	htmlContent = strings.Replace(htmlContent, _WordPressMoreTag, _customMoreTag, 1)
 	markdown, err := converter.ConvertString(htmlContent)

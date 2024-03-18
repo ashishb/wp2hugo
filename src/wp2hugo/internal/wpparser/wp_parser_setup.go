@@ -90,7 +90,7 @@ type CommonFields struct {
 	Categories []string
 	Tags       []string
 
-	// TODO: may be add author
+	attachmentURL *string
 }
 
 func (i CommonFields) Filename() string {
@@ -108,6 +108,10 @@ func (i CommonFields) Filename() string {
 		str1 = strings.TrimSuffix(str1, "-")
 	}
 	return str1
+}
+
+func (i CommonFields) GetAttachmentURL() *string {
+	return i.attachmentURL
 }
 
 type PageInfo struct {
@@ -271,6 +275,15 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 			Msg("Multiple links are not handled right now")
 	}
 
+	var attachmentURL *string
+	tmp1 := item.Extensions["wp"]["attachment_url"]
+	if len(tmp1) > 0 {
+		attachmentURL = &tmp1[0].Value
+		log.Debug().
+			Str("attachmentURL", *attachmentURL).
+			Msg("Attachment URL")
+	}
+
 	return &CommonFields{
 		PostID:           item.Extensions["wp"]["post_id"][0].Value,
 		Title:            item.Title,
@@ -285,6 +298,8 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 		Content:     item.Content,
 		Categories:  pageCategories,
 		Tags:        pageTags,
+
+		attachmentURL: attachmentURL,
 	}, nil
 }
 
