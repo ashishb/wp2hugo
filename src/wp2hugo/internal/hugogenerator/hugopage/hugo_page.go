@@ -24,19 +24,16 @@ const (
 
 type Page struct {
 	// This is the original URL of the page from the WordPress site
-	AbsoluteURL url.URL
+	absoluteURL url.URL
 
-	Title       string
-	PublishDate *time.Time
-	Draft       bool
-	Categories  []string
-	Tags        []string
-	GUID        *rss.GUID
-
-	// HTMLContent is the HTML content of the page that will be
-	// transformed to Markdown
-	HTMLContent string
+	metadata map[string]any
+	markdown string
 }
+
+const _WordPressMoreTag = "<!--more-->"
+
+// In the next step, we will replace this as well
+const _customMoreTag = "{{< more >}}"
 
 var _markdownImageLinks = regexp.MustCompile(`!\[.*?]\((.+?)\)`)
 
@@ -44,8 +41,20 @@ var _markdownImageLinks = regexp.MustCompile(`!\[.*?]\((.+?)\)`)
 // {{< figure align=aligncenter width=905 src="/wp-content/uploads/2023/01/Stollemeyer-castle-1024x768.jpg" alt="" >}}
 var _hugoFigureLinks = regexp.MustCompile(`{{< figure.*?src="(.+?)".*? >}}`)
 
-func (page Page) getRelativeURL() string {
-	return page.AbsoluteURL.Path
+func NewPage(pageURL url.URL, title string, publishDate *time.Time, isDraft bool,
+	categories []string, tags []string, htmlContent string, guid *rss.GUID) (*Page, error) {
+	page := Page{
+		absoluteURL: pageURL,
+		metadata:    getMetadata(pageURL, title, publishDate, isDraft, categories, tags, guid),
+	}
+	// htmlContent is the HTML content of the page that will be
+	// transformed to Markdown
+	markdown, err := page.getMarkdown(htmlContent)
+	if err != nil {
+		return nil, err
+	}
+	page.markdown = *markdown
+	return &page, nil
 }
 
 func (page Page) Write(w io.Writer) error {
@@ -58,14 +67,10 @@ func (page Page) Write(w io.Writer) error {
 	return nil
 }
 
-func (page Page) WPImageLinks() ([]string, error) {
-	markdown, err := page.getMarkdown()
-	if err != nil {
-		return nil, err
-	}
-	arr1 := getMarkdownLinks(_markdownImageLinks, *markdown)
-	arr2 := getMarkdownLinks(_hugoFigureLinks, *markdown)
-	return append(arr1, arr2...), nil
+func (page *Page) WPImageLinks() []string {
+	arr1 := getMarkdownLinks(_markdownImageLinks, page.markdown)
+	arr2 := getMarkdownLinks(_hugoFigureLinks, page.markdown)
+	return append(arr1, arr2...)
 }
 
 func getMarkdownLinks(regex *regexp.Regexp, markdown string) []string {
@@ -77,29 +82,31 @@ func getMarkdownLinks(regex *regexp.Regexp, markdown string) []string {
 	return links
 }
 
-func (page Page) writeMetadata(w io.Writer) error {
+func getMetadata(pageURL url.URL, title string, publishDate *time.Time, isDraft bool,
+	categories []string, tags []string, guid *rss.GUID) map[string]any {
 	metadata := make(map[string]any)
-	metadata["url"] = page.getRelativeURL()
-	metadata["title"] = page.Title
-	if page.PublishDate != nil {
-		metadata["date"] = page.PublishDate.Format(_hugoDateFormat)
+	metadata["url"] = pageURL.Path // Relative URL
+	metadata["title"] = title
+	if publishDate != nil {
+		metadata["date"] = publishDate.Format(_hugoDateFormat)
 	}
-	if page.Draft {
+	if isDraft {
 		metadata["draft"] = "true"
 	}
-
-	if len(page.Categories) > 0 {
-		metadata[CategoryName] = page.Categories
+	if len(categories) > 0 {
+		metadata[CategoryName] = categories
 	}
-
-	if len(page.Tags) > 0 {
-		metadata[TagName] = page.Tags
+	if len(tags) > 0 {
+		metadata[TagName] = tags
 	}
-	if page.GUID != nil {
-		metadata["GUID"] = page.GUID.Value
+	if guid != nil {
+		metadata["guid"] = guid.Value
 	}
+	return metadata
+}
 
-	combinedMetadata, err := yaml.Marshal(metadata)
+func (page *Page) writeMetadata(w io.Writer) error {
+	combinedMetadata, err := yaml.Marshal(page.metadata)
 	if err != nil {
 		return fmt.Errorf("error marshalling metadata: %s", err)
 	}
@@ -110,12 +117,14 @@ func (page Page) writeMetadata(w io.Writer) error {
 	return nil
 }
 
-func (page Page) getMarkdown() (*string, error) {
-	if page.HTMLContent == "" {
+func (page *Page) getMarkdown(htmlContent string) (*string, error) {
+	if htmlContent == "" {
 		return nil, fmt.Errorf("empty HTML content")
 	}
 	converter := getMarkdownConverter()
-	htmlContent := replaceCaptionWithFigure(page.HTMLContent)
+	htmlContent = replaceCaptionWithFigure(htmlContent)
+
+	htmlContent = strings.Replace(htmlContent, _WordPressMoreTag, _customMoreTag, 1)
 	markdown, err := converter.ConvertString(htmlContent)
 	if err != nil {
 		return nil, fmt.Errorf("error converting HTML to Markdown: %s", err)
@@ -123,13 +132,21 @@ func (page Page) getMarkdown() (*string, error) {
 	if len(strings.TrimSpace(markdown)) == 0 {
 		return nil, fmt.Errorf("empty markdown")
 	}
-	markdown = ReplaceAbsoluteLinksWithRelative(page.AbsoluteURL.Host, markdown)
+	if strings.Contains(markdown, _customMoreTag) {
+		// Ref: https://gohugo.io/content-management/summaries/#manual-summary-splitting
+		page.metadata["summary"] = strings.Split(markdown, _customMoreTag)[0]
+		markdown = strings.Replace(markdown, _customMoreTag, "", 1)
+		log.Warn().
+			Msgf("Manual summary splitting is not supported: %s", page.metadata)
+	}
+
+	markdown = ReplaceAbsoluteLinksWithRelative(page.absoluteURL.Host, markdown)
 	markdown = replaceCatlistWithShortcode(markdown)
 	// Disabled for now, as it does not work well
 	if false {
 		markdown = highlightCode(markdown)
 	} else {
-		log.Warn().Msg("Auto-detecting languages of code blocks is disabled for now")
+		log.Debug().Msg("Auto-detecting languages of code blocks is disabled for now")
 	}
 	return &markdown, nil
 }
@@ -195,12 +212,7 @@ func getLanguageCode(code string) string {
 }
 
 func (page Page) writeContent(w io.Writer) error {
-	markdown, err := page.getMarkdown()
-	if err != nil {
-		return err
-	}
-
-	if _, err := w.Write([]byte(*markdown)); err != nil {
+	if _, err := w.Write([]byte(page.markdown)); err != nil {
 		return fmt.Errorf("error writing to page file: %s", err)
 	}
 	return nil

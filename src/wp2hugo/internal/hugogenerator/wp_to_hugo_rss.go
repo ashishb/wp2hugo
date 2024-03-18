@@ -7,7 +7,7 @@ import (
 	"path"
 )
 
-// setupRssFeedFormat sets up custom GUID for RSS feed that is being migrated from WordPress
+// setupRssFeedFormat sets up custom guid for RSS feed that is being migrated from WordPress
 // to Hugo
 func setupRssFeedFormat(siteDir string) error {
 	if err := createDirIfNotExist(path.Join(siteDir, "layouts")); err != nil {
@@ -27,7 +27,7 @@ func getModifiedRSSXML(data []byte) []byte {
 	original := "<guid>{{ .Permalink }}</guid>"
 	wordPressCompatible := "" +
 		"{{ if .Params.GUID }} " +
-		"<guid isPermaLink=\"false\">{{ .Params.GUID }}</guid> " +
+		"<guid isPermaLink=\"false\">{{ .Params.guid }}</guid> " +
 		"{{ else }} " +
 		"<guid isPermaLink=\"false\">{{ .Permalink }}</guid> " +
 		"{{ end }}"

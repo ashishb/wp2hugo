@@ -206,25 +206,19 @@ func writePage(outputMediaDirPath string, pagePath string, page wpparser.CommonF
 		return fmt.Errorf("error parsing page URL: %s", err)
 	}
 
-	p := hugopage.Page{
-		AbsoluteURL: *pageURL,
-		Title:       page.Title,
-		PublishDate: page.PublishDate,
-		Draft:       page.PublishStatus == wpparser.PublishStatusDraft || page.PublishStatus == wpparser.PublishStatusPending,
-		Categories:  page.Categories,
-		Tags:        page.Tags,
-		HTMLContent: page.Content,
-		GUID:        page.GUID,
+	p, err := hugopage.NewPage(
+		*pageURL, page.Title, page.PublishDate,
+		page.PublishStatus == wpparser.PublishStatusDraft || page.PublishStatus == wpparser.PublishStatusPending,
+		page.Categories, page.Tags, page.Content, page.GUID)
+	if err != nil {
+		return fmt.Errorf("error creating Hugo page: %s", err)
 	}
 	if err = p.Write(w); err != nil {
 		return err
 	}
 	log.Info().Msgf("Page written: %s", pagePath)
 
-	links, err := p.WPImageLinks()
-	if err != nil {
-		return fmt.Errorf("error getting WordPress content links: %s", err)
-	}
+	links := p.WPImageLinks()
 	log.Debug().
 		Str("page", page.Title).
 		Int("links", len(links)).
