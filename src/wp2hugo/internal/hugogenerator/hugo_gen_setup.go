@@ -3,8 +3,10 @@ package hugogenerator
 import (
 	"fmt"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugogenerator/hugopage"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
 	"github.com/rs/zerolog/log"
+	"io"
 	"net/url"
 	"os"
 	"os/exec"
@@ -37,12 +39,18 @@ type Generator struct {
 	outputDirPath    string
 	downloadMedia    bool
 	wpInfo           wpparser.WebsiteInfo
+	mediaProvider    MediaProvider
 }
 
-func NewGenerator(outputDirPath string, downloadMedia bool, info wpparser.WebsiteInfo) *Generator {
+type MediaProvider interface {
+	GetReader(url string) (io.Reader, error)
+}
+
+func NewGenerator(outputDirPath string, downloadMedia bool, mediaProvider MediaProvider, info wpparser.WebsiteInfo) *Generator {
 	return &Generator{
 		imageURLProvider: newImageURLProvider(info),
 		outputDirPath:    outputDirPath,
+		mediaProvider:    mediaProvider,
 		downloadMedia:    downloadMedia,
 		wpInfo:           info,
 	}
@@ -78,7 +86,12 @@ func (g Generator) Generate() error {
 	}
 
 	if g.downloadMedia {
-		if err = writeFavicon(*siteDir, info.Link); err != nil {
+		url1 := info.Link + "/favicon.ico"
+		media, err := g.mediaProvider.GetReader(url1)
+		if err != nil {
+			return fmt.Errorf("error fetching media file %s: %s", url1, err)
+		}
+		if err = writeFavicon(*siteDir, media); err != nil {
 			return err
 		}
 	}
@@ -130,7 +143,7 @@ func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) e
 	}
 
 	pagesDir := path.Join(outputDirPath, "content", "pages")
-	if err := createDirIfNotExist(pagesDir); err != nil {
+	if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
 		return err
 	}
 
@@ -152,7 +165,7 @@ func (g Generator) writePosts(outputDirPath string, info wpparser.WebsiteInfo) e
 	}
 
 	postsDir := path.Join(outputDirPath, "content", "posts")
-	if err := createDirIfNotExist(postsDir); err != nil {
+	if err := utils.CreateDirIfNotExist(postsDir); err != nil {
 		return err
 	}
 
@@ -188,13 +201,6 @@ func writeFile(filePath string, content []byte) error {
 	defer w.Close()
 	if _, err := w.Write(content); err != nil {
 		return fmt.Errorf("error writing to archive file: %s", err)
-	}
-	return nil
-}
-
-func createDirIfNotExist(dirPath string) error {
-	if err := os.MkdirAll(dirPath, 0755); err != nil && !os.IsExist(err) {
-		return fmt.Errorf("error creating directory: %s", err)
 	}
 	return nil
 }
@@ -254,7 +260,11 @@ func (g Generator) writePage(outputMediaDirPath string, pagePath string, page wp
 			if !strings.HasPrefix(link, "http") {
 				link = "https://ashishb.net/" + link
 			}
-			if err = downloadFromURL(link, outputFilePath); err != nil {
+			media, err := g.mediaProvider.GetReader(link)
+			if err != nil {
+				return fmt.Errorf("error fetching media file %s: %s", link, err)
+			}
+			if err = download(outputFilePath, media); err != nil {
 				return fmt.Errorf("error downloading media file: %s embedded in %s", err, page.Link)
 			}
 		}

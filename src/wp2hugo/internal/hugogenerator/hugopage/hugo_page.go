@@ -41,6 +41,9 @@ var _markdownImageLinks = regexp.MustCompile(`!\[.*?]\((.+?)\)`)
 // {{< figure align=aligncenter width=905 src="/wp-content/uploads/2023/01/Stollemeyer-castle-1024x768.jpg" alt="" >}}
 var _hugoFigureLinks = regexp.MustCompile(`{{< figure.*?src="(.+?)".*? >}}`)
 
+// {{< parallaxblur src="/wp-content/uploads/2018/12/bora%5Fbora%5F5%5Fresized.jpg" >}}
+var _hugoParallaxBlurLinks = regexp.MustCompile(`{{< parallaxblur.*?src="(.+?)".*? >}}`)
+
 func NewPage(provider ImageURLProvider, pageURL url.URL, title string, publishDate *time.Time, isDraft bool,
 	categories []string, tags []string, htmlContent string, guid *rss.GUID) (*Page, error) {
 	page := Page{
@@ -70,7 +73,8 @@ func (page Page) Write(w io.Writer) error {
 func (page *Page) WPImageLinks() []string {
 	arr1 := getMarkdownLinks(_markdownImageLinks, page.markdown)
 	arr2 := getMarkdownLinks(_hugoFigureLinks, page.markdown)
-	return append(arr1, arr2...)
+	arr3 := getMarkdownLinks(_hugoParallaxBlurLinks, page.markdown)
+	return append(append(arr1, arr2...), arr3...)
 }
 
 func getMarkdownLinks(regex *regexp.Regexp, markdown string) []string {

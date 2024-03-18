@@ -2,44 +2,46 @@ package hugogenerator
 
 import (
 	"fmt"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
 	"github.com/rs/zerolog/log"
-	"net/http"
+	"io"
+	"net/url"
 	"os"
 	"path"
 	"strings"
 )
 
-func writeFavicon(outputDirPath string, websiteURL string) error {
-	log.Debug().Msg("Fetching and writing favicon")
-	filePath := path.Join(outputDirPath, "static", "favicon.ico")
-	if !strings.HasPrefix(websiteURL, "http") {
-		websiteURL = "https://" + websiteURL
-	}
-	url1 := fmt.Sprintf("%s/favicon.ico", websiteURL)
-	return downloadFromURL(url1, filePath)
+func writeFavicon(outputDirPath string, faviconData io.Reader) error {
+	log.Debug().Msg("Writing favicon")
+	return download(path.Join(outputDirPath, "favicon.ico"), faviconData)
 }
 
-func downloadFromURL(srcURL string, destFilePath string) error {
+func download(destFilePath string, reader io.Reader) error {
 	log.Debug().
-		Str("srcURL", srcURL).
 		Str("destFilePath", destFilePath).
 		Msg("Downloading from URL")
-	if err := createDirIfNotExist(path.Dir(destFilePath)); err != nil {
+	if err := utils.CreateDirIfNotExist(path.Dir(destFilePath)); err != nil {
 		return err
 	}
+	fileName := path.Base(destFilePath)
+	if strings.Contains(fileName, "%5F") {
+		tmp1, err := url.PathUnescape(fileName)
+		if err != nil {
+			return fmt.Errorf("error unescaping filename %s: %s", fileName, err)
+		}
+		log.Info().
+			Str("fileName", fileName).
+			Str("newFileName", tmp1).
+			Msg("Unescaped filename")
+		fileName = tmp1
+		destFilePath = path.Join(path.Dir(destFilePath), fileName)
+	}
 
-	resp, err := http.Get(srcURL)
-	if err != nil {
-		return fmt.Errorf("error fetching %s: %s", srcURL, err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("error fetching %s: %s", srcURL, resp.Status)
-	}
 	file, err := os.OpenFile(destFilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return fmt.Errorf("error opening file %s: %s", file.Name(), err)
 	}
 	defer file.Close()
-	return resp.Write(file)
+	_, err = io.Copy(file, reader)
+	return err
 }

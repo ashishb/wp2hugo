@@ -36,6 +36,7 @@ func awbReplacementFunction(provider ImageURLProvider, groups []string) string {
 			Err(err).
 			Str("imageID", srcImageID).
 			Msg("Image URL not found")
+		return ""
 	}
 	src := *tmp
 	// These character creates problem in Hugo's markdown

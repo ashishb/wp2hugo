@@ -4,15 +4,20 @@ import (
 	"flag"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugogenerator"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/logger"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/mediacache"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
 	"github.com/rs/zerolog/log"
 	"os"
+	"path"
 )
 
 var (
 	sourceFile    = flag.String("source", "", "file path to the source WordPress XML file")
 	outputDir     = flag.String("output", "/tmp", "dir path to the write the Hugo generated data to")
 	downloadMedia = flag.Bool("download-media", false, "download media files embedded in the WordPress content")
+	// This is useful for repeated executions of the tool to avoid downloading the media files again
+	// Mostly for development and not for the production use
+	mediaCacheDir = flag.String("media-cache-dir", path.Join("/tmp/wp2hugo-cache"), "dir path to cache the downloaded media files")
 )
 
 func main() {
@@ -52,6 +57,6 @@ func getWebsiteInfo(filePath string) (*wpparser.WebsiteInfo, error) {
 
 func generate(info wpparser.WebsiteInfo, outputDirPath string, downloadMedia bool) error {
 	log.Debug().Msgf("Output: %s", outputDirPath)
-	generator := hugogenerator.NewGenerator(outputDirPath, downloadMedia, info)
+	generator := hugogenerator.NewGenerator(outputDirPath, downloadMedia, mediacache.New(*mediaCacheDir), info)
 	return generator.Generate()
 }
