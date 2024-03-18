@@ -2,10 +2,10 @@ package hugopage
 
 import (
 	"fmt"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
 	"github.com/go-enry/go-enry/v2"
 	"github.com/mmcdole/gofeed/rss"
 	"github.com/rs/zerolog/log"
-	"gopkg.in/yaml.v3"
 	"io"
 	"net/url"
 	"regexp"
@@ -110,7 +110,7 @@ func getMetadata(pageURL url.URL, title string, publishDate *time.Time, isDraft 
 }
 
 func (page *Page) writeMetadata(w io.Writer) error {
-	combinedMetadata, err := yaml.Marshal(page.metadata)
+	combinedMetadata, err := utils.GetYAML(page.metadata)
 	if err != nil {
 		return fmt.Errorf("error marshalling metadata: %s", err)
 	}

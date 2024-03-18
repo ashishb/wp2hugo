@@ -3,6 +3,7 @@ package hugogenerator
 import (
 	"fmt"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugogenerator/hugopage"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
@@ -108,7 +109,7 @@ func updateConfig(siteDir string, info wpparser.WebsiteInfo) error {
 	if err := r.Close(); err != nil {
 		return fmt.Errorf("error closing config file: %s", err)
 	}
-	data, err := yaml.Marshal(config)
+	data, err := utils.GetYAML(config)
 	if err != nil {
 		return fmt.Errorf("error marshalling config: %s", err)
 	}
