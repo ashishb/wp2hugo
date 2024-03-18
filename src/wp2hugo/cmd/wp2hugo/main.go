@@ -18,6 +18,8 @@ var (
 	// This is useful for repeated executions of the tool to avoid downloading the media files again
 	// Mostly for development and not for the production use
 	mediaCacheDir = flag.String("media-cache-dir", path.Join("/tmp/wp2hugo-cache"), "dir path to cache the downloaded media files")
+	// Custom font for Hugo's papermod theme
+	font = flag.String("font", "Lexend", "custom font for the output website")
 )
 
 func main() {
@@ -43,7 +45,7 @@ func handle(filePath string) error {
 	if err != nil {
 		return err
 	}
-	return generate(*websiteInfo, *outputDir, *downloadMedia)
+	return generate(*websiteInfo, *outputDir)
 }
 
 func getWebsiteInfo(filePath string) (*wpparser.WebsiteInfo, error) {
@@ -55,8 +57,8 @@ func getWebsiteInfo(filePath string) (*wpparser.WebsiteInfo, error) {
 	return parser.Parse(file)
 }
 
-func generate(info wpparser.WebsiteInfo, outputDirPath string, downloadMedia bool) error {
+func generate(info wpparser.WebsiteInfo, outputDirPath string) error {
 	log.Debug().Msgf("Output: %s", outputDirPath)
-	generator := hugogenerator.NewGenerator(outputDirPath, downloadMedia, mediacache.New(*mediaCacheDir), info)
+	generator := hugogenerator.NewGenerator(outputDirPath, *downloadMedia, *font, mediacache.New(*mediaCacheDir), info)
 	return generator.Generate()
 }

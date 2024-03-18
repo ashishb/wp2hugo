@@ -35,6 +35,7 @@ placeholder: "placeholder text in search input box"
 `
 
 type Generator struct {
+	fontName         string
 	imageURLProvider hugopage.ImageURLProvider
 	outputDirPath    string
 	downloadMedia    bool
@@ -46,8 +47,10 @@ type MediaProvider interface {
 	GetReader(url string) (io.Reader, error)
 }
 
-func NewGenerator(outputDirPath string, downloadMedia bool, mediaProvider MediaProvider, info wpparser.WebsiteInfo) *Generator {
+func NewGenerator(outputDirPath string, downloadMedia bool, fontName string,
+	mediaProvider MediaProvider, info wpparser.WebsiteInfo) *Generator {
 	return &Generator{
+		fontName:         fontName,
 		imageURLProvider: newImageURLProvider(info),
 		outputDirPath:    outputDirPath,
 		mediaProvider:    mediaProvider,
@@ -77,6 +80,9 @@ func (g Generator) Generate() error {
 	if err = setupSearchPage(*siteDir); err != nil {
 		return err
 	}
+	if err = setupFont(*siteDir, g.fontName); err != nil {
+		return err
+	}
 	if err = WriteCustomShortCodes(*siteDir); err != nil {
 		return err
 	}
@@ -91,7 +97,7 @@ func (g Generator) Generate() error {
 		if err != nil {
 			return fmt.Errorf("error fetching media file %s: %s", url1, err)
 		}
-		if err = writeFavicon(*siteDir, media); err != nil {
+		if err = writeFavicon(path.Join(*siteDir, "static"), media); err != nil {
 			return err
 		}
 	}
