@@ -7,7 +7,7 @@
 [![Validate Go code formatting](https://github.com/ashishb/wp2hugo/actions/workflows/format-go.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/format-go.yaml)
 
 This is the best migrator for migrating WordPress export to Hugo.
-It handles several weird edge cases that I encountered while trying to migrate my [personal website](https://ashishb.net).
+It handles several weird edge cases that I encountered while trying to migrate my [personal website](https://ashishb.net) to [Hugo-based site](https://v2.ashishb.net/).
 
 ## Usage
 
