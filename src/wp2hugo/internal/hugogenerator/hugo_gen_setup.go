@@ -121,8 +121,8 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 		// Use YMAL file as it is easier to edit it afterwards than TOML
 		fmt.Sprintf("hugo new site %s --format yaml", siteName),
 		"cd " + siteName,
-		"git init",
 		"git clone https://github.com/adityatelange/hugo-PaperMod themes/PaperMod --depth=1",
+		`rm -rf themes/PaperMod/.git themes/PaperMod/.github`,
 		`echo "theme: 'PaperMod'">> hugo.yaml`,
 		// Verify that the site is setup correctly
 		"hugo",
