@@ -171,9 +171,10 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string) (*s
 	return &markdown, nil
 }
 
+// Markdown converter will automatically pick up "class" attribute fromn "code" tag
+// Ref: https://github.com/JohannesKaufmann/html-to-markdown/blob/master/commonmark.go#L334
 func improvePreTagsWithCode(htmlContent string) string {
 	// Replace all occurrences of "data-enlighter-language" with "language"
-	// Ref: https://github.com/JohannesKaufmann/html-to-markdown/blob/master/commonmark.go#L334
 	if strings.Contains(htmlContent, "data-enlighter-language") {
 		htmlContent = strings.ReplaceAll(htmlContent, `data-enlighter-language="golang"`, `data-enlighter-language="go"`)
 		htmlContent = strings.ReplaceAll(htmlContent, `data-enlighter-language="shell"`, `data-enlighter-language="bash"`)

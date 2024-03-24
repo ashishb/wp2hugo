@@ -122,8 +122,7 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 		fmt.Sprintf("hugo new site %s --format yaml", siteName),
 		"cd " + siteName,
 		"git init",
-		"git submodule add --depth=1 https://github.com/adityatelange/hugo-PaperMod.git themes/PaperMod",
-		"git submodule update --init --recursive",
+		"git clone https://github.com/adityatelange/hugo-PaperMod themes/PaperMod --depth=1",
 		`echo "theme: 'PaperMod'">> hugo.yaml`,
 		// Verify that the site is setup correctly
 		"hugo",
