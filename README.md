@@ -11,9 +11,11 @@ It handles several weird edge cases that I encountered while trying to migrate m
 
 ## Usage
 
+### Binary
+
 - Download the `wp2hugo` tool from [releases](./wp2hugo/releases)
 - Export your WordPress website via `Tools -> Export` in your admin dashboard
-- Let's say the downloaded file is `tmp1.xml` generate the website using `$wp2hugo --source tmp1.xml --download-media`
+- Let's say the downloaded file is `wordpress-export.xml` generate the website using `$ wp2hugo --source wordpress-export.xml --download-media`
 
 Now, run this
 
@@ -30,6 +32,15 @@ Usage of ./bin/wp2hugo:
    dir path to the write the Hugo generated data to (default "/tmp")
   -source string
    file path to the source WordPress XML file
+```
+
+### Build from source
+
+```bash
+$ git clone git@github.com:ashishb/wp2hugo.git
+$ cd wp2hugo/src/wp2hugo
+$ make build_prod
+# `./cmd/wp2hugo` will contain the binary and you can use it as `$ ./bin.wp2hugo --source wordpress-export.xml --download-media`
 ```
 
 ## Goals of `wp2hugo`
