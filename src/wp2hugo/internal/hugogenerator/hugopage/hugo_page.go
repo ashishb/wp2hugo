@@ -36,7 +36,13 @@ const _WordPressMoreTag = "<!--more-->"
 const _customMoreTag = "{{< more >}}"
 const _wordPressTocTag = "[toc]"
 
-var _markdownImageLinks = regexp.MustCompile(`!\[.*?]\((.+?)\)`)
+var (
+	_markdownImageLinks = regexp.MustCompile(`!\[.*?]\((.+?)\)`)
+	// E.g. <pre class="EnlighterJSRAW" data-enlighter-language="golang">
+	_preTagExtractor1 = regexp.MustCompile(`<pre class="EnlighterJSRAW" data-enlighter-language="([^"]+?)".*?>([\s\S]*?)</pre>`)
+	// E.g. <pre class="lang:bash" nums="false">
+	_preTagExtractor2 = regexp.MustCompile(`<pre class=".*?lang:([^" ]+).*?>([\s\S]*?)</pre>`)
+)
 
 // Extracts "src" from Hugo figure shortcode
 // {{< figure align=aligncenter width=905 src="/wp-content/uploads/2023/01/Stollemeyer-castle-1024x768.jpg" alt="" >}}
@@ -127,6 +133,7 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string) (*s
 		return nil, fmt.Errorf("empty HTML content")
 	}
 	converter := getMarkdownConverter()
+	htmlContent = improvePreTagsWithCode(htmlContent)
 	htmlContent = replaceCaptionWithFigure(htmlContent)
 	htmlContent = replaceAWBWithParallaxBlur(provider, htmlContent)
 
@@ -162,6 +169,26 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string) (*s
 		log.Debug().Msg("Auto-detecting languages of code blocks is disabled for now")
 	}
 	return &markdown, nil
+}
+
+func improvePreTagsWithCode(htmlContent string) string {
+	// Replace all occurrences of "data-enlighter-language" with "language"
+	// Ref: https://github.com/JohannesKaufmann/html-to-markdown/blob/master/commonmark.go#L334
+	if strings.Contains(htmlContent, "data-enlighter-language") {
+		htmlContent = strings.ReplaceAll(htmlContent, `data-enlighter-language="golang"`, `data-enlighter-language="go"`)
+		htmlContent = strings.ReplaceAll(htmlContent, `data-enlighter-language="shell"`, `data-enlighter-language="bash"`)
+		htmlContent = strings.ReplaceAll(htmlContent, `data-enlighter-language="sh"`, `data-enlighter-language="bash"`)
+		htmlContent = strings.ReplaceAll(htmlContent, `data-enlighter-language="lang:`, `data-enlighter-language="`)
+		htmlContent = strings.ReplaceAll(htmlContent, `data-enlighter-language="language-`, `data-enlighter-language="`)
+		htmlContent = strings.ReplaceAll(htmlContent, `data-enlighter-language="raw"`, "")
+		htmlContent = strings.ReplaceAll(htmlContent, `data-enlighter-language="generic"`, "")
+		htmlContent = _preTagExtractor1.ReplaceAllString(htmlContent, `<pre><code class="$1">$2</code></pre>`)
+		htmlContent = strings.ReplaceAll(htmlContent, `class="EnlighterJSRAW"`, "")
+	}
+	if strings.Contains(htmlContent, "pre class=") {
+		htmlContent = _preTagExtractor2.ReplaceAllString(htmlContent, `<pre><code class="$1">$2</code></pre>`)
+	}
+	return htmlContent
 }
 
 // Mark code blocks with auto-detected language
