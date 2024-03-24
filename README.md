@@ -9,6 +9,29 @@
 This is the best migrator for migrating WordPress export to Hugo.
 It handles several weird edge cases that I encountered while trying to migrate my [personal website](https://ashishb.net).
 
+## Usage
+
+- Download the `wp2hugo` tool from [releases](./wp2hugo/releases)
+- Export your WordPress website via `Tools -> Export` in your admin dashboard
+- Let's say the downloaded file is `tmp1.xml` generate the website using `$wp2hugo --source tmp1.xml --download-media`
+
+Now, run this
+
+```bash
+$ wp2hugo
+Usage of ./bin/wp2hugo:
+  -download-media
+   download media files embedded in the WordPress content
+  -font string
+   custom font for the output website (default "Lexend")
+  -media-cache-dir string
+   dir path to cache the downloaded media files (default "/tmp/wp2hugo-cache")
+  -output string
+   dir path to the write the Hugo generated data to (default "/tmp")
+  -source string
+   file path to the source WordPress XML file
+```
+
 ## Goals of `wp2hugo`
 
 1. [x] Migrate posts
