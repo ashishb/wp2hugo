@@ -9,7 +9,7 @@
 This is the best migrator for migrating WordPress export to Hugo.
 It handles several weird edge cases that I encountered while trying to migrate my [personal website](https://ashishb.net).
 
-### Goals of this tool
+## Goals of `wp2hugo`
 
 1. [x] Migrate posts
 1. [x] Migrate pages
