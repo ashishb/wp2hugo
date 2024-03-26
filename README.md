@@ -21,7 +21,7 @@ Now, run this
 
 ```bash
 $ wp2hugo
-Usage of ./bin/wp2hugo:
+Usage of wp2hugo:
   -download-media
    download media files embedded in the WordPress content
   -font string
@@ -40,7 +40,7 @@ Usage of ./bin/wp2hugo:
 $ git clone git@github.com:ashishb/wp2hugo.git
 $ cd wp2hugo/src/wp2hugo
 $ make build_prod
-# `./cmd/wp2hugo` will contain the binary and you can use it as `$ ./bin.wp2hugo --source wordpress-export.xml --download-media`
+# `./bin/wp2hugo` will contain the binary and you can use it as `$ ./bin/wp2hugo --source wordpress-export.xml --download-media`
 ```
 
 ## Goals of `wp2hugo`
