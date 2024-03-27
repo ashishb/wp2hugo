@@ -35,6 +35,9 @@ func (m MediaCache) GetReader(url string) (io.Reader, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error fetching media %s: %s", url, err)
 	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("error fetching media %s: %s", url, resp.Status)
+	}
 	defer resp.Body.Close()
 	file, err = os.OpenFile(path.Join(m.cacheDirPath, key), os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
