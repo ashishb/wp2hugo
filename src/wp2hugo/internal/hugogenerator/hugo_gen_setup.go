@@ -154,13 +154,32 @@ func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) e
 
 	// Write pages
 	for _, page := range info.Pages {
-		pagePath := path.Join(pagesDir, fmt.Sprintf("%s.md", page.Filename()))
+		pagePath := getFilePath(pagesDir, page.Filename())
 		if err := g.writePage(outputDirPath, pagePath, page.CommonFields); err != nil {
 			return err
 		}
 	}
 
 	return nil
+}
+
+// Sometimes multiple pages have the same filename
+// Ref: https://github.com/ashishb/wp2hugo/issues/7
+func getFilePath(pagesDir string, baseFileName string) string {
+	pagePath := path.Join(pagesDir, fmt.Sprintf("%s.md", baseFileName))
+	if utils.FileExists(pagePath) {
+		for i := 1; ; i++ {
+			log.Info().
+				Str("baseFileName", baseFileName).
+				Str("pagePath", pagePath).
+				Msg("File already exists, trying another filename")
+			pagePath = path.Join(pagesDir, fmt.Sprintf("%s-%d.md", baseFileName, i))
+			if !utils.FileExists(pagePath) {
+				break
+			}
+		}
+	}
+	return pagePath
 }
 
 func (g Generator) writePosts(outputDirPath string, info wpparser.WebsiteInfo) error {
@@ -176,7 +195,7 @@ func (g Generator) writePosts(outputDirPath string, info wpparser.WebsiteInfo) e
 
 	// Write posts
 	for _, post := range info.Posts {
-		postPath := path.Join(postsDir, fmt.Sprintf("%s.md", post.Filename()))
+		postPath := getFilePath(postsDir, post.Filename())
 		if err := g.writePage(outputDirPath, postPath, post.CommonFields); err != nil {
 			return err
 		}
