@@ -282,7 +282,7 @@ func (g Generator) writePage(outputMediaDirPath string, pagePath string, page wp
 			}
 			outputFilePath := fmt.Sprintf("%s/static/%s", outputMediaDirPath, strings.TrimSuffix(link, "/"))
 			if !strings.HasPrefix(link, "http") {
-				link = "https://ashishb.net/" + link
+				link = g.wpInfo.Link + link
 			}
 			media, err := g.mediaProvider.GetReader(link)
 			if err != nil {
