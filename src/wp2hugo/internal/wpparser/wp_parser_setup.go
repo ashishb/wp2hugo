@@ -361,16 +361,12 @@ func getNavigationLinks(content string) ([]NavigationLink, error) {
 */
 func getNavigationLink(match string) (*NavigationLink, error) {
 	type _NavigationLink struct {
-		ClassName     string `json:"className"`
-		Description   string `json:"description"`
-		ID            string `json:"id"`
-		Kind          string `json:"kind"`
-		Label         string `json:"label"`
-		OpensInNewTab bool   `json:"opensInNewTab"`
-		Rel           string `json:"rel"`
-		Title         string `json:"title"`
-		Type          string `json:"type"`
-		URL           string `json:"url"`
+		// Note that ID is string in ashishb.net export but is int in some other exports
+		// https://github.com/ashishb/wp2hugo/issues/9
+		Label string `json:"label"`
+		Title string `json:"title"`
+		Type  string `json:"type"`
+		URL   string `json:"url"`
 	}
 	var navLink _NavigationLink
 	if err := json.Unmarshal([]byte(match), &navLink); err != nil {
