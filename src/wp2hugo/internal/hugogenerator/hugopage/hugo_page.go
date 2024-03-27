@@ -42,6 +42,8 @@ var (
 	_preTagExtractor1 = regexp.MustCompile(`<pre class="EnlighterJSRAW" data-enlighter-language="([^"]+?)".*?>([\s\S]*?)</pre>`)
 	// E.g. <pre class="lang:bash" nums="false">
 	_preTagExtractor2 = regexp.MustCompile(`<pre class=".*?lang:([^" ]+).*?>([\s\S]*?)</pre>`)
+
+	_hugoShortCodeMatcher = regexp.MustCompile(`{{<.*?>}}`)
 )
 
 // Extracts "src" from Hugo figure shortcode
@@ -154,8 +156,11 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string) (*s
 	}
 	if strings.Contains(markdown, _customMoreTag) {
 		// Ref: https://gohugo.io/content-management/summaries/#manual-summary-splitting
-		page.metadata["summary"] = strings.Split(markdown, _customMoreTag)[0]
+		summary := strings.Split(markdown, _customMoreTag)[0]
 		markdown = strings.Replace(markdown, _customMoreTag, "", 1)
+		// Remove short codes from summary
+		// Ref: https://github.com/ashishb/wp2hugo/issues/13
+		page.metadata["summary"] = removeAllHugoShortcodes(summary)
 		log.Warn().
 			Msgf("Manual summary splitting is not supported: %s", page.metadata)
 	}
@@ -169,6 +174,11 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string) (*s
 		log.Debug().Msg("Auto-detecting languages of code blocks is disabled for now")
 	}
 	return &markdown, nil
+}
+
+func removeAllHugoShortcodes(summary string) string {
+	// Ref: https://gohugo.io/content-management/shortcodes/#remove-shortcodes
+	return _hugoShortCodeMatcher.ReplaceAllString(summary, " ")
 }
 
 // Markdown converter will automatically pick up "class" attribute fromn "code" tag
