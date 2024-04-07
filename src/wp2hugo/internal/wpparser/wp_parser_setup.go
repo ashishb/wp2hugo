@@ -7,10 +7,14 @@ import (
 	"github.com/mmcdole/gofeed/extensions"
 	"github.com/mmcdole/gofeed/rss"
 	"github.com/rs/zerolog/log"
+	"golang.org/x/text/runes"
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
 	"io"
 	"regexp"
 	"strings"
 	"time"
+	"unicode"
 )
 
 var (
@@ -95,6 +99,19 @@ type CommonFields struct {
 
 func (i CommonFields) Filename() string {
 	str1 := strings.ToLower(i.Title)
+
+	// Remove diacritics
+	t := transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
+	result, _, err := transform.String(t, str1)
+	if err != nil {
+		log.Warn().
+			Str("title", i.Title).
+			Err(err).
+			Msgf("error removing diacritics from title")
+	} else {
+		str1 = result
+	}
+
 	str1 = nonAlphanumericRegex.ReplaceAllString(str1, "-")
 	for strings.Contains(str1, "--") {
 		str1 = strings.ReplaceAll(str1, "--", "-")
