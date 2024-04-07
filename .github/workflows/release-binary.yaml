@@ -6,7 +6,7 @@ on:
     branches: ["main", "master"]
     # Release whenever this file changes
     paths:
-      - "./version.txt"
+      - "version.txt"
   workflow_dispatch:
 
 permissions:
