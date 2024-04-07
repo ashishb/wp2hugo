@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"regexp"
 	"slices"
+	"sort"
 	"strings"
 	"time"
 )
@@ -107,10 +108,12 @@ func getMetadata(pageURL url.URL, title string, publishDate *time.Time, isDraft 
 		metadata["draft"] = "true"
 	}
 	if len(categories) > 0 {
-		metadata[CategoryName] = categories
+		sort.Strings(categories)
+		metadata[CategoryName] = slices.Compact(categories)
 	}
 	if len(tags) > 0 {
-		metadata[TagName] = tags
+		sort.Strings(tags)
+		metadata[TagName] = slices.Compact(tags)
 	}
 	if guid != nil {
 		metadata["guid"] = guid.Value
@@ -160,7 +163,7 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string) (*s
 		markdown = strings.Replace(markdown, _customMoreTag, "", 1)
 		// Remove short codes from summary
 		// Ref: https://github.com/ashishb/wp2hugo/issues/13
-		page.metadata["summary"] = removeAllHugoShortcodes(summary)
+		page.metadata["summary"] = strings.TrimSpace(removeAllHugoShortcodes(summary))
 		log.Warn().
 			Msgf("Manual summary splitting is not supported: %s", page.metadata)
 	}
