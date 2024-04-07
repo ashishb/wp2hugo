@@ -56,6 +56,12 @@ type _HugoConfig struct {
 	Outputs struct {
 		Home []string `yaml:"home"`
 	}
+	OutputFormats struct {
+		RSS struct {
+			MediaType string `yaml:"mediaType"`
+			BaseName  string `yaml:"baseName"`
+		} `yaml:"RSS"`
+	} `yaml:"outputFormats"`
 	Menu struct {
 		Main []_HugoNavMenu `yaml:"main"`
 	} `yaml:"menu"`
@@ -101,6 +107,9 @@ func updateConfig(siteDir string, info wpparser.WebsiteInfo) error {
 	config.Markup.Highlight.Style = "monokai"
 	// https://adityatelange.github.io/hugo-PaperMod/posts/papermod/papermod-features/#search-page
 	config.Outputs.Home = []string{"HTML", "RSS", "JSON"}
+	config.OutputFormats.RSS.MediaType = "application/rss+xml"
+	// Same as WordPress's feed.xml
+	config.OutputFormats.RSS.BaseName = "feed"
 
 	if err := addNavigationLinks(info, &config); err != nil {
 		return err
