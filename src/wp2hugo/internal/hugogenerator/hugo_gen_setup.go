@@ -95,10 +95,12 @@ func (g Generator) Generate() error {
 		url1 := info.Link + "/favicon.ico"
 		media, err := g.mediaProvider.GetReader(url1)
 		if err != nil {
-			return fmt.Errorf("error fetching media file %s: %s", url1, err)
-		}
-		if err = writeFavicon(path.Join(*siteDir, "static"), media); err != nil {
-			return err
+			log.Info().
+				Msgf("Site has no /favicon.ico")
+		} else {
+			if err = writeFavicon(path.Join(*siteDir, "static"), media); err != nil {
+				return err
+			}
 		}
 	}
 	log.Debug().
