@@ -135,7 +135,11 @@ func (page *Page) writeMetadata(w io.Writer) error {
 
 func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string) (*string, error) {
 	if htmlContent == "" {
-		return nil, fmt.Errorf("empty HTML content")
+		log.Error().
+			Any("page", page.metadata).
+			Msg("Empty HTML body for page")
+		msg := ""
+		return &msg, nil
 	}
 	converter := getMarkdownConverter()
 	htmlContent = improvePreTagsWithCode(htmlContent)
