@@ -283,7 +283,7 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 		} else if isTag(category) {
 			pageTags = append(pageTags, NormalizeCategoryName(category.Value))
 		} else {
-			log.Fatal().
+			log.Warn().
 				Str("link", item.Link).
 				Any("categories", item.Categories).
 				Msgf("Unknown category: %s", category)
