@@ -73,7 +73,7 @@ jobs:
 
       # More assembly might be required: Docker logins, GPG, etc. It all depends
       # on your needs.
-      - uses: goreleaser/goreleaser-action@v5
+      - uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
           version: latest
