@@ -7,7 +7,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.9.2
 	github.com/go-enry/go-enry/v2 v2.8.8
 	github.com/mmcdole/gofeed v1.3.0
-	github.com/rs/zerolog v1.32.0
+	github.com/rs/zerolog v1.33.0
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/text v0.16.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -21,6 +21,6 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mmcdole/goxpp v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	golang.org/x/net v0.25.0 // indirect
-	golang.org/x/sys v0.20.0 // indirect
+	golang.org/x/net v0.26.0 // indirect
+	golang.org/x/sys v0.21.0 // indirect
 )
