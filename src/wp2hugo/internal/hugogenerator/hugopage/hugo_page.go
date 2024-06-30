@@ -273,6 +273,13 @@ func (page Page) writeContent(w io.Writer) error {
 	if _, err := w.Write([]byte(page.markdown)); err != nil {
 		return fmt.Errorf("error writing to page file: %s", err)
 	}
+
+	if !strings.HasSuffix(page.markdown, "\n") {
+		// Add a newline at the end of the file
+		if _, err := w.Write([]byte("\n")); err != nil {
+			return fmt.Errorf("error writing newline to page file: %s", err)
+		}
+	}
 	return nil
 }
 
