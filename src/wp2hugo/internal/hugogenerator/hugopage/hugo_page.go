@@ -186,6 +186,8 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 		log.Debug().Msg("Auto-detecting languages of code blocks is disabled for now")
 	}
 
+	// Replace footnote links with actual Hugo-style footnotes
+	// Ref: https://geekthis.net/post/hugo-footnotes-and-citations
 	footnoteStrs := make([]string, 0, len(footnotes))
 	if len(footnotes) > 0 {
 		// [^1]: And that's the footnote.
