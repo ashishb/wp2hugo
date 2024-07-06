@@ -3,6 +3,7 @@ package hugopage
 import (
 	"fmt"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
 	"github.com/go-enry/go-enry/v2"
 	"github.com/mmcdole/gofeed/rss"
 	"github.com/rs/zerolog/log"
@@ -55,19 +56,24 @@ var _hugoFigureLinks = regexp.MustCompile(`{{< figure.*?src="(.+?)".*? >}}`)
 var _hugoParallaxBlurLinks = regexp.MustCompile(`{{< parallaxblur.*?src="(.+?)".*? >}}`)
 
 func NewPage(provider ImageURLProvider, pageURL url.URL, title string, publishDate *time.Time, isDraft bool,
-	categories []string, tags []string, htmlContent string, guid *rss.GUID) (*Page, error) {
+	categories []string, tags []string, footnotes []wpparser.Footnote,
+	htmlContent string, guid *rss.GUID) (*Page, error) {
 	page := Page{
 		absoluteURL: pageURL,
 		metadata:    getMetadata(pageURL, title, publishDate, isDraft, categories, tags, guid),
 	}
 	// htmlContent is the HTML content of the page that will be
 	// transformed to Markdown
-	markdown, err := page.getMarkdown(provider, htmlContent)
+	markdown, err := page.getMarkdown(provider, htmlContent, footnotes)
 	if err != nil {
 		return nil, err
 	}
 	page.markdown = *markdown
 	return &page, nil
+}
+
+func (page *Page) Markdown() string {
+	return page.markdown
 }
 
 func (page Page) Write(w io.Writer) error {
@@ -133,7 +139,7 @@ func (page *Page) writeMetadata(w io.Writer) error {
 	return nil
 }
 
-func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string) (*string, error) {
+func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, footnotes []wpparser.Footnote) (*string, error) {
 	if htmlContent == "" {
 		log.Error().
 			Any("page", page.metadata).
@@ -145,7 +151,6 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string) (*s
 	htmlContent = improvePreTagsWithCode(htmlContent)
 	htmlContent = replaceCaptionWithFigure(htmlContent)
 	htmlContent = replaceAWBWithParallaxBlur(provider, htmlContent)
-
 	htmlContent = strings.Replace(htmlContent, _WordPressMoreTag, _customMoreTag, 1)
 	// This handling is specific to paperMod theme
 	// Ref: https://adityatelange.github.io/hugo-PaperMod/posts/papermod/papermod-features/#show-table-of-contents-toc-on-blog-post
@@ -180,6 +185,19 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string) (*s
 	} else {
 		log.Debug().Msg("Auto-detecting languages of code blocks is disabled for now")
 	}
+
+	footnoteStrs := make([]string, 0, len(footnotes))
+	if len(footnotes) > 0 {
+		// [^1]: And that's the footnote.
+		for i, footnote := range footnotes {
+			tmp := fmt.Sprintf("[^%d]: %s", i+1, footnote.Content)
+			footnoteStrs = append(footnoteStrs, tmp)
+			regex1 := regexp.MustCompile(fmt.Sprintf(`\[\S+\]\(#%s\)`, footnote.ID))
+			markdown = regex1.ReplaceAllString(markdown, fmt.Sprintf(`[^%d]`, i+1))
+		}
+		markdown = fmt.Sprintf("%s\n\n%s", markdown, strings.Join(footnoteStrs, "\n\n"))
+	}
+
 	return &markdown, nil
 }
 

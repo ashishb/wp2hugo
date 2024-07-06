@@ -245,11 +245,7 @@ func (g Generator) writePage(outputMediaDirPath string, pagePath string, page wp
 		return fmt.Errorf("error parsing page URL: %s", err)
 	}
 
-	p, err := hugopage.NewPage(
-		g.imageURLProvider,
-		*pageURL, page.Title, page.PublishDate,
-		page.PublishStatus == wpparser.PublishStatusDraft || page.PublishStatus == wpparser.PublishStatusPending,
-		page.Categories, page.Tags, page.Content, page.GUID)
+	p, err := g.NewHugoPage(pageURL, page)
 	if err != nil {
 		return fmt.Errorf("error creating Hugo page: %s", err)
 	}
@@ -298,4 +294,12 @@ func (g Generator) writePage(outputMediaDirPath string, pagePath string, page wp
 		}
 	}
 	return nil
+}
+
+func (g Generator) NewHugoPage(pageURL *url.URL, page wpparser.CommonFields) (*hugopage.Page, error) {
+	return hugopage.NewPage(
+		g.imageURLProvider,
+		*pageURL, page.Title, page.PublishDate,
+		page.PublishStatus == wpparser.PublishStatusDraft || page.PublishStatus == wpparser.PublishStatusPending,
+		page.Categories, page.Tags, page.Footnotes, page.Content, page.GUID)
 }

@@ -40,7 +40,9 @@ func main() {
 }
 
 func handle(filePath string) error {
-	log.Debug().Msgf("Source: %s", filePath)
+	log.Debug().
+		Str("source", filePath).
+		Msg("Reading website export")
 	websiteInfo, err := getWebsiteInfo(filePath)
 	if err != nil {
 		return err

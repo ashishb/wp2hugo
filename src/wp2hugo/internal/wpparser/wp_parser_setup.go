@@ -93,6 +93,7 @@ type CommonFields struct {
 
 	Categories []string
 	Tags       []string
+	Footnotes  []Footnote
 
 	attachmentURL *string
 }
@@ -141,6 +142,11 @@ type PostInfo struct {
 
 type AttachmentInfo struct {
 	CommonFields
+}
+
+type Footnote struct {
+	ID      string `json:"id"`
+	Content string `json:"content"`
 }
 
 func (p *Parser) Parse(xmlData io.Reader) (*WebsiteInfo, error) {
@@ -332,6 +338,7 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 		Content:     item.Content,
 		Categories:  pageCategories,
 		Tags:        pageTags,
+		Footnotes:   getFootnotes(item),
 
 		attachmentURL: attachmentURL,
 	}, nil
@@ -470,6 +477,49 @@ func getTags(inputs []ext.Extension) []TagInfo {
 		categories = append(categories, tag)
 	}
 	return categories
+}
+
+func getFootnotes(item *rss.Item) []Footnote {
+	if len(item.Extensions["wp"]["postmeta"]) == 0 {
+		return nil
+	}
+
+	footnotes := make([]Footnote, 0)
+	// Footnotes
+	for _, meta := range item.Extensions["wp"]["postmeta"] {
+		if len(meta.Children["meta_key"]) == 0 {
+			continue
+		}
+		if len(meta.Children["meta_value"]) == 0 {
+			continue
+		}
+		if meta.Children["meta_key"][0].Value != "footnotes" {
+			continue
+		}
+		log.Warn().Msgf("ashishb_meta: %+v", meta)
+		footnoteJSON := meta.Children["meta_value"][0].Value
+		footnoteArr := make([]Footnote, 0)
+		if err := json.Unmarshal([]byte(footnoteJSON), &footnoteArr); err != nil {
+			log.Warn().
+				Str("link", item.Link).
+				Str("footnoteJSON", footnoteJSON).
+				Err(err).
+				Msg("Error unmarshalling footnotes")
+		} else {
+			log.Debug().
+				Any("footnotes", footnotes).
+				Msg("Footnotes")
+			footnotes = append(footnotes, footnoteArr...)
+		}
+	}
+	if len(footnotes) == 0 {
+		return nil
+	}
+	log.Debug().
+		Int("numFootnotes", len(footnotes)).
+		Str("link", item.Link).
+		Msg("Footnotes found")
+	return footnotes
 }
 
 func parseTime(utcTime string) (*time.Time, error) {
