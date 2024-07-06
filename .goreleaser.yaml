@@ -1,4 +1,6 @@
 ---
+
+version: 2
 # Ref: https://goreleaser.com
 before:
   hooks:
