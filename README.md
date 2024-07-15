@@ -9,6 +9,13 @@
 This is the best migrator for migrating WordPress export to Hugo.
 It handles several weird edge cases that I encountered while trying to migrate my [personal website](https://ashishb.net) to [Hugo-based site](https://v2.ashishb.net/).
 
+## Commercial usage
+
+I want this project to be as widely accessible as possible, while still funding the development costs. 
+This project is completely free for non-commercial and personal usage.
+Commercial usage is restricted via a license.
+Feel free to contact me if you want to license this commercially
+
 ## Usage
 
 ### Binary
