@@ -10,7 +10,7 @@ import (
 )
 
 var youtubeID = regexp.MustCompile(`youtube\.com/embed/([^\&\?\/]+)`)
-var googleMapsID = regexp.MustCompile(`google\.com/maps/d/embed\?mid=([0-9A-Za-z-_]+)`)
+var googleMapsID = regexp.MustCompile(`google\.com/maps/d/.*embed\?mid=([0-9A-Za-z-_]+)`)
 
 func getMarkdownConverter() *md.Converter {
 	converter := md.NewConverter("", true, nil)
