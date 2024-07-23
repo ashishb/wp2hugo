@@ -11,7 +11,7 @@ It handles several weird edge cases that I encountered while trying to migrate m
 
 ## Commercial usage
 
-I want this project to be as widely accessible as possible, while still funding the development costs. 
+I want this project to be as widely accessible as possible, while still funding the development costs.
 This project is completely free for non-commercial and personal usage.
 Commercial usage is restricted via a license.
 Feel free to contact me if you want to license this commercially
