@@ -470,10 +470,20 @@ func getCategories(inputs []ext.Extension) []CategoryInfo {
 func getTags(inputs []ext.Extension) []TagInfo {
 	categories := make([]TagInfo, 0, len(inputs))
 	for _, input := range inputs {
+		var tagName string
+		if len(input.Children["tag_name"]) == 0 {
+			// Fallback
+			tagName = input.Children["tag_slug"][0].Value
+			log.Warn().
+				Any("input", input).
+				Msg("tag_name is missing")
+		} else {
+			tagName = input.Children["tag_name"][0].Value
+		}
 		tag := TagInfo{
 			// ID is usually int but for safety let's assume string
 			ID:   input.Children["term_id"][0].Value,
-			Name: NormalizeCategoryName(input.Children["tag_name"][0].Value),
+			Name: NormalizeCategoryName(tagName),
 			Slug: input.Children["tag_slug"][0].Value,
 		}
 		log.Trace().Msgf("tag: %+v", tag)
