@@ -164,7 +164,7 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 		return nil, fmt.Errorf("error converting HTML to Markdown: %s", err)
 	}
 	if len(strings.TrimSpace(markdown)) == 0 {
-		return nil, fmt.Errorf("empty markdown")
+		return nil, fmt.Errorf("empty markdown for %s", page.absoluteURL.String())
 	}
 	if strings.Contains(markdown, _customMoreTag) {
 		// Ref: https://gohugo.io/content-management/summaries/#manual-summary-splitting
