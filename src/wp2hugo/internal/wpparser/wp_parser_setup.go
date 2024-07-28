@@ -153,6 +153,9 @@ func (p *Parser) Parse(xmlData io.Reader) (*WebsiteInfo, error) {
 	fp := rss.Parser{}
 	feed, err := fp.Parse(InvalidatorCharacterRemover{reader: xmlData})
 	if err != nil {
+		log.Warn().
+			Err(err).
+			Msgf("error parsing XML")
 		return nil, fmt.Errorf("error parsing XML: %s", err)
 	}
 	return p.getWebsiteInfo(feed)
