@@ -122,7 +122,7 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 	commands := []string{
 		"hugo version",
 		"cd " + outputDirPath,
-		// Use YMAL file as it is easier to edit it afterwards than TOML
+		// Use YAML file as it is easier to edit it afterward than TOML
 		fmt.Sprintf("hugo new site %s --format yaml", siteName),
 		"cd " + siteName,
 		"git clone https://github.com/adityatelange/hugo-PaperMod themes/PaperMod --depth=1",
@@ -135,6 +135,10 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 	log.Debug().Msg("Running Hugo setup commands")
 	output, err := exec.Command("bash", "-c", combinedCommand).Output()
 	if err != nil {
+		log.Error().
+			Err(err).
+			Bytes("output", output).
+			Msg("error running Hugo setup commands")
 		return nil, fmt.Errorf("error running Hugo setup commands: %s", err)
 	}
 	log.Debug().Msgf("Hugo setup output: %s", output)
