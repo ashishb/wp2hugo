@@ -509,7 +509,10 @@ func getFootnotes(item *rss.Item) []Footnote {
 		if meta.Children["meta_key"][0].Value != "footnotes" {
 			continue
 		}
-		log.Warn().Msgf("ashishb_meta: %+v", meta)
+		if len(meta.Children["meta_value"][0].Value) == 0 {
+			continue
+		}
+		log.Debug().Msgf("ashishb_meta: %+v", meta)
 		footnoteJSON := meta.Children["meta_value"][0].Value
 		footnoteArr := make([]Footnote, 0)
 		if err := json.Unmarshal([]byte(footnoteJSON), &footnoteArr); err != nil {

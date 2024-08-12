@@ -76,6 +76,10 @@
       <wp:meta_key><![CDATA[footnotes]]></wp:meta_key>
       <wp:meta_value><![CDATA[[{"content":"Here we are: the footnote.","id":"082fba72-356e-41c6-acc1-ae0bc20828b2"}]]]></wp:meta_value>
     </wp:postmeta>
+    <wp:postmeta>
+      <wp:meta_key><![CDATA[footnotes]]></wp:meta_key>
+      <wp:meta_value><![CDATA[]]></wp:meta_value><!-- Empty Footnote -->
+    </wp:postmeta>
   </item>
 </channel>
 </rss>
