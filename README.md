@@ -54,6 +54,10 @@ $ make build_prod
 # `./bin/wp2hugo` will contain the binary and you can use it as `$ ./bin/wp2hugo --source wordpress-export.xml --download-media`
 ```
 
+### Installation via Package Managers
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/wp2hugo.svg)](https://repology.org/project/wp2hugo/versions)
+
 ## Goals of `wp2hugo`
 
 1. [x] Migrate posts
