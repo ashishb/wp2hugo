@@ -69,12 +69,17 @@ type TagInfo struct {
 
 type PublishStatus string
 
+// See some discussion here https://github.com/ashishb/wp2hugo/issues/26
 const (
-	PublishStatusPublish PublishStatus = "publish"
-	PublishStatusDraft   PublishStatus = "draft"
-	PublishStatusPending PublishStatus = "pending"
-	PublishStatusInherit PublishStatus = "inherit"
-	PublishStatusFuture  PublishStatus = "future"
+	PublishStatusAttachment PublishStatus = "attachment"
+	PublishStatusDraft      PublishStatus = "draft"
+	PublishStatusFuture     PublishStatus = "future"
+	PublishStatusInherit    PublishStatus = "inherit"
+	PublishStatusPending    PublishStatus = "pending"
+	PublishStatusPrivate    PublishStatus = "private"
+	PublishStatusPublish    PublishStatus = "publish"
+	PublishStatusStatic     PublishStatus = "static"
+	PublishStatusTrash      PublishStatus = "trash"
 )
 
 type CommonFields struct {
@@ -275,11 +280,11 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 	}
 
 	publishStatus := item.Extensions["wp"]["status"][0].Value
-	switch publishStatus {
-	// See some discussion here https://github.com/ashishb/wp2hugo/issues/26
-	case "attachment", "draft", "future", "inherit", "pending", "private", "publish", "static":
+	switch PublishStatus(publishStatus) {
+	case PublishStatusAttachment, PublishStatusDraft, PublishStatusFuture, PublishStatusInherit, PublishStatusPending,
+		PublishStatusPrivate, PublishStatusPublish, PublishStatusStatic:
 		// OK
-	case "trash":
+	case PublishStatusTrash:
 		return nil, fmt.Errorf("%w, ignored: %s", errTrashItem, item.Title)
 	default:
 		log.Fatal().Msgf("Unknown publish status: '%s' for '%s'", publishStatus, item.Title)
