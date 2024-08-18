@@ -55,12 +55,12 @@ var _hugoFigureLinks = regexp.MustCompile(`{{< figure.*?src="(.+?)".*? >}}`)
 // {{< parallaxblur src="/wp-content/uploads/2018/12/bora%5Fbora%5F5%5Fresized.jpg" >}}
 var _hugoParallaxBlurLinks = regexp.MustCompile(`{{< parallaxblur.*?src="(.+?)".*? >}}`)
 
-func NewPage(provider ImageURLProvider, pageURL url.URL, title string, publishDate *time.Time, isDraft bool,
+func NewPage(provider ImageURLProvider, pageURL url.URL, author string, title string, publishDate *time.Time, isDraft bool,
 	categories []string, tags []string, footnotes []wpparser.Footnote,
 	htmlContent string, guid *rss.GUID) (*Page, error) {
 	page := Page{
 		absoluteURL: pageURL,
-		metadata:    getMetadata(pageURL, title, publishDate, isDraft, categories, tags, guid),
+		metadata:    getMetadata(pageURL, author, title, publishDate, isDraft, categories, tags, guid),
 	}
 	// htmlContent is the HTML content of the page that will be
 	// transformed to Markdown
@@ -102,10 +102,11 @@ func getMarkdownLinks(regex *regexp.Regexp, markdown string) []string {
 	return links
 }
 
-func getMetadata(pageURL url.URL, title string, publishDate *time.Time, isDraft bool,
+func getMetadata(pageURL url.URL, author string, title string, publishDate *time.Time, isDraft bool,
 	categories []string, tags []string, guid *rss.GUID) map[string]any {
 	metadata := make(map[string]any)
 	metadata["url"] = pageURL.Path // Relative URL
+	metadata["author"] = author
 	metadata["title"] = title
 	if publishDate != nil {
 		metadata["date"] = publishDate.Format(_hugoDateFormat)

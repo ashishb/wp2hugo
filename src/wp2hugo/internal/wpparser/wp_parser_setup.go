@@ -85,6 +85,7 @@ const (
 type CommonFields struct {
 	PostID string
 
+	Author           string
 	Title            string
 	Link             string     // Note that this is the absolute link for example https://example.com/about
 	PublishDate      *time.Time // This can be nil since an item might have never been published
@@ -332,8 +333,8 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 			pubDate = &tmp
 		}
 	}
-
 	return &CommonFields{
+		Author:           getAuthor(item),
 		PostID:           item.Extensions["wp"]["post_id"][0].Value,
 		Title:            item.Title,
 		Link:             item.Link,
@@ -351,6 +352,17 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 
 		attachmentURL: attachmentURL,
 	}, nil
+}
+
+func getAuthor(item *rss.Item) string {
+	author := item.Author
+	if len(author) > 0 {
+		return author
+	}
+	if item.Extensions["dc"] != nil && item.Extensions["dc"]["creator"] != nil {
+		return item.Extensions["dc"]["creator"][0].Value
+	}
+	return ""
 }
 
 func getNavigationLinks(content string) ([]NavigationLink, error) {

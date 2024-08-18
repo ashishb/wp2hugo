@@ -84,6 +84,7 @@ $ make build_prod
 1. [x] Download embedded photos while maintaining relative URLs
 1. [x] Map WordPress's `feed.xml` to Hugo's `feed.xml`
 1. [x] WordPress [footnotes](https://github.com/ashishb/wp2hugo/issues/24)
+1. [x] WordPress page author
 1. [ ] Featured images - I tried this [WordPress plugin](https://wordpress.org/plugins/export-media-with-selected-content/) but featured images are simply not exported
 
 ## Why existing tools don't work

@@ -335,7 +335,7 @@ func (g Generator) writePage(outputMediaDirPath string, pagePath string, page wp
 func (g Generator) NewHugoPage(pageURL *url.URL, page wpparser.CommonFields) (*hugopage.Page, error) {
 	return hugopage.NewPage(
 		g.imageURLProvider,
-		*pageURL, page.Title, page.PublishDate,
+		*pageURL, page.Author, page.Title, page.PublishDate,
 		page.PublishStatus == wpparser.PublishStatusDraft || page.PublishStatus == wpparser.PublishStatusPending,
 		page.Categories, page.Tags, page.Footnotes, page.Content, page.GUID)
 }
