@@ -25,6 +25,11 @@ const (
 	_sampleMarkdownOutput3 = "1. First item\n1. Second item\n1. Third item"
 )
 
+const (
+	_sampleHTMLInput4      = `This is<br><br>some<br><br><br>text`
+	_sampleMarkdownOutput4 = "This is\n\nsome\n\ntext"
+)
+
 func TestMarkdownExtractorWithLink1(t *testing.T) {
 	testMarkdownExtractor(t, _sampleHTMLInput2, _sampleMarkdownOutput2)
 }
@@ -39,6 +44,10 @@ func TestMarkdownExtractorWithLink2(t *testing.T) {
 
 func TestListExtractor(t *testing.T) {
 	testMarkdownExtractor(t, _sampleHTMLInput3, _sampleMarkdownOutput3)
+}
+
+func TestConsecutiveNewlines(t *testing.T) {
+	testMarkdownExtractor(t, _sampleHTMLInput4, _sampleMarkdownOutput4)
 }
 
 func testMarkdownExtractor(t *testing.T, htmlInput string, markdownOutput string) {

@@ -202,6 +202,7 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 	}
 
 	markdown = replaceOrderedListNumbers(markdown)
+	markdown = replaceConsecutiveNewlines(markdown)
 
 	return &markdown, nil
 }
@@ -297,6 +298,13 @@ func replaceOrderedListNumbers(markdown string) string {
 	// Find all the ordered list items starting with optional whitespaces followed by \d. and replace with 1.
 	reg1 := regexp.MustCompile(`(?m)^(\s*)(\d+)\.(\s)`)
 	return reg1.ReplaceAllString(markdown, `${1}1.$3`)
+}
+
+func replaceConsecutiveNewlines(markdown string) string {
+	// Ref: https://github.com/markdownlint/markdownlint/blob/main/docs/RULES.md#md012---multiple-consecutive-blank-lines
+	// Replace multiple consecutive newlines with just two newlines
+	reg1 := regexp.MustCompile(`\n{3,}`)
+	return reg1.ReplaceAllString(markdown, "\n\n")
 }
 
 func (page Page) writeContent(w io.Writer) error {
