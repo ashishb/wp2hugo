@@ -201,6 +201,8 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 		markdown = fmt.Sprintf("%s\n\n%s", markdown, strings.Join(footnoteStrs, "\n\n"))
 	}
 
+	markdown = replaceOrderedListNumbers(markdown)
+
 	return &markdown, nil
 }
 
@@ -288,6 +290,13 @@ func getLanguageCode(code string) string {
 		Str("language", language).
 		Msg("Detected language for code block")
 	return languageCodes[slices.Index(possibleLanguages, language)]
+}
+
+func replaceOrderedListNumbers(markdown string) string {
+	// Ref: https://github.com/markdownlint/markdownlint/blob/main/docs/RULES.md#md029---ordered-list-item-prefix
+	// Find all the ordered list items starting with optional whitespaces followed by \d. and replace with 1.
+	reg1 := regexp.MustCompile(`(?m)^(\s*)(\d+)\.(\s)`)
+	return reg1.ReplaceAllString(markdown, `${1}1.$3`)
 }
 
 func (page Page) writeContent(w io.Writer) error {

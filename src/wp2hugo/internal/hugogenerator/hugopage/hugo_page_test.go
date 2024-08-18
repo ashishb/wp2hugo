@@ -21,8 +21,8 @@ const (
 )
 
 const (
-	_sampleHTMLInput3      = `<ol><li>First item</li><li>Second item</li></ol>`
-	_sampleMarkdownOutput3 = "1. First item\n1. Second item"
+	_sampleHTMLInput3      = `<ol><li>First item</li><li>Second item</li><li>Third item</li></ol>`
+	_sampleMarkdownOutput3 = "1. First item\n1. Second item\n1. Third item"
 )
 
 func TestMarkdownExtractorWithLink1(t *testing.T) {
@@ -38,7 +38,6 @@ func TestMarkdownExtractorWithLink2(t *testing.T) {
 }
 
 func TestListExtractor(t *testing.T) {
-	t.Skipf("This is failing due to how the underlying library works. Skipping for now.")
 	testMarkdownExtractor(t, _sampleHTMLInput3, _sampleMarkdownOutput3)
 }
 
