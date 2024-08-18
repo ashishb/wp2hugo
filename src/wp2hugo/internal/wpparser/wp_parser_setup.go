@@ -166,7 +166,14 @@ func (p *Parser) Parse(xmlData io.Reader, authors []string) (*WebsiteInfo, error
 			Msgf("error parsing XML")
 		return nil, fmt.Errorf("error parsing XML: %s", err)
 	}
-	return p.getWebsiteInfo(feed, authors)
+	nonEmptyAuthors := make([]string, 0, len(authors))
+	for _, a := range authors {
+		a = strings.TrimSpace(a)
+		if a != "" {
+			nonEmptyAuthors = append(nonEmptyAuthors, a)
+		}
+	}
+	return p.getWebsiteInfo(feed, nonEmptyAuthors)
 }
 
 func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo, error) {
