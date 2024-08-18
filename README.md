@@ -29,6 +29,10 @@ Now, run this
 ```bash
 $ wp2hugo
 Usage of wp2hugo:
+  -color-log-output
+   enable colored log output, set false to structured JSON log (default true)
+  -continue-on-media-download-error
+   continue processing even if one more more media download fails
   -download-media
    download media files embedded in the WordPress content
   -font string
