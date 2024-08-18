@@ -9,6 +9,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"os"
 	"path"
+	"strings"
 )
 
 var (
@@ -16,6 +17,7 @@ var (
 	outputDir                      = flag.String("output", "/tmp", "dir path to the write the Hugo generated data to")
 	downloadMedia                  = flag.Bool("download-media", false, "download media files embedded in the WordPress content")
 	continueOnMediaDownloadFailure = flag.Bool("continue-on-media-download-error", false, "continue processing even if one more more media download fails")
+	authors                        = flag.String("authors", "", "CSV list of author name(s), if provided, only posts by these authors will be processed")
 	// This is useful for repeated executions of the tool to avoid downloading the media files again
 	// Mostly for development and not for the production use
 	mediaCacheDir = flag.String("media-cache-dir", path.Join("/tmp/wp2hugo-cache"), "dir path to cache the downloaded media files")
@@ -58,7 +60,7 @@ func getWebsiteInfo(filePath string) (*wpparser.WebsiteInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	return parser.Parse(file)
+	return parser.Parse(file, strings.Split(*authors, ","))
 }
 
 func generate(info wpparser.WebsiteInfo, outputDirPath string) error {

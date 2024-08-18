@@ -29,6 +29,8 @@ Now, run this
 ```bash
 $ wp2hugo
 Usage of wp2hugo:
+ -authors string
+   CSV list of author name(s), if provided, only posts by these authors will be processed
   -color-log-output
    enable colored log output, set false to structured JSON log (default true)
   -continue-on-media-download-error
@@ -85,6 +87,7 @@ $ make build_prod
 1. [x] Map WordPress's `feed.xml` to Hugo's `feed.xml`
 1. [x] WordPress [footnotes](https://github.com/ashishb/wp2hugo/issues/24)
 1. [x] WordPress page author
+1. [x] Ability to filter by author(s), useful for [WordPress multi-site](https://www.smashingmagazine.com/2020/01/complete-guide-wordpress-multisite/) migrations
 1. [ ] Featured images - I tried this [WordPress plugin](https://wordpress.org/plugins/export-media-with-selected-content/) but featured images are simply not exported
 
 ## Why existing tools don't work

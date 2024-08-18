@@ -14,7 +14,7 @@ func TestFootnote(t *testing.T) {
 	assert.NoError(t, err)
 
 	parser := wpparser.NewParser()
-	websiteInfo, err := parser.Parse(file)
+	websiteInfo, err := parser.Parse(file, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, len(websiteInfo.Posts))
 

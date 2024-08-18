@@ -155,7 +155,9 @@ type Footnote struct {
 	Content string `json:"content"`
 }
 
-func (p *Parser) Parse(xmlData io.Reader) (*WebsiteInfo, error) {
+// Parse parses the XML data and returns the WebsiteInfo.
+// authors is a list of author names. If it is empty, all authors are considered.
+func (p *Parser) Parse(xmlData io.Reader, authors []string) (*WebsiteInfo, error) {
 	fp := rss.Parser{}
 	feed, err := fp.Parse(InvalidatorCharacterRemover{reader: xmlData})
 	if err != nil {
@@ -164,10 +166,10 @@ func (p *Parser) Parse(xmlData io.Reader) (*WebsiteInfo, error) {
 			Msgf("error parsing XML")
 		return nil, fmt.Errorf("error parsing XML: %s", err)
 	}
-	return p.getWebsiteInfo(feed)
+	return p.getWebsiteInfo(feed, authors)
 }
 
-func (p *Parser) getWebsiteInfo(feed *rss.Feed) (*WebsiteInfo, error) {
+func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo, error) {
 	if feed.PubDateParsed == nil {
 		log.Warn().Msgf("error parsing published date: %s", feed.PubDateParsed)
 	}
@@ -191,14 +193,14 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed) (*WebsiteInfo, error) {
 		case "attachment":
 			if attachment, err := getAttachmentInfo(item); err != nil && !errors.Is(err, errTrashItem) {
 				return nil, err
-			} else if attachment != nil {
+			} else if attachment != nil && hasValidAuthor(authors, attachment.CommonFields) {
 				attachments = append(attachments, *attachment)
 			}
 		case "page":
 			if page, err := getPageInfo(item); err != nil && !errors.Is(err, errTrashItem) {
 				return nil, err
 			} else if page != nil {
-				if page.Content == "" {
+				if page.Content == "" && hasValidAuthor(authors, page.CommonFields) {
 					log.Warn().
 						Str("title", page.Title).
 						Msg("Empty content")
@@ -208,7 +210,7 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed) (*WebsiteInfo, error) {
 		case "post":
 			if post, err := getPostInfo(item); err != nil && !errors.Is(err, errTrashItem) {
 				return nil, err
-			} else if post != nil {
+			} else if post != nil && hasValidAuthor(authors, post.CommonFields) {
 				if post.Content == "" {
 					log.Warn().
 						Str("title", post.Title).
@@ -352,6 +354,24 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 
 		attachmentURL: attachmentURL,
 	}, nil
+}
+
+func hasValidAuthor(authors []string, fields CommonFields) bool {
+	if len(authors) == 0 {
+		return true
+	}
+	for _, a := range authors {
+		if a == fields.Author {
+			return true
+		}
+	}
+	log.Warn().
+		Str("author", fields.Author).
+		Str("authors", strings.Join(authors, ",")).
+		Str("title", fields.Title).
+		Str("link", fields.Link).
+		Msg("Author not in the list of authors to process")
+	return false
 }
 
 func getAuthor(item *rss.Item) string {
