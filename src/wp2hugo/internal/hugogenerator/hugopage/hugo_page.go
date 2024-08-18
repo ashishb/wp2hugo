@@ -50,6 +50,9 @@ var (
 	// Ref: https://github.com/markdownlint/markdownlint/blob/main/docs/RULES.md#md012---multiple-consecutive-blank-lines
 	// Replace multiple consecutive newlines with just two newlines
 	_moreThanTwoNewlines = regexp.MustCompile(`\n{3,}`)
+
+	// Catch \nspace\n
+	_spaceSurroundedByNewlines = regexp.MustCompile(`\n[ \t]+\n`)
 )
 
 // Extracts "src" from Hugo figure shortcode
@@ -157,6 +160,12 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 	htmlContent = replaceCaptionWithFigure(htmlContent)
 	htmlContent = replaceAWBWithParallaxBlur(provider, htmlContent)
 	htmlContent = strings.Replace(htmlContent, _WordPressMoreTag, _customMoreTag, 1)
+
+	// We convert consecutive <br> to a custom tag
+	// then we convert <br> to "  \n" and then we convert the custom tag to "\n\n"
+	// It is convoluted but it works.
+	htmlContent = convertConsecutiveBRToCustomTag(htmlContent)
+
 	// This handling is specific to paperMod theme
 	// Ref: https://adityatelange.github.io/hugo-PaperMod/posts/papermod/papermod-features/#show-table-of-contents-toc-on-blog-post
 	if strings.Contains(htmlContent, _wordPressTocTag) {
@@ -165,6 +174,11 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 		page.metadata["TocOpen"] = true
 	}
 	markdown, err := converter.ConvertString(htmlContent)
+	log.Debug().
+		Str("htmlContent", htmlContent).
+		Str("markdown", markdown).
+		Msg("Markdown conversion")
+
 	if err != nil {
 		return nil, fmt.Errorf("error converting HTML to Markdown: %s", err)
 	}
@@ -182,6 +196,7 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 			Msgf("Manual summary splitting is not supported: %s", page.metadata)
 	}
 
+	markdown = strings.ReplaceAll(markdown, _doubleSpaceWithNewline, "  \n")
 	markdown = ReplaceAbsoluteLinksWithRelative(page.absoluteURL.Host, markdown)
 	markdown = replaceCatlistWithShortcode(markdown)
 	// Disabled for now, as it does not work well
@@ -207,6 +222,7 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 
 	markdown = replaceOrderedListNumbers(markdown)
 	markdown = replaceConsecutiveNewlines(markdown)
+	markdown = removeTrailingSpaces(markdown)
 
 	return &markdown, nil
 }
@@ -306,6 +322,10 @@ func replaceOrderedListNumbers(markdown string) string {
 
 func replaceConsecutiveNewlines(markdown string) string {
 	return _moreThanTwoNewlines.ReplaceAllString(markdown, "\n\n")
+}
+
+func removeTrailingSpaces(markdown string) string {
+	return _spaceSurroundedByNewlines.ReplaceAllString(markdown, "\n\n")
 }
 
 func (page Page) writeContent(w io.Writer) error {

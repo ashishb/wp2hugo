@@ -16,6 +16,8 @@ func getMarkdownConverter() *md.Converter {
 	converter := md.NewConverter("", true, nil)
 	converter.Use(getYouTubeForHugoConverter())
 	converter.Use(getGoogleMapsEmbedForHugoConverter())
+	converter.Use(convertCustomBRToNewline())
+	converter.Use(convertBrToNewline())
 	return converter
 }
 

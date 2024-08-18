@@ -26,8 +26,8 @@ const (
 )
 
 const (
-	_sampleHTMLInput4      = `This is<br><br>some<br><br><br>text`
-	_sampleMarkdownOutput4 = "This is\n\nsome\n\ntext"
+	_sampleHTMLInput4      = `This is<br><br>some<br><br><br>tExt`
+	_sampleMarkdownOutput4 = "This is\n\nsome\n\ntExt"
 )
 
 const (
@@ -56,8 +56,6 @@ func TestConsecutiveNewlines(t *testing.T) {
 }
 
 func TestManualLineBreaks(t *testing.T) {
-	// Ref: https://github.com/ashishb/wp2hugo/issues/12
-	t.Skipf("This is failing due to a bug in the underlying library. Skipping for now.")
 	testMarkdownExtractor(t, _sampleHTMLInput5, _sampleMarkdownOutput5)
 }
 
