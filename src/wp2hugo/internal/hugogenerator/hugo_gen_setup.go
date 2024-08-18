@@ -119,6 +119,15 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 	log.Debug().
 		Str("siteName", siteName).
 		Msg("Setting up Hugo site")
+	// Verify hugo is present
+	_, err := exec.LookPath("hugo")
+	if err != nil {
+		log.Fatal().
+			Err(err).
+			Msg("Hugo not found, install it from https://gohugo.io/")
+		return nil, fmt.Errorf("hugo not found, install it from https://gohugo.io/: %s", err)
+	}
+
 	commands := []string{
 		"hugo version",
 		"cd " + outputDirPath,
