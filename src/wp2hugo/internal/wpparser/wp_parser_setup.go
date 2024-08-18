@@ -510,9 +510,11 @@ func getFootnotes(item *rss.Item) []Footnote {
 			continue
 		}
 		if len(meta.Children["meta_value"][0].Value) == 0 {
+			log.Warn().
+				Str("link", item.Link).
+				Msg("ignoring empty footnote")
 			continue
 		}
-		log.Debug().Msgf("ashishb_meta: %+v", meta)
 		footnoteJSON := meta.Children["meta_value"][0].Value
 		footnoteArr := make([]Footnote, 0)
 		if err := json.Unmarshal([]byte(footnoteJSON), &footnoteArr); err != nil {
