@@ -19,14 +19,15 @@ var (
 	// Mostly for development and not for the production use
 	mediaCacheDir = flag.String("media-cache-dir", path.Join("/tmp/wp2hugo-cache"), "dir path to cache the downloaded media files")
 	// Custom font for Hugo's papermod theme
-	font = flag.String("font", "Lexend", "custom font for the output website")
+	font           = flag.String("font", "Lexend", "custom font for the output website")
+	colorLogOutput = flag.Bool("color-log-output", true, "enable colored log output, set false to structured JSON log")
 )
 
 func main() {
 	flag.Parse()
 
 	// Set log level
-	logger.ConfigureLogging()
+	logger.ConfigureLogging(*colorLogOutput)
 	if len(*sourceFile) == 0 {
 		log.Fatal().Msg("Source file is required")
 	}

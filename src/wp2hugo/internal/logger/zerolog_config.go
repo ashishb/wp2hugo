@@ -17,13 +17,12 @@ const (
 )
 
 // ConfigureLogging configures ZeroLog's logging config with good defaults
-func ConfigureLogging() {
+func ConfigureLogging(colorLogOutput bool) {
 	// UNIX Time is faster and smaller than most timestamps
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	logLevel := getLogLevel()
 	zerolog.SetGlobalLevel(logLevel)
 
-	colorLogOutput := strings.EqualFold(os.Getenv("COLOR_LOG_OUTPUT"), "true")
 	if colorLogOutput {
 		// Pretty printing is a bit inefficient for production
 		output := zerolog.ConsoleWriter{Out: os.Stderr}
