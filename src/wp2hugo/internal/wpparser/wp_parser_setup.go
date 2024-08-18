@@ -276,12 +276,13 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 
 	publishStatus := item.Extensions["wp"]["status"][0].Value
 	switch publishStatus {
-	case "publish", "draft", "pending", "inherit", "future":
+	// See some discussion here https://github.com/ashishb/wp2hugo/issues/26
+	case "attachment", "draft", "future", "inherit", "pending", "private", "publish", "static":
 		// OK
 	case "trash":
 		return nil, fmt.Errorf("%w, ignored: %s", errTrashItem, item.Title)
 	default:
-		log.Fatal().Msgf("Unknown publish status: %s for %s", publishStatus, item.Title)
+		log.Fatal().Msgf("Unknown publish status: '%s' for '%s'", publishStatus, item.Title)
 	}
 	pageCategories := make([]string, 0, len(item.Categories))
 	pageTags := make([]string, 0, len(item.Categories))
