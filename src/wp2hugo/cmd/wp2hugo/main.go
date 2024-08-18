@@ -12,9 +12,10 @@ import (
 )
 
 var (
-	sourceFile    = flag.String("source", "", "file path to the source WordPress XML file")
-	outputDir     = flag.String("output", "/tmp", "dir path to the write the Hugo generated data to")
-	downloadMedia = flag.Bool("download-media", false, "download media files embedded in the WordPress content")
+	sourceFile                     = flag.String("source", "", "file path to the source WordPress XML file")
+	outputDir                      = flag.String("output", "/tmp", "dir path to the write the Hugo generated data to")
+	downloadMedia                  = flag.Bool("download-media", false, "download media files embedded in the WordPress content")
+	continueOnMediaDownloadFailure = flag.Bool("continue-on-media-download-error", false, "continue processing even if one more more media download fails")
 	// This is useful for repeated executions of the tool to avoid downloading the media files again
 	// Mostly for development and not for the production use
 	mediaCacheDir = flag.String("media-cache-dir", path.Join("/tmp/wp2hugo-cache"), "dir path to cache the downloaded media files")
@@ -62,6 +63,7 @@ func getWebsiteInfo(filePath string) (*wpparser.WebsiteInfo, error) {
 
 func generate(info wpparser.WebsiteInfo, outputDirPath string) error {
 	log.Debug().Msgf("Output: %s", outputDirPath)
-	generator := hugogenerator.NewGenerator(outputDirPath, *downloadMedia, *font, mediacache.New(*mediaCacheDir), info)
+	generator := hugogenerator.NewGenerator(outputDirPath, *font, mediacache.New(*mediaCacheDir),
+		*downloadMedia, *continueOnMediaDownloadFailure, info)
 	return generator.Generate()
 }

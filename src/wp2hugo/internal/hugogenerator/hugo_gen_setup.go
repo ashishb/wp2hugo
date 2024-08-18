@@ -38,24 +38,31 @@ type Generator struct {
 	fontName         string
 	imageURLProvider hugopage.ImageURLProvider
 	outputDirPath    string
-	downloadMedia    bool
 	wpInfo           wpparser.WebsiteInfo
-	mediaProvider    MediaProvider
+
+	// Media related
+	mediaProvider                  MediaProvider
+	downloadMedia                  bool
+	continueOnMediaDownloadFailure bool
 }
 
 type MediaProvider interface {
 	GetReader(url string) (io.Reader, error)
 }
 
-func NewGenerator(outputDirPath string, downloadMedia bool, fontName string,
-	mediaProvider MediaProvider, info wpparser.WebsiteInfo) *Generator {
+func NewGenerator(outputDirPath string, fontName string,
+	mediaProvider MediaProvider, downloadMedia bool, continueOnMediaDownloadFailure bool,
+	info wpparser.WebsiteInfo) *Generator {
 	return &Generator{
 		fontName:         fontName,
 		imageURLProvider: newImageURLProvider(info),
 		outputDirPath:    outputDirPath,
-		mediaProvider:    mediaProvider,
-		downloadMedia:    downloadMedia,
 		wpInfo:           info,
+
+		// Media related
+		mediaProvider:                  mediaProvider,
+		downloadMedia:                  downloadMedia,
+		continueOnMediaDownloadFailure: continueOnMediaDownloadFailure,
 	}
 }
 
@@ -299,9 +306,25 @@ func (g Generator) writePage(outputMediaDirPath string, pagePath string, page wp
 			}
 			media, err := g.mediaProvider.GetReader(link)
 			if err != nil {
+				if g.continueOnMediaDownloadFailure {
+					log.Error().
+						Err(err).
+						Str("mediaLink", link).
+						Str("pageLink", page.Link).
+						Msg("error fetching media file")
+					continue
+				}
 				return fmt.Errorf("error fetching media file %s: %s", link, err)
 			}
 			if err = download(outputFilePath, media); err != nil {
+				if g.continueOnMediaDownloadFailure {
+					log.Error().
+						Err(err).
+						Str("mediaLink", link).
+						Str("pageLink", page.Link).
+						Msg("error downloading media file")
+					continue
+				}
 				return fmt.Errorf("error downloading media file: %s embedded in %s", err, page.Link)
 			}
 		}
