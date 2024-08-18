@@ -46,6 +46,10 @@ var (
 	_preTagExtractor2 = regexp.MustCompile(`<pre class=".*?lang:([^" ]+).*?>([\s\S]*?)</pre>`)
 
 	_hugoShortCodeMatcher = regexp.MustCompile(`{{<.*?>}}`)
+
+	// Ref: https://github.com/markdownlint/markdownlint/blob/main/docs/RULES.md#md012---multiple-consecutive-blank-lines
+	// Replace multiple consecutive newlines with just two newlines
+	_moreThanTwoNewlines = regexp.MustCompile(`\n{3,}`)
 )
 
 // Extracts "src" from Hugo figure shortcode
@@ -301,10 +305,7 @@ func replaceOrderedListNumbers(markdown string) string {
 }
 
 func replaceConsecutiveNewlines(markdown string) string {
-	// Ref: https://github.com/markdownlint/markdownlint/blob/main/docs/RULES.md#md012---multiple-consecutive-blank-lines
-	// Replace multiple consecutive newlines with just two newlines
-	reg1 := regexp.MustCompile(`\n{3,}`)
-	return reg1.ReplaceAllString(markdown, "\n\n")
+	return _moreThanTwoNewlines.ReplaceAllString(markdown, "\n\n")
 }
 
 func (page Page) writeContent(w io.Writer) error {

@@ -30,6 +30,11 @@ const (
 	_sampleMarkdownOutput4 = "This is\n\nsome\n\ntext"
 )
 
+const (
+	_sampleHTMLInput5      = "<!-- wp:paragraph --><p>First line<br /><abcedef>Second line<br>Third line</p><!-- /wp:paragraph -->"
+	_sampleMarkdownOutput5 = "First line  \nSecond line  \nThird line"
+)
+
 func TestMarkdownExtractorWithLink1(t *testing.T) {
 	testMarkdownExtractor(t, _sampleHTMLInput2, _sampleMarkdownOutput2)
 }
@@ -48,6 +53,12 @@ func TestListExtractor(t *testing.T) {
 
 func TestConsecutiveNewlines(t *testing.T) {
 	testMarkdownExtractor(t, _sampleHTMLInput4, _sampleMarkdownOutput4)
+}
+
+func TestManualLineBreaks(t *testing.T) {
+	// Ref: https://github.com/ashishb/wp2hugo/issues/12
+	t.Skipf("This is failing due to a bug in the underlying library. Skipping for now.")
+	testMarkdownExtractor(t, _sampleHTMLInput5, _sampleMarkdownOutput5)
 }
 
 func testMarkdownExtractor(t *testing.T, htmlInput string, markdownOutput string) {
