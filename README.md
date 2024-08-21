@@ -9,7 +9,7 @@
 This is the best migrator for migrating WordPress export to Hugo.
 It handles several weird edge cases that I encountered while trying to migrate my [personal website](https://ashishb.net) to [Hugo-based site](https://v2.ashishb.net/).
 
-While this primarily targets Hugo-based code generation, one can use it to convert WordPress blog to Markdown-based files that can be used with other systems for example Mkdocs or Jekyll as well.
+While this primarily targets Hugo-based code generation, one can use it to convert WordPress blogs to Markdown-based files that can be used with other systems for example Mkdocs or Jekyll as well.
 
 ## Commercial usage
 
@@ -36,7 +36,7 @@ Usage of wp2hugo:
   -color-log-output
    enable colored log output, set false to structured JSON log (default true)
   -continue-on-media-download-error
-   continue processing even if one more more media download fails
+   continue processing even if one or more media downloads fail
   -download-media
    download media files embedded in the WordPress content
   -font string
@@ -44,7 +44,7 @@ Usage of wp2hugo:
   -media-cache-dir string
    dir path to cache the downloaded media files (default "/tmp/wp2hugo-cache")
   -output string
-   dir path to the write the Hugo generated data to (default "/tmp")
+   dir path to write the Hugo-generated data to (default "/tmp")
   -source string
    file path to the source WordPress XML file
 ```
@@ -68,15 +68,15 @@ $ make build_prod
 1. [x] Migrate pages
 1. [x] Migrate tags
 1. [x] Migrate categories
-1. [x] Migrate all the URL including media URLs correctly
+1. [x] Migrate all the URLs including media URLs correctly
 1. [x] Migrate iframe(s) like YouTube embeds
 1. [x] Migrate "Excerpt"
 1. [x] Migrate "catlist"
-1. [x] Set WordPress homepage correctly
-1. [x] Migrate RSS feed with existing UUIDs, so that entries appear the same - this is really important for anyone with a significant feed following, see more details of a [failed migration](https://theorangeone.net/posts/rss-guids/)
+1. [x] Set the WordPress homepage correctly
+1. [x] Migrate the RSS feed with existing UUIDs, so that entries appear the same - this is really important for anyone with a significant feed following, see more details of a [failed migration](https://theorangeone.net/posts/rss-guids/)
 1. [x] favicon.ico
 1. [x] YouTube embeds
-1. [x] Google Map embed via a custom short code `googlemaps`
+1. [x] Google Map embed via a custom shortcode `googlemaps`
 1. [x] Migrate `caption` (WordPress) to `figure` (Hugo)
 1. [x] Migrate "Show more..." of WordPress -> `Summary` in Hugo
 1. [x] Support for parallax blur (similar to [WordPress Advanced Backgrounds](https://wordpress.org/plugins/advanced-backgrounds/))
