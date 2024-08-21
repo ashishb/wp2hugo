@@ -9,6 +9,8 @@
 This is the best migrator for migrating WordPress export to Hugo.
 It handles several weird edge cases that I encountered while trying to migrate my [personal website](https://ashishb.net) to [Hugo-based site](https://v2.ashishb.net/).
 
+While this primarily targets Hugo-based code generation, one can use it to convert WordPress blog to Markdown-based files that can be used with other systems for example Mkdocs or Jekyll as well.
+
 ## Commercial usage
 
 I want this project to be as widely accessible as possible, while still funding the development costs.
