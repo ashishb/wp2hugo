@@ -22,7 +22,7 @@ Feel free to contact me if you want to license this commercially
 
 ### Binary
 
-- Download the `wp2hugo` tool from [releases](./wp2hugo/releases)
+- Download the `wp2hugo` tool from [releases](https://github.com/ashishb/wp2hugo/releases)
 - Export your WordPress website via `Tools -> Export` in your admin dashboard
 - Let's say the downloaded file is `wordpress-export.xml` generate the website using `$ wp2hugo --source wordpress-export.xml --download-media`
 
