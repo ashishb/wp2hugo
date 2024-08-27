@@ -5,7 +5,7 @@ go 1.22.1
 require (
 	github.com/JohannesKaufmann/html-to-markdown v1.6.0
 	github.com/PuerkitoBio/goquery v1.9.2
-	github.com/go-enry/go-enry/v2 v2.8.8
+	github.com/go-enry/go-enry/v2 v2.8.9
 	github.com/mmcdole/gofeed v1.3.0
 	github.com/rs/zerolog v1.33.0
 	github.com/stretchr/testify v1.9.0
