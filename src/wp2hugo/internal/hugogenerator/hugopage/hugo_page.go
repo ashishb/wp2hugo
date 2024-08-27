@@ -27,9 +27,8 @@ const (
 type Page struct {
 	// This is the original URL of the page from the WordPress site
 	absoluteURL url.URL
-
-	metadata map[string]any
-	markdown string
+	metadata    map[string]any
+	markdown    string
 }
 
 const _WordPressMoreTag = "<!--more-->"
@@ -62,12 +61,16 @@ var _hugoFigureLinks = regexp.MustCompile(`{{< figure.*?src="(.+?)".*? >}}`)
 // {{< parallaxblur src="/wp-content/uploads/2018/12/bora%5Fbora%5F5%5Fresized.jpg" >}}
 var _hugoParallaxBlurLinks = regexp.MustCompile(`{{< parallaxblur.*?src="(.+?)".*? >}}`)
 
-func NewPage(provider ImageURLProvider, pageURL url.URL, author string, title string, publishDate *time.Time, isDraft bool,
-	categories []string, tags []string, footnotes []wpparser.Footnote,
-	htmlContent string, guid *rss.GUID) (*Page, error) {
+func NewPage(provider ImageURLProvider, pageURL url.URL, author string, title string, publishDate *time.Time,
+	isDraft bool, categories []string, tags []string, footnotes []wpparser.Footnote,
+	htmlContent string, guid *rss.GUID, featuredImageID *string) (*Page, error) {
+	metadata, err := getMetadata(provider, pageURL, author, title, publishDate, isDraft, categories, tags, guid, featuredImageID)
+	if err != nil {
+		return nil, err
+	}
 	page := Page{
 		absoluteURL: pageURL,
-		metadata:    getMetadata(pageURL, author, title, publishDate, isDraft, categories, tags, guid),
+		metadata:    metadata,
 	}
 	// htmlContent is the HTML content of the page that will be
 	// transformed to Markdown
@@ -97,7 +100,12 @@ func (page *Page) WPImageLinks() []string {
 	arr1 := getMarkdownLinks(_markdownImageLinks, page.markdown)
 	arr2 := getMarkdownLinks(_hugoFigureLinks, page.markdown)
 	arr3 := getMarkdownLinks(_hugoParallaxBlurLinks, page.markdown)
-	return append(append(arr1, arr2...), arr3...)
+	coverImageURL := page.getCoverImageURL()
+	result := append(append(arr1, arr2...), arr3...)
+	if coverImageURL != nil {
+		result = append(result, *coverImageURL)
+	}
+	return result
 }
 
 func getMarkdownLinks(regex *regexp.Regexp, markdown string) []string {
@@ -109,8 +117,8 @@ func getMarkdownLinks(regex *regexp.Regexp, markdown string) []string {
 	return links
 }
 
-func getMetadata(pageURL url.URL, author string, title string, publishDate *time.Time, isDraft bool,
-	categories []string, tags []string, guid *rss.GUID) map[string]any {
+func getMetadata(provider ImageURLProvider, pageURL url.URL, author string, title string, publishDate *time.Time,
+	isDraft bool, categories []string, tags []string, guid *rss.GUID, featuredImageID *string) (map[string]any, error) {
 	metadata := make(map[string]any)
 	metadata["url"] = pageURL.Path // Relative URL
 	metadata["author"] = author
@@ -132,7 +140,48 @@ func getMetadata(pageURL url.URL, author string, title string, publishDate *time
 	if guid != nil {
 		metadata["guid"] = guid.Value
 	}
-	return metadata
+	if featuredImageID != nil {
+		if imageInfo, err := provider.GetImageInfo(*featuredImageID); err != nil {
+			log.Fatal().
+				Err(err).
+				Str("imageID", *featuredImageID).
+				Msg("Image URL not found")
+		} else {
+			coverInfo := make(map[string]string)
+			imageURL, err := url.Parse(imageInfo.ImageURL)
+			if err != nil {
+				return nil, fmt.Errorf("error parsing image URL '%s': %s", imageInfo.ImageURL, err)
+			}
+			if imageURL.Host == pageURL.Host {
+				// If the image URL is on the same host as the page, we can use a relative URL
+				coverInfo["image"] = imageURL.Path
+			} else {
+				coverInfo["image"] = imageInfo.ImageURL
+			}
+			coverInfo["alt"] = imageInfo.Title
+			metadata["cover"] = coverInfo
+		}
+	}
+	return metadata, nil
+}
+
+func (page *Page) getCoverImageURL() *string {
+	if page.metadata == nil {
+		return nil
+	}
+	cover, ok := page.metadata["cover"]
+	if !ok {
+		return nil
+	}
+	coverInfo, ok := cover.(map[string]string)
+	if !ok {
+		return nil
+	}
+	url1, ok := coverInfo["image"]
+	if !ok {
+		return nil
+	}
+	return &url1
 }
 
 func (page *Page) writeMetadata(w io.Writer) error {

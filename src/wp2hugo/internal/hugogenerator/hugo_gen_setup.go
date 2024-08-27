@@ -265,7 +265,7 @@ func (g Generator) writePage(outputMediaDirPath string, pagePath string, page wp
 		return fmt.Errorf("error parsing page URL: %s", err)
 	}
 
-	p, err := g.NewHugoPage(pageURL, page)
+	p, err := g.newHugoPage(pageURL, page)
 	if err != nil {
 		return fmt.Errorf("error creating Hugo page: %s", err)
 	}
@@ -274,68 +274,79 @@ func (g Generator) writePage(outputMediaDirPath string, pagePath string, page wp
 	}
 	log.Info().Msgf("Page written: %s", pagePath)
 
-	links := p.WPImageLinks()
-	log.Debug().
-		Str("page", page.Title).
-		Int("links", len(links)).
-		Msgf("Embedded media links")
-	prefixes := make([]string, 0)
-	pageURL.Host = strings.TrimPrefix(pageURL.Host, "www.")
-	prefixes = append(prefixes, fmt.Sprintf("https://%s", pageURL.Host))
-	prefixes = append(prefixes, fmt.Sprintf("http://%s", pageURL.Host))
-	prefixes = append(prefixes, fmt.Sprintf("https://www.%s", pageURL.Host))
-	prefixes = append(prefixes, fmt.Sprintf("http://www.%s", pageURL.Host))
-
 	if g.downloadMedia {
-		log.Debug().
-			Int("links", len(links)).
-			Msg("Downloading media files")
-		for _, link := range links {
-			for _, prefix := range prefixes {
-				link = strings.TrimPrefix(link, prefix)
-			}
-			if !strings.HasPrefix(link, "/") {
-				log.Warn().
-					Str("link", link).
-					Str("source", page.Link).
-					Msg("non-relative link")
-			}
-			outputFilePath := fmt.Sprintf("%s/static/%s", outputMediaDirPath, strings.TrimSuffix(link, "/"))
-			if !strings.HasPrefix(link, "http") {
-				link = g.wpInfo.Link + link
-			}
-			media, err := g.mediaProvider.GetReader(link)
-			if err != nil {
-				if g.continueOnMediaDownloadFailure {
-					log.Error().
-						Err(err).
-						Str("mediaLink", link).
-						Str("pageLink", page.Link).
-						Msg("error fetching media file")
-					continue
-				}
-				return fmt.Errorf("error fetching media file %s: %s", link, err)
-			}
-			if err = download(outputFilePath, media); err != nil {
-				if g.continueOnMediaDownloadFailure {
-					log.Error().
-						Err(err).
-						Str("mediaLink", link).
-						Str("pageLink", page.Link).
-						Msg("error downloading media file")
-					continue
-				}
-				return fmt.Errorf("error downloading media file: %s embedded in %s", err, page.Link)
-			}
+		err := g.downloadPageMedia(outputMediaDirPath, p, pageURL)
+		if err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (g Generator) NewHugoPage(pageURL *url.URL, page wpparser.CommonFields) (*hugopage.Page, error) {
+func (g Generator) newHugoPage(pageURL *url.URL, page wpparser.CommonFields) (*hugopage.Page, error) {
 	return hugopage.NewPage(
 		g.imageURLProvider,
 		*pageURL, page.Author, page.Title, page.PublishDate,
 		page.PublishStatus == wpparser.PublishStatusDraft || page.PublishStatus == wpparser.PublishStatusPending,
-		page.Categories, page.Tags, page.Footnotes, page.Content, page.GUID)
+		page.Categories, page.Tags, page.Footnotes, page.Content, page.GUID, page.FeaturedImageID)
+}
+
+func (g Generator) downloadPageMedia(outputMediaDirPath string, p *hugopage.Page, pageURL *url.URL) error {
+	links := p.WPImageLinks()
+	log.Debug().
+		Str("page", pageURL.String()).
+		Int("links", len(links)).
+		Msgf("Embedded media links")
+
+	log.Debug().
+		Int("links", len(links)).
+		Msg("Downloading media files")
+
+	hostname := pageURL.Host
+	prefixes := make([]string, 0)
+	hostname = strings.TrimPrefix(hostname, "www.")
+	prefixes = append(prefixes, fmt.Sprintf("https://%s", hostname))
+	prefixes = append(prefixes, fmt.Sprintf("http://%s", hostname))
+	prefixes = append(prefixes, fmt.Sprintf("https://www.%s", hostname))
+	prefixes = append(prefixes, fmt.Sprintf("http://www.%s", hostname))
+
+	for _, link := range links {
+		for _, prefix := range prefixes {
+			link = strings.TrimPrefix(link, prefix)
+		}
+		if !strings.HasPrefix(link, "/") {
+			log.Warn().
+				Str("link", link).
+				Str("source", pageURL.String()).
+				Msg("non-relative link")
+		}
+		outputFilePath := fmt.Sprintf("%s/static/%s", outputMediaDirPath, strings.TrimSuffix(link, "/"))
+		if !strings.HasPrefix(link, "http") {
+			link = g.wpInfo.Link + link
+		}
+		media, err := g.mediaProvider.GetReader(link)
+		if err != nil {
+			if g.continueOnMediaDownloadFailure {
+				log.Error().
+					Err(err).
+					Str("mediaLink", link).
+					Str("pageLink", pageURL.String()).
+					Msg("error fetching media file")
+				continue
+			}
+			return fmt.Errorf("error fetching media file %s: %s", link, err)
+		}
+		if err = download(outputFilePath, media); err != nil {
+			if g.continueOnMediaDownloadFailure {
+				log.Error().
+					Err(err).
+					Str("mediaLink", link).
+					Str("pageLink", pageURL.String()).
+					Msg("error downloading media file")
+				continue
+			}
+			return fmt.Errorf("error downloading media file: %s embedded in %s", err, pageURL.String())
+		}
+	}
+	return nil
 }

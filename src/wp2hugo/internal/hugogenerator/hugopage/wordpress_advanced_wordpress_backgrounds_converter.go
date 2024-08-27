@@ -9,7 +9,12 @@ import (
 
 type ImageURLProvider interface {
 	// E.g. converts "4256" to "https://ashishb.net/wp-content/uploads/2018/12/bora_bora_5_resized.jpg"
-	GetImageURL(imageID string) (*string, error)
+	GetImageInfo(imageID string) (*ImageInfo, error)
+}
+
+type ImageInfo struct {
+	ImageURL string
+	Title    string
 }
 
 // Example: [nk_awb awb_type="image" awb_image="4256" awb_stretch="true" awb_image_size="full" awb_image_background_size="cover" awb_image_background_position="50% 50%" awb_parallax="scroll-opacity" awb_parallax_speed="0.5" awb_parallax_mobile="true"]
@@ -30,7 +35,7 @@ func replaceAWBWithParallaxBlur(provider ImageURLProvider, htmlData string) stri
 
 func awbReplacementFunction(provider ImageURLProvider, groups []string) string {
 	srcImageID := groups[1]
-	tmp, err := provider.GetImageURL(srcImageID)
+	tmp, err := provider.GetImageInfo(srcImageID)
 	if tmp == nil {
 		log.Fatal().
 			Err(err).
@@ -38,7 +43,7 @@ func awbReplacementFunction(provider ImageURLProvider, groups []string) string {
 			Msg("Image URL not found")
 		return ""
 	}
-	src := *tmp
+	src := tmp.ImageURL
 	// These character creates problem in Hugo's markdown
 	src = strings.ReplaceAll(src, " ", "%20")
 	src = strings.ReplaceAll(src, "_", "%5F")

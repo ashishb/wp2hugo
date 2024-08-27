@@ -97,9 +97,10 @@ type CommonFields struct {
 	Content     string
 	Excerpt     string // may be empty
 
-	Categories []string
-	Tags       []string
-	Footnotes  []Footnote
+	Categories      []string
+	Tags            []string
+	Footnotes       []Footnote
+	FeaturedImageID *string // Optional WordPress attachment ID of the featured image
 
 	attachmentURL *string
 }
@@ -342,6 +343,7 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 			pubDate = &tmp
 		}
 	}
+
 	return &CommonFields{
 		Author:           getAuthor(item),
 		PostID:           item.Extensions["wp"]["post_id"][0].Value,
@@ -353,11 +355,12 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 		PublishStatus:    PublishStatus(publishStatus),
 		Excerpt:          item.Extensions["excerpt"]["encoded"][0].Value,
 
-		Description: item.Description,
-		Content:     item.Content,
-		Categories:  pageCategories,
-		Tags:        pageTags,
-		Footnotes:   getFootnotes(item),
+		Description:     item.Description,
+		Content:         item.Content,
+		Categories:      pageCategories,
+		Tags:            pageTags,
+		Footnotes:       getFootnotes(item),
+		FeaturedImageID: getThumbnailID(item),
 
 		attachmentURL: attachmentURL,
 	}, nil
@@ -583,6 +586,30 @@ func getFootnotes(item *rss.Item) []Footnote {
 		Str("link", item.Link).
 		Msg("Footnotes found")
 	return footnotes
+}
+
+func getThumbnailID(item *rss.Item) *string {
+	if len(item.Extensions["wp"]["postmeta"]) == 0 {
+		return nil
+	}
+
+	for _, meta := range item.Extensions["wp"]["postmeta"] {
+		if len(meta.Children["meta_key"]) == 0 {
+			continue
+		}
+		if len(meta.Children["meta_value"]) == 0 {
+			continue
+		}
+		if meta.Children["meta_key"][0].Value != "_thumbnail_id" {
+			continue
+		}
+		thumbnailID := meta.Children["meta_value"][0].Value
+		log.Debug().
+			Str("thumbnailID", thumbnailID).
+			Msg("Thumbnail ID")
+		return &thumbnailID
+	}
+	return nil
 }
 
 func parseTime(utcTime string) (*time.Time, error) {

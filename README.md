@@ -90,7 +90,7 @@ $ make build_prod
 1. [x] WordPress [footnotes](https://github.com/ashishb/wp2hugo/issues/24)
 1. [x] WordPress page author
 1. [x] Ability to filter by author(s), useful for [WordPress multi-site](https://www.smashingmagazine.com/2020/01/complete-guide-wordpress-multisite/) migrations
-1. [ ] Featured images - I tried this [WordPress plugin](https://wordpress.org/plugins/export-media-with-selected-content/) but featured images are simply not exported
+1. [x] Featured images - export featured image associations with pages and posts correctly
 
 ## Why existing tools don't work
 

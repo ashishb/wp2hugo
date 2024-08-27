@@ -25,7 +25,7 @@ func TestFootnote(t *testing.T) {
 	generator := NewGenerator("/tmp", "", nil, false, false, *websiteInfo)
 	url1, err := url.Parse(post.GUID.Value)
 	assert.NoError(t, err)
-	hugoPage, err := generator.NewHugoPage(url1, post.CommonFields)
+	hugoPage, err := generator.newHugoPage(url1, post.CommonFields)
 	assert.NoError(t, err)
 
 	const expectedMarkdown = "Some text[^1] with a footnote\n\n[^1]: Here we are: the footnote."
