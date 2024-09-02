@@ -2,10 +2,6 @@ package hugogenerator
 
 import (
 	"fmt"
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugogenerator/hugopage"
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
-	"github.com/rs/zerolog/log"
 	"io"
 	"net/url"
 	"os"
@@ -13,6 +9,11 @@ import (
 	"path"
 	"strings"
 	"time"
+
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugogenerator/hugopage"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
+	"github.com/rs/zerolog/log"
 )
 
 const _archiveContent = `
