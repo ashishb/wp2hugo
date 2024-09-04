@@ -22,7 +22,7 @@ func getMarkdownConverter() *md.Converter {
 	converter.Use(convertCustomBRToNewline())
 	converter.Use(convertBrToNewline())
 	converter.Use(convertGistURLsToShortcodes())
-	// converter.Use(handleBlockEditorImages())
+	converter.Use(handleBlockEditorImages())
 	return converter
 }
 
