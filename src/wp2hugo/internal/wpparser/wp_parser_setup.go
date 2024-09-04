@@ -281,13 +281,18 @@ func getAttachmentInfo(item *rss.Item) (*AttachmentInfo, error) {
 }
 
 func getCommonFields(item *rss.Item) (*CommonFields, error) {
-	lastModifiedDate, err := parseTime(item.Extensions["wp"]["post_modified_gmt"][0].Value)
-	if err != nil {
-		log.Warn().
-			Str("link", item.Link).
-			Str("date", item.Extensions["wp"]["post_modified_gmt"][0].Value).
-			Err(err).
-			Msg("Error parsing last modified date")
+	var lastModifiedDate *time.Time
+	values := item.Extensions["wp"]["post_modified_gmt"]
+	if len(values) > 0 {
+		var err error
+		lastModifiedDate, err = parseTime(values[0].Value)
+		if err != nil {
+			log.Warn().
+				Str("link", item.Link).
+				Str("date", item.Extensions["wp"]["post_modified_gmt"][0].Value).
+				Err(err).
+				Msg("Error parsing last modified date")
+		}
 	}
 
 	publishStatus := item.Extensions["wp"]["status"][0].Value
