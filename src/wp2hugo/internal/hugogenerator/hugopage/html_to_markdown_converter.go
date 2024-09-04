@@ -22,7 +22,6 @@ func getMarkdownConverter() *md.Converter {
 	converter.Use(convertCustomBRToNewline())
 	converter.Use(convertBrToNewline())
 	converter.Use(convertGistURLsToShortcodes())
-	converter.Use(handleBlockEditorImages())
 	return converter
 }
 
@@ -118,34 +117,6 @@ func convertGistURLsToShortcodes() md.Plugin {
 					text := gistMarkdown.ReplaceAllStringFunc(content, func(s string) string {
 						return extractShortcodeFromGistUrl(content)
 					})
-					return &text
-				},
-			},
-		}
-	}
-}
-
-// <figure class="wp-block-image size-large"><a href="https://blog.gripdev.xyz/wp-content/uploads/2024/03/image.png"><img src="https://blog.gripdev.xyz/wp-content/uploads/2024/03/image.png?w=1024" alt="" class="wp-image-1663" /></a></figure>
-func handleBlockEditorImages() md.Plugin {
-	return func(c *md.Converter) []md.Rule {
-		return []md.Rule{
-			{
-				Filter: []string{"figure"},
-				Replacement: func(content string, selec *goquery.Selection, opt *md.Options) *string {
-					classes := selec.AttrOr("class", "")
-					if !strings.Contains(classes, "wp-block-image") {
-						return &content
-					}
-					imgUrl := selec.Find("figure.wp-block-image a img").First()
-					imgSrc := imgUrl.AttrOr("src", "")
-					if imgSrc == "" {
-						return &content
-					}
-					strippedImgSrc := strings.Split(imgSrc, "?")[0]
-					text := strings.Replace(content, imgSrc, strippedImgSrc, 1)
-					log.Debug().
-						Str("imgSrc", imgSrc).
-						Msg("Block editor image found, stripping params")
 					return &text
 				},
 			},
