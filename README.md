@@ -73,10 +73,11 @@ $ make build_prod
 1. [x] Migrate "Excerpt"
 1. [x] Migrate "catlist"
 1. [x] Set the WordPress homepage correctly
-1. [x] Migrate the RSS feed with existing UUIDs, so that entries appear the same - this is really important for anyone with a significant feed following, see more details of a [failed migration](https://theorangeone.net/posts/rss-guids/)
-1. [x] favicon.ico
-1. [x] YouTube embeds
-1. [x] Google Map embed via a custom shortcode `googlemaps`
+1. [x] Migrate the RSS feed with existing UUIDs, so that entries appear the same - this is important for anyone with a significant feed following, see more details of a [failed migration](https://theorangeone.net/posts/rss-guids/)
+1. [x] Migrate favicon.ico
+1. [x] Migrate [YouTube embeds](https://support.google.com/youtube/answer/171780)
+1. [x] Migrate [Google Map embed](https://developers.google.com/maps/documentation/embed/get-started) via a custom shortcode `googlemaps`
+1. [x] Migrate [GitHub gists](https://gist.github.com/)
 1. [x] Migrate `caption` (WordPress) to `figure` (Hugo)
 1. [x] Migrate "Show more..." of WordPress -> `Summary` in Hugo
 1. [x] Support for parallax blur (similar to [WordPress Advanced Backgrounds](https://wordpress.org/plugins/advanced-backgrounds/))
