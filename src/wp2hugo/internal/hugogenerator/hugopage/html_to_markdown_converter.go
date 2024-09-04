@@ -11,6 +11,7 @@ import (
 
 var youtubeID = regexp.MustCompile(`youtube\.com/embed/([^\&\?\/]+)`)
 var googleMapsID = regexp.MustCompile(`google\.com/maps/d/.*embed\?mid=([0-9A-Za-z-_]+)`)
+var gistUrl = regexp.MustCompile(`gist\.github\.com/([^/]+)/([0-9a-f]+)`)
 
 func getMarkdownConverter() *md.Converter {
 	converter := md.NewConverter("", true, nil)
@@ -18,6 +19,7 @@ func getMarkdownConverter() *md.Converter {
 	converter.Use(getGoogleMapsEmbedForHugoConverter())
 	converter.Use(convertCustomBRToNewline())
 	converter.Use(convertBrToNewline())
+	converter.Use(convertGistURLsToShortcodes())
 	return converter
 }
 
@@ -69,6 +71,31 @@ func getGoogleMapsEmbedForHugoConverter() md.Plugin {
 						Str("id", id).
 						Msg("Google Maps embed found")
 					text := fmt.Sprintf("{{< googlemaps src=\"%s\" width=%s height=%s >}}", id, width, height)
+					return &text
+				},
+			},
+		}
+	}
+}
+
+func convertGistURLsToShortcodes() md.Plugin {
+	return func(c *md.Converter) []md.Rule {
+		return []md.Rule{
+			{
+				Filter: []string{"a"},
+				Replacement: func(content string, selec *goquery.Selection, opt *md.Options) *string {
+					href := selec.AttrOr("href", "")
+					parts := gistUrl.FindStringSubmatch(href)
+					if len(parts) != 3 {
+						return nil
+					}
+					user := parts[1]
+					id := parts[2]
+					text := fmt.Sprintf("{{< gist %s %s >}}", user, id)
+					log.Debug().
+						Str("user", user).
+						Str("id", id).
+						Msg("Gist URL found")
 					return &text
 				},
 			},
