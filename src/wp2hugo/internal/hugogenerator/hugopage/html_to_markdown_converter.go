@@ -2,16 +2,18 @@ package hugopage
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
+
 	md "github.com/JohannesKaufmann/html-to-markdown"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/rs/zerolog/log"
-	"regexp"
-	"strings"
 )
 
 var youtubeID = regexp.MustCompile(`youtube\.com/embed/([^\&\?\/]+)`)
 var googleMapsID = regexp.MustCompile(`google\.com/maps/d/.*embed\?mid=([0-9A-Za-z-_]+)`)
 var gistUrl = regexp.MustCompile(`gist\.github\.com/([^/]+)/([0-9a-f]+)`)
+var gistMarkdown = regexp.MustCompile(`\\\[gist .*\]`)
 
 func getMarkdownConverter() *md.Converter {
 	converter := md.NewConverter("", true, nil)
@@ -81,11 +83,15 @@ func getGoogleMapsEmbedForHugoConverter() md.Plugin {
 func convertGistURLsToShortcodes() md.Plugin {
 	return func(c *md.Converter) []md.Rule {
 		return []md.Rule{
+			// Handle new embed style from block editor
 			{
-				Filter: []string{"a"},
+				Filter: []string{"figure"},
 				Replacement: func(content string, selec *goquery.Selection, opt *md.Options) *string {
-					href := selec.AttrOr("href", "")
-					parts := gistUrl.FindStringSubmatch(href)
+					classes := selec.AttrOr("class", "")
+					if !strings.Contains(classes, "is-provider-embed-handler") {
+						return nil
+					}
+					parts := gistUrl.FindStringSubmatch(content)
 					if len(parts) != 3 {
 						return nil
 					}
@@ -96,6 +102,23 @@ func convertGistURLsToShortcodes() md.Plugin {
 						Str("user", user).
 						Str("id", id).
 						Msg("Gist URL found")
+					return &text
+				},
+			},
+			// Handle basic `[gist url] embed`
+			{
+				Filter: []string{"body"},
+				Replacement: func(content string, selec *goquery.Selection, opt *md.Options) *string {
+					text := gistMarkdown.ReplaceAllStringFunc(content, func(s string) string {
+						parts := gistUrl.FindStringSubmatch(s)
+						if len(parts) != 3 {
+							return s
+						}
+						user := parts[1]
+						id := parts[2]
+						text := fmt.Sprintf("{{< gist %s %s >}}", user, id)
+						return text
+					})
 					return &text
 				},
 			},

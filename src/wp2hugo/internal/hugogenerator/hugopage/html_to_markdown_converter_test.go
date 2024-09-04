@@ -1,8 +1,9 @@
 package hugopage
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 const _textWithIframe = `
@@ -10,7 +11,17 @@ const _textWithIframe = `
 `
 
 const _textWithGist = `
-<p><a href="https://gist.github.com/lawrencegripper/8e701b0d201e65af0f8bc9b8b0b14207">Gist Link</a></p>
+<figure class="wp-block-embed is-type-rich is-provider-embed-handler wp-block-embed-embed-handler"><div class="wp-block-embed__wrapper">
+https://gist.github.com/lawrencegripper/8e701b0d201e65af0f8bc9b8b0b14207
+</div></figure>
+`
+
+const _textMarkdownGist = `
+<body>
+some text
+\[gist https://gist.github.com/lawrencegripper/6bee7de123bea1936359\]
+some more text
+</body>
 `
 
 func TestIframe(t *testing.T) {
@@ -25,4 +36,11 @@ func TestGist(t *testing.T) {
 	result, err := converter.ConvertString(_textWithGist)
 	assert.NoError(t, err)
 	assert.Contains(t, result, `{{< gist lawrencegripper 8e701b0d201e65af0f8bc9b8b0b14207 >}}`)
+}
+
+func TestMarkdownGist(t *testing.T) {
+	converter := getMarkdownConverter()
+	result, err := converter.ConvertString(_textMarkdownGist)
+	assert.NoError(t, err)
+	assert.Contains(t, result, `{{< gist lawrencegripper 6bee7de123bea1936359 >}}`)
 }
