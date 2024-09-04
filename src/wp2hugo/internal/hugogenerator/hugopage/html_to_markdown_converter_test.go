@@ -28,6 +28,14 @@ some more text
 </body>
 `
 
+const _textBlockEditorImg = `
+<figure class="wp-block-image size-large">
+ <a href="https://blog.gripdev.xyz/wp-content/uploads/2024/03/image.png">
+   <img src="https://blog.gripdev.xyz/wp-content/uploads/2024/03/image.png?w=1024" alt="" class="wp-image-1663" />
+ </a>
+</figure>
+`
+
 func TestIframe(t *testing.T) {
 	converter := getMarkdownConverter()
 	result, err := converter.ConvertString(_textWithIframe)
@@ -47,6 +55,13 @@ func TestBlockGistDoesNotBreakImgParsing(t *testing.T) {
 	result, err := converter.ConvertString(_textWithImgFigureBlock)
 	assert.NoError(t, err)
 	assert.Equal(t, result, `[![](https://blog.gripdev.xyz/wp-content/uploads/2024/03/image.png?w=1024)](https://blog.gripdev.xyz/wp-content/uploads/2024/03/image.png)`)
+}
+
+func TestBlockEditorImgExtractedWithoutWidthParam(t *testing.T) {
+	converter := getMarkdownConverter()
+	result, err := converter.ConvertString(_textWithImgFigureBlock)
+	assert.NoError(t, err)
+	assert.Equal(t, result, `[![](https://blog.gripdev.xyz/wp-content/uploads/2024/03/image.png)](https://blog.gripdev.xyz/wp-content/uploads/2024/03/image.png)`)
 }
 
 func TestMarkdownGist(t *testing.T) {
