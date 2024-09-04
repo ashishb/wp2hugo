@@ -80,6 +80,21 @@ func getGoogleMapsEmbedForHugoConverter() md.Plugin {
 	}
 }
 
+func extractShortcodeFromGistUrl(content string) string {
+	parts := gistUrl.FindStringSubmatch(content)
+	if len(parts) != 3 {
+		return content
+	}
+	user := parts[1]
+	id := parts[2]
+	text := fmt.Sprintf("{{< gist %s %s >}}", user, id)
+	log.Debug().
+		Str("user", user).
+		Str("id", id).
+		Msg("Gist URL found")
+	return text
+}
+
 func convertGistURLsToShortcodes() md.Plugin {
 	return func(c *md.Converter) []md.Rule {
 		return []md.Rule{
@@ -91,18 +106,8 @@ func convertGistURLsToShortcodes() md.Plugin {
 					if !strings.Contains(classes, "is-provider-embed-handler") {
 						return nil
 					}
-					parts := gistUrl.FindStringSubmatch(content)
-					if len(parts) != 3 {
-						return nil
-					}
-					user := parts[1]
-					id := parts[2]
-					text := fmt.Sprintf("{{< gist %s %s >}}", user, id)
-					log.Debug().
-						Str("user", user).
-						Str("id", id).
-						Msg("Gist URL found")
-					return &text
+					shortcode := extractShortcodeFromGistUrl(content)
+					return &shortcode
 				},
 			},
 			// Handle basic `[gist url] embed`
@@ -110,14 +115,7 @@ func convertGistURLsToShortcodes() md.Plugin {
 				Filter: []string{"body"},
 				Replacement: func(content string, selec *goquery.Selection, opt *md.Options) *string {
 					text := gistMarkdown.ReplaceAllStringFunc(content, func(s string) string {
-						parts := gistUrl.FindStringSubmatch(s)
-						if len(parts) != 3 {
-							return s
-						}
-						user := parts[1]
-						id := parts[2]
-						text := fmt.Sprintf("{{< gist %s %s >}}", user, id)
-						return text
+						return extractShortcodeFromGistUrl(content)
 					})
 					return &text
 				},
