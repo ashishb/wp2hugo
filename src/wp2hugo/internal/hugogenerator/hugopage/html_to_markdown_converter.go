@@ -104,7 +104,7 @@ func convertGistURLsToShortcodes() md.Plugin {
 				Replacement: func(content string, selec *goquery.Selection, opt *md.Options) *string {
 					classes := selec.AttrOr("class", "")
 					if !strings.Contains(classes, "is-provider-embed-handler") {
-						return nil
+						return &content
 					}
 					shortcode := extractShortcodeFromGistUrl(content)
 					return &shortcode

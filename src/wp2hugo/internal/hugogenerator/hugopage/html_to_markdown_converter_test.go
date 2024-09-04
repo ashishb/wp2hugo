@@ -16,6 +16,10 @@ https://gist.github.com/lawrencegripper/8e701b0d201e65af0f8bc9b8b0b14207
 </div></figure>
 `
 
+const _textWithImgFigureBlock = `
+<figure class="wp-block-image size-large"><a href="https://blog.gripdev.xyz/wp-content/uploads/2024/03/image.png"><img src="https://blog.gripdev.xyz/wp-content/uploads/2024/03/image.png?w=1024" alt="" class="wp-image-1663" /></a></figure>
+`
+
 const _textMarkdownGist = `
 <body>
 some text
@@ -36,6 +40,13 @@ func TestBlockGist(t *testing.T) {
 	result, err := converter.ConvertString(_textWithBlockGist)
 	assert.NoError(t, err)
 	assert.Contains(t, result, `{{< gist lawrencegripper 8e701b0d201e65af0f8bc9b8b0b14207 >}}`)
+}
+
+func TestBlockGistDoesNotBreakImgParsing(t *testing.T) {
+	converter := getMarkdownConverter()
+	result, err := converter.ConvertString(_textWithImgFigureBlock)
+	assert.NoError(t, err)
+	assert.Equal(t, result, `[![](https://blog.gripdev.xyz/wp-content/uploads/2024/03/image.png?w=1024)](https://blog.gripdev.xyz/wp-content/uploads/2024/03/image.png)`)
 }
 
 func TestMarkdownGist(t *testing.T) {
