@@ -2,11 +2,6 @@ package hugopage
 
 import (
 	"fmt"
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
-	"github.com/go-enry/go-enry/v2"
-	"github.com/mmcdole/gofeed/rss"
-	"github.com/rs/zerolog/log"
 	"io"
 	"net/url"
 	"regexp"
@@ -14,6 +9,12 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
+	"github.com/go-enry/go-enry/v2"
+	"github.com/mmcdole/gofeed/rss"
+	"github.com/rs/zerolog/log"
 )
 
 const (
