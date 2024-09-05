@@ -26,8 +26,6 @@ Feel free to contact me if you want to license this commercially
 - Export your WordPress website via `Tools -> Export` in your admin dashboard
 - Let's say the downloaded file is `wordpress-export.xml` generate the website using `$ wp2hugo --source wordpress-export.xml --download-media`
 
-Now, run this
-
 ```bash
 $ wp2hugo
 Usage of wp2hugo:
