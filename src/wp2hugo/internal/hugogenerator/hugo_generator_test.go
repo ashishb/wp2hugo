@@ -22,7 +22,7 @@ func TestFootnote(t *testing.T) {
 	assert.Equal(t, 1, len(post.Footnotes))
 	assert.NotNil(t, post.CommonFields)
 
-	generator := NewGenerator("/tmp", "", nil, false, false, *websiteInfo)
+	generator := NewGenerator("/tmp", "", nil, false, false, true, *websiteInfo)
 	url1, err := url.Parse(post.GUID.Value)
 	assert.NoError(t, err)
 	hugoPage, err := generator.newHugoPage(url1, post.CommonFields)

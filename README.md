@@ -67,6 +67,7 @@ $ make build_prod
 1. [x] Migrate tags
 1. [x] Migrate categories
 1. [x] Migrate all the URLs including media URLs correctly
+1. [x] Generate Ngninx config containing GUID -> relative URL mapping
 1. [x] Migrate iframe(s) like YouTube embeds
 1. [x] Migrate "Excerpt"
 1. [x] Migrate "catlist"

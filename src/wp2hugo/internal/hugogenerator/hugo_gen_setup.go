@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugogenerator/hugopage"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/nginxgenerator"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
 	"github.com/rs/zerolog/log"
@@ -45,6 +46,10 @@ type Generator struct {
 	mediaProvider                  MediaProvider
 	downloadMedia                  bool
 	continueOnMediaDownloadFailure bool
+
+	// Nginx related
+	generateNgnixConfig bool
+	ngnixConfig         *nginxgenerator.Config
 }
 
 type MediaProvider interface {
@@ -53,7 +58,11 @@ type MediaProvider interface {
 
 func NewGenerator(outputDirPath string, fontName string,
 	mediaProvider MediaProvider, downloadMedia bool, continueOnMediaDownloadFailure bool,
-	info wpparser.WebsiteInfo) *Generator {
+	generateNgnixConfig bool, info wpparser.WebsiteInfo) *Generator {
+	var ngnixConfig *nginxgenerator.Config
+	if generateNgnixConfig {
+		ngnixConfig = nginxgenerator.NewConfig()
+	}
 	return &Generator{
 		fontName:         fontName,
 		imageURLProvider: newImageURLProvider(info),
@@ -64,6 +73,10 @@ func NewGenerator(outputDirPath string, fontName string,
 		mediaProvider:                  mediaProvider,
 		downloadMedia:                  downloadMedia,
 		continueOnMediaDownloadFailure: continueOnMediaDownloadFailure,
+
+		// Nginx related
+		generateNgnixConfig: generateNgnixConfig,
+		ngnixConfig:         ngnixConfig,
 	}
 }
 
@@ -113,6 +126,18 @@ func (g Generator) Generate() error {
 			}
 		}
 	}
+
+	if g.generateNgnixConfig {
+		nginxConfigPath := path.Join(*siteDir, "nginx.conf")
+		if err = os.WriteFile(nginxConfigPath, []byte(g.ngnixConfig.Generate()), 0644); err != nil {
+			return err
+		} else {
+			log.Info().
+				Str("nginxConfigPath", nginxConfigPath).
+				Msg("Nginx config generated")
+		}
+	}
+
 	log.Debug().
 		Str("cmd", fmt.Sprintf("cd %s && hugo serve", *siteDir)).
 		Msg("Hugo site has been generated")
@@ -183,9 +208,58 @@ func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) e
 		if err := g.writePage(outputDirPath, pagePath, page.CommonFields); err != nil {
 			return err
 		}
+		// Redirect from old URL to new URL
+		g.maybeAddNginxRedirect(page.CommonFields)
 	}
 
 	return nil
+}
+
+func (g Generator) maybeAddNginxRedirect(page wpparser.CommonFields) {
+	if !g.generateNgnixConfig {
+		return
+	}
+
+	if page.GUID.Value == "" {
+		return
+	}
+
+	u1, err := url.Parse(strings.TrimSpace(page.GUID.Value))
+	if err != nil {
+		log.Warn().
+			Err(err).
+			Str("url", page.GUID.Value).
+			Msg("error parsing GUID as URL")
+		return
+	}
+
+	u2, err := url.Parse(strings.TrimSpace(page.Link))
+	if err != nil {
+		log.Warn().
+			Err(err).
+			Str("url", page.Link).
+			Msg("error parsing Link as URL")
+		return
+	}
+
+	if !sameHost(*u1, *u2) {
+		return
+	}
+
+	oldURLPathWithQuery := u1.Path + "?" + u1.RawQuery
+	newPath := u2.Path
+	if err := g.ngnixConfig.AddRedirect(oldURLPathWithQuery, newPath); err != nil {
+		log.Warn().
+			Err(err).
+			Str("oldURL", oldURLPathWithQuery).
+			Str("newURL", page.Link).
+			Msg("error adding nginx redirect")
+		return
+	}
+}
+
+func sameHost(url1 url.URL, url2 url.URL) bool {
+	return strings.TrimSuffix(url1.Host, "/") == strings.TrimSuffix(url2.Host, "/")
 }
 
 // Sometimes multiple pages have the same filename
@@ -224,6 +298,8 @@ func (g Generator) writePosts(outputDirPath string, info wpparser.WebsiteInfo) e
 		if err := g.writePage(outputDirPath, postPath, post.CommonFields); err != nil {
 			return err
 		}
+		// Redirect from old URL to new URL
+		g.maybeAddNginxRedirect(post.CommonFields)
 	}
 	return nil
 }

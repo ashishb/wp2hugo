@@ -17,6 +17,7 @@ var (
 	outputDir                      = flag.String("output", "/tmp", "dir path to write the Hugo-generated data to")
 	downloadMedia                  = flag.Bool("download-media", false, "download media files embedded in the WordPress content")
 	continueOnMediaDownloadFailure = flag.Bool("continue-on-media-download-error", false, "continue processing even if one or more media downloads fail")
+	generateNgnixConfig            = flag.Bool("generate-nginx-config", true, "generate Nginx configuration for the generated Hugo website for redirecting WordPress GUIDs to Hugo URLs")
 	authors                        = flag.String("authors", "", "CSV list of author name(s), if provided, only posts by these authors will be processed")
 	// This is useful for repeated executions of the tool to avoid downloading the media files again
 	// Mostly for development and not for the production use
@@ -66,6 +67,6 @@ func getWebsiteInfo(filePath string) (*wpparser.WebsiteInfo, error) {
 func generate(info wpparser.WebsiteInfo, outputDirPath string) error {
 	log.Debug().Msgf("Output: %s", outputDirPath)
 	generator := hugogenerator.NewGenerator(outputDirPath, *font, mediacache.New(*mediaCacheDir),
-		*downloadMedia, *continueOnMediaDownloadFailure, info)
+		*downloadMedia, *continueOnMediaDownloadFailure, *generateNgnixConfig, info)
 	return generator.Generate()
 }
