@@ -7,6 +7,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.9.2
 	github.com/adrg/frontmatter v0.2.0
 	github.com/go-enry/go-enry/v2 v2.8.9
+	github.com/mergestat/timediff v0.0.3
 	github.com/mmcdole/gofeed v1.3.0
 	github.com/rs/zerolog v1.33.0
 	github.com/stretchr/testify v1.9.0
@@ -18,7 +19,6 @@ require (
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
-	github.com/mergestat/timediff v0.0.3 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect

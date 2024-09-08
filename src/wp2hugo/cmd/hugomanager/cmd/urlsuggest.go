@@ -20,8 +20,8 @@ var (
 
 var urlSuggestCmd = &cobra.Command{
 	Use:   "urlsuggest",
-	Short: "Suggests URLs for all the posts that are missing one",
-	Long:  "Suggests URLs for all the posts that are missing one",
+	Short: "Suggests URLs for all the pending/future posts that are missing a URL",
+	Long:  "Suggests URLs for all the pending/future posts that are missing a URL",
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Info().Msg("URL Suggest command called")
 		logger.ConfigureLogging(ColorLogOutput)
