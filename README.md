@@ -7,7 +7,7 @@
 [![Validate Go code formatting](https://github.com/ashishb/wp2hugo/actions/workflows/format-go.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/format-go.yaml)
 
 This is the best migrator for migrating WordPress export to Hugo.
-It handles several weird edge cases that I encountered while trying to migrate my [personal website](https://ashishb.net) to [Hugo-based site](https://v2.ashishb.net/).
+It handles several weird edge cases that I encountered while trying to migrate my [personal website](https://v1.ashishb.net) to [Hugo-based site](https://v2.ashishb.net/).
 
 While this primarily targets Hugo-based code generation, one can use it to convert WordPress blogs to Markdown-based files that can be used with other systems for example Mkdocs or Jekyll as well.
 
@@ -92,12 +92,47 @@ $ make build_prod
 1. [x] Ability to filter by author(s), useful for [WordPress multi-site](https://www.smashingmagazine.com/2020/01/complete-guide-wordpress-multisite/) migrations
 1. [x] Featured images - export featured image associations with pages and posts correctly
 
-## Why existing tools don't work
+### Why existing tools don't work
 
-- [Jekyll Exporter](https://github.com/benbalter/wordpress-to-jekyll-exporter/) always times out for me
-- Various options can be seen [here](https://gohugo.io/tools/migrations/) that are partially good.
-  1. Export via `https://<website>/wp-admin/export.php`
-  1. The problem is that there is no good tool to perform a proper import into Hugo
+[Existing tools](https://gohugo.io/tools/migrations/) do a half-baked job of migrating content.
+They rarely migrate the metadata like GUID, YouTube embeds, Google Map embeds, code embeds properly.
+
+## Hugo Manager
+
+This repository contains an experimental tool `hugomanager`.
+I use this tool for automatic generation of URL from title as well as for knowing which blog posts are still
+marked draft or which ones are scheduled to be published soon.
+
+You can build that via
+
+```bash
+src/wp2hugo $ make build_hugo_manager
+...
+```
+
+```bash
+src/wp2hugo $ ./bin/hugomanager
+A tool for managing Hugo sites e.g. adding URL suggestions, generating site status summary etc.
+
+Usage:
+  hugomanager [command]
+
+Available Commands:
+  completion  Generate the autocompletion script for the specified shell
+  help        Help about any command
+  sitesummary Print site stats (e.g. number of posts, number of drafts etc.)
+  urlsuggest  Suggests URLs for all the pending/future posts that are missing a URL
+  version     Print the version number of HugoManager
+
+Flags:
+  -a, --author string    author name for copyright attribution (default "YOUR NAME")
+      --config string    config file (default is $HOME/.cobra.yaml)
+  -h, --help             help for hugomanager
+  -l, --license string   name of license for the project
+      --viper            use Viper for configuration (default true)
+
+Use "hugomanager [command] --help" for more information about a command.
+```
 
 Note:
 
