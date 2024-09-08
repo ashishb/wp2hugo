@@ -14,13 +14,28 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type _FrontMatter struct {
+type FrontMatter struct {
 	URL         string   `yaml:"url"`
 	PublishDate string   `yaml:"date"`
 	Draft       string   `yaml:"draft"`
 	Title       string   `yaml:"title"`
 	Categories  []string `yaml:"category"`
 	Tags        []string `yaml:"tag"`
+}
+
+func (f *FrontMatter) IsDraft() bool {
+	return strings.ToLower(f.Draft) == "true"
+}
+
+func (matter *FrontMatter) IsInFuture() (bool, error) {
+	if matter.PublishDate == "" {
+		return false, nil
+	}
+	t1, err := time.Parse(time.RFC3339, matter.PublishDate)
+	if err != nil {
+		return false, err
+	}
+	return t1.After(time.Now()), nil
 }
 
 func ProcessFile(path string, updateInline bool) (*string, error) {
@@ -31,7 +46,7 @@ func ProcessFile(path string, updateInline bool) (*string, error) {
 	if !utils.FileExists(path) {
 		return nil, fmt.Errorf("file does not exist: %s", path)
 	}
-	matter, err := getSelectiveFrontMatter(path)
+	matter, err := GetSelectiveFrontMatter(path)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +58,7 @@ func ProcessFile(path string, updateInline bool) (*string, error) {
 		return &matter.URL, nil
 	}
 	// We are only interested in unpublished posts
-	inFuture, err := isInFuture(matter.PublishDate)
+	inFuture, err := matter.IsInFuture()
 	if err != nil {
 		log.Error().
 			Err(err).
@@ -52,7 +67,7 @@ func ProcessFile(path string, updateInline bool) (*string, error) {
 			Msg("Error parsing date")
 		return nil, err
 	}
-	unpublished := (strings.ToLower(matter.Draft) == "true") || inFuture
+	unpublished := matter.IsDraft() || inFuture
 	if !unpublished {
 		log.Debug().
 			Str("path", path).
@@ -128,14 +143,14 @@ func updateFrontmatter(path string, url string) error {
 	return nil
 }
 
-func getSelectiveFrontMatter(path string) (*_FrontMatter, error) {
+func GetSelectiveFrontMatter(path string) (*FrontMatter, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
-	var matter _FrontMatter
+	var matter FrontMatter
 	_, err = frontmatter.Parse(file, &matter)
 	if err != nil {
 		log.Error().
@@ -166,15 +181,7 @@ func getFullFrontMatter(path string) (map[string]any, []byte, error) {
 	return matter, restOfTheFile, nil
 }
 
-func isInFuture(date string) (bool, error) {
-	t1, err := time.Parse(time.RFC3339, date)
-	if err != nil {
-		return false, err
-	}
-	return t1.After(time.Now()), nil
-}
-
-func suggestURL(matter _FrontMatter, path string) (*string, error) {
+func suggestURL(matter FrontMatter, path string) (*string, error) {
 	prefix := getPrefix(matter)
 	suffix := getSuffix(matter, path)
 	if prefix == "" {
@@ -192,7 +199,7 @@ func suggestURL(matter _FrontMatter, path string) (*string, error) {
 	return &url, nil
 }
 
-func getSuffix(matter _FrontMatter, path string) string {
+func getSuffix(matter FrontMatter, path string) string {
 	if matter.Title != "" {
 		return matter.Title
 	}
@@ -202,7 +209,7 @@ func getSuffix(matter _FrontMatter, path string) string {
 
 // getPrefix returns the first category or tag that is not generic.
 // It might return an empty string if no category or tag is found.
-func getPrefix(matter _FrontMatter) string {
+func getPrefix(matter FrontMatter) string {
 	genericCategories := map[string]bool{
 		"uncategorized": true,
 		"all":           true,
