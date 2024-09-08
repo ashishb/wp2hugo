@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/urlsuggest"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/logger"
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/urlsuggest"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -25,11 +25,14 @@ var urlSuggestCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Info().Msg("URL Suggest command called")
 		logger.ConfigureLogging(ColorLogOutput)
-		scanDir(HugoDir, UpdateInline)
+		action := func(path string, updateInline bool) (*string, error) {
+			return urlsuggest.ProcessFile(path, updateInline)
+		}
+		scanDir(HugoDir, UpdateInline, action)
 	},
 }
 
-func scanDir(dir string, updateInline bool) {
+func scanDir(dir string, updateInline bool, action func(string, bool) (*string, error)) {
 	if dir == "" {
 		log.Fatal().Msg("Hugo directory not provided")
 	}
@@ -60,7 +63,7 @@ func scanDir(dir string, updateInline bool) {
 		log.Debug().
 			Str("path", path).
 			Msg("Processing file")
-		_, err = urlsuggest.ProcessFile(path, updateInline)
+		_, err = action(path, updateInline)
 		if err != nil {
 			failed++
 		} else {

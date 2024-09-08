@@ -1,8 +1,8 @@
 package cmd
 
 import (
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/sitesummary"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/logger"
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/sitesummary"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"

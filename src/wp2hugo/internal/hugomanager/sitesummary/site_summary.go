@@ -7,7 +7,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/urlsuggest"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/urlsuggest"
 	"github.com/mergestat/timediff"
 	"github.com/rs/zerolog/log"
 )

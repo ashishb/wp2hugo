@@ -52,6 +52,13 @@ func init() {
 	siteSummaryCmd.PersistentFlags().BoolVarP(&ColorLogOutput, "color-log-output", "", true,
 		"enable colored log output, set false to structured JSON log")
 	rootCmd.AddCommand(siteSummaryCmd)
+
+	relativeLinksCmd.Flags().StringVarP(&HugoDir, "hugo-dir", "", "", "Hugo base directory or any directory containing Hugo markdown files")
+	relativeLinksCmd.Flags().BoolVarP(&UpdateInline, "in-place", "", false, "Update titles in in markdown files")
+	relativeLinksCmd.PersistentFlags().BoolVarP(&ColorLogOutput, "color-log-output", "", true,
+		"enable colored log output, set false to structured JSON log")
+	relativeLinksCmd.Flags().StringVarP(&Hostname, "hostname", "", "", "All hostname under this will be considered internal links")
+	rootCmd.AddCommand(relativeLinksCmd)
 }
 
 func initConfig() {

@@ -21,6 +21,7 @@ type FrontMatter struct {
 	Title       string   `yaml:"title"`
 	Categories  []string `yaml:"category"`
 	Tags        []string `yaml:"tag"`
+	Summary     string   `yaml:"summary"`
 }
 
 func (f *FrontMatter) IsDraft() bool {
@@ -92,7 +93,7 @@ func ProcessFile(path string, updateInline bool) (*string, error) {
 		// Get all the fields this time
 		// Update the URL field
 		// Write the updated front matter back to the file
-		if err := updateFrontmatter(path, *url); err != nil {
+		if err := UpdateFrontmatter(path, "url", *url); err != nil {
 			log.Error().
 				Err(err).
 				Str("path", path).
@@ -104,13 +105,13 @@ func ProcessFile(path string, updateInline bool) (*string, error) {
 	return url, nil
 }
 
-func updateFrontmatter(path string, url string) error {
+func UpdateFrontmatter(path string, key string, value string) error {
 	fullmatter, restOfTheFile, err := getFullFrontMatter(path)
 	if err != nil {
 		return err
 	}
 
-	fullmatter["url"] = url
+	fullmatter[key] = value
 	file, err := os.OpenFile(path, os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		return err
@@ -124,14 +125,9 @@ func updateFrontmatter(path string, url string) error {
 	yamlEncoder := yaml.NewEncoder(file)
 	yamlEncoder.SetIndent(2)
 	err = yamlEncoder.Encode(&fullmatter)
-	// data, err := yaml.Marshal(fullmatter)
 	if err != nil {
 		return err
 	}
-	// _, err = file.Write(data)
-	// if err != nil {
-	// 	return err
-	// }
 	_, err = file.Write([]byte("---\n"))
 	if err != nil {
 		return err
