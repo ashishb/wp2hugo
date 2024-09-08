@@ -40,8 +40,21 @@ func generateDirSummary(dir string) {
 			Msg("Error scanning directory")
 	}
 	log.Info().
-		Int("posts", summary.Posts).
-		Int("drafts", summary.Drafts).
-		Int("future", summary.Future).
+		Int("posts", summary.Posts()).
+		Int("drafts", summary.Drafts()).
+		Int("future", summary.Future()).
 		Msg("Site Summary")
+
+	for _, draft := range summary.DraftPostPaths(10) {
+		log.Info().
+			Str("Path", draft.Path).
+			Msg("Draft post")
+	}
+
+	for _, future := range summary.FuturePostPaths(10) {
+		log.Info().
+			Str("Path", future.Path).
+			Str("TimeLeftToPublish", future.RelativeTime()).
+			Msg("Future post")
+	}
 }
