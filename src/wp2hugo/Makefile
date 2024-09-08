@@ -8,6 +8,9 @@ build_prod:
 	# Ref: https://lukeeckley.com/post/useful-go-build-flags/
 	go build -v -ldflags="-s -w" -o bin/${BINARY_NAME} ./cmd/wp2hugo
 
+build_hugo_manager:
+	go build -v -o bin/hugomanager ./cmd/hugomanager
+
 go_lint:
 	go mod tidy
 	go vet ./...
