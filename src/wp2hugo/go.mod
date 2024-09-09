@@ -1,17 +1,18 @@
 module github.com/ashishb/wp2hugo/src/wp2hugo
 
 go 1.22.1
+toolchain go1.23.1
 
 require (
 	github.com/JohannesKaufmann/html-to-markdown v1.6.0
-	github.com/PuerkitoBio/goquery v1.9.2
+	github.com/PuerkitoBio/goquery v1.10.0
 	github.com/adrg/frontmatter v0.2.0
 	github.com/go-enry/go-enry/v2 v2.8.9
 	github.com/mergestat/timediff v0.0.3
 	github.com/mmcdole/gofeed v1.3.0
 	github.com/rs/zerolog v1.33.0
 	github.com/stretchr/testify v1.9.0
-	golang.org/x/text v0.17.0
+	golang.org/x/text v0.18.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -46,7 +47,7 @@ require (
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.19.0
-	golang.org/x/net v0.26.0 // indirect
-	golang.org/x/sys v0.21.0 // indirect
+	golang.org/x/net v0.29.0 // indirect
+	golang.org/x/sys v0.25.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
