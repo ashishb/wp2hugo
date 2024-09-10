@@ -52,6 +52,12 @@ type _HugoConfig struct {
 			GuessSyntax bool   `yaml:"guessSyntax"`
 			Style       string `yaml:"style"`
 		} `yaml:"highlight"`
+		Goldmark struct {
+			// Unsafe HTML is needed to nest shortcodes within each other, aka figure inside gallery
+			Renderer struct {
+				Unsafe bool `yaml:"unsafe"`
+			} `yaml:"renderer"`
+		} `yaml:"goldmark"`
 	}
 	Outputs struct {
 		Home []string `yaml:"home"`
@@ -105,6 +111,7 @@ func updateConfig(siteDir string, info wpparser.WebsiteInfo) error {
 	config.Markup.Highlight.CodeFences = true
 	config.Markup.Highlight.GuessSyntax = true
 	config.Markup.Highlight.Style = "monokai"
+	config.Markup.Goldmark.Renderer.Unsafe = true
 	// https://adityatelange.github.io/hugo-PaperMod/posts/papermod/papermod-features/#search-page
 	config.Outputs.Home = []string{"HTML", "RSS", "JSON"}
 	config.OutputFormats.RSS.MediaType = "application/rss+xml"
