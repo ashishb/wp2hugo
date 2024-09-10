@@ -64,8 +64,8 @@ var _hugoParallaxBlurLinks = regexp.MustCompile(`{{< parallaxblur.*?src="(.+?)".
 
 func NewPage(provider ImageURLProvider, pageURL url.URL, author string, title string, publishDate *time.Time,
 	isDraft bool, categories []string, tags []string, footnotes []wpparser.Footnote,
-	htmlContent string, guid *rss.GUID, featuredImageID *string) (*Page, error) {
-	metadata, err := getMetadata(provider, pageURL, author, title, publishDate, isDraft, categories, tags, guid, featuredImageID)
+	htmlContent string, guid *rss.GUID, featuredImageID *string, postFormat string) (*Page, error) {
+	metadata, err := getMetadata(provider, pageURL, author, title, publishDate, isDraft, categories, tags, guid, featuredImageID, postFormat)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +119,7 @@ func getMarkdownLinks(regex *regexp.Regexp, markdown string) []string {
 }
 
 func getMetadata(provider ImageURLProvider, pageURL url.URL, author string, title string, publishDate *time.Time,
-	isDraft bool, categories []string, tags []string, guid *rss.GUID, featuredImageID *string) (map[string]any, error) {
+	isDraft bool, categories []string, tags []string, guid *rss.GUID, featuredImageID *string, postFormat string) (map[string]any, error) {
 	metadata := make(map[string]any)
 	metadata["url"] = pageURL.Path // Relative URL
 	metadata["author"] = author
@@ -162,6 +162,9 @@ func getMetadata(provider ImageURLProvider, pageURL url.URL, author string, titl
 			coverInfo["alt"] = imageInfo.Title
 			metadata["cover"] = coverInfo
 		}
+	}
+	if postFormat != "" {
+		metadata["type"] = postFormat
 	}
 	return metadata, nil
 }
