@@ -275,6 +275,7 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 
 	markdown = replaceOrderedListNumbers(markdown)
 	markdown = replaceConsecutiveNewlines(markdown)
+	markdown = replaceYoutubeURL(markdown)
 	markdown = removeTrailingSpaces(markdown)
 
 	return &markdown, nil
