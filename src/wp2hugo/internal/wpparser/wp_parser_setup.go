@@ -4,17 +4,18 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/mmcdole/gofeed/extensions"
-	"github.com/mmcdole/gofeed/rss"
-	"github.com/rs/zerolog/log"
-	"golang.org/x/text/runes"
-	"golang.org/x/text/transform"
-	"golang.org/x/text/unicode/norm"
 	"io"
 	"regexp"
 	"strings"
 	"time"
 	"unicode"
+
+	ext "github.com/mmcdole/gofeed/extensions"
+	"github.com/mmcdole/gofeed/rss"
+	"github.com/rs/zerolog/log"
+	"golang.org/x/text/runes"
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
 )
 
 var (
@@ -92,6 +93,7 @@ type CommonFields struct {
 	LastModifiedDate *time.Time
 	PublishStatus    PublishStatus // "publish", "draft", "pending" etc. may be make this a custom type
 	GUID             *rss.GUID
+	PostFormat       *string
 
 	Description string // how to use this?
 	Content     string
@@ -307,12 +309,16 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 	}
 	pageCategories := make([]string, 0, len(item.Categories))
 	pageTags := make([]string, 0, len(item.Categories))
+	var postFormat *string
 
 	for _, category := range item.Categories {
 		if isCategory(category) {
 			pageCategories = append(pageTags, NormalizeCategoryName(category.Value))
 		} else if isTag(category) {
 			pageTags = append(pageTags, NormalizeCategoryName(category.Value))
+		} else if isPostFormat(category) {
+			tmp := NormalizeCategoryName(category.Value)
+			postFormat = &tmp
 		} else {
 			log.Warn().
 				Str("link", item.Link).
@@ -358,6 +364,7 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 		GUID:             item.GUID,
 		LastModifiedDate: lastModifiedDate,
 		PublishStatus:    PublishStatus(publishStatus),
+		PostFormat:       postFormat,
 		Excerpt:          item.Extensions["excerpt"]["encoded"][0].Value,
 
 		Description:     item.Description,
@@ -469,6 +476,10 @@ func getNavigationLink(match string) (*NavigationLink, error) {
 
 func isCategory(category *rss.Category) bool {
 	return category.Domain == "category"
+}
+
+func isPostFormat(category *rss.Category) bool {
+	return category.Domain == "post_format"
 }
 
 func isTag(tag *rss.Category) bool {

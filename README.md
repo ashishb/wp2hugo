@@ -91,6 +91,7 @@ $ make build_prod
 1. [x] WordPress page author
 1. [x] Ability to filter by author(s), useful for [WordPress multi-site](https://www.smashingmagazine.com/2020/01/complete-guide-wordpress-multisite/) migrations
 1. [x] Featured images - export featured image associations with pages and posts correctly
+1. [x] WordPoress [Post formats](https://developer.wordpress.org/advanced-administration/wordpress/post-formats/)
 
 ### Why existing tools don't work
 
