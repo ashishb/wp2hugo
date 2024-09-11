@@ -74,7 +74,7 @@ $ make build_prod
 1. [x] Set the WordPress homepage correctly
 1. [x] Migrate the RSS feed with existing UUIDs, so that entries appear the same - this is important for anyone with a significant feed following, see more details of a [failed migration](https://theorangeone.net/posts/rss-guids/)
 1. [x] Migrate favicon.ico
-1. [x] Migrate [YouTube embeds](https://support.google.com/youtube/answer/171780)
+1. [x] Migrate [YouTube embeds](https://support.google.com/youtube/answer/171780), including WordPress-style plain-text URLs [pasted](https://wordpress.org/documentation/article/youtube-embed/) into the content
 1. [x] Migrate [Google Map embed](https://developers.google.com/maps/documentation/embed/get-started) via a custom shortcode `googlemaps`
 1. [x] Migrate [GitHub gists](https://gist.github.com/)
 1. [x] Migrate `caption` (WordPress) to `figure` (Hugo)
