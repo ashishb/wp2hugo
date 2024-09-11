@@ -365,7 +365,7 @@ func (g Generator) newHugoPage(pageURL *url.URL, page wpparser.CommonFields) (*h
 		g.imageURLProvider,
 		*pageURL, page.Author, page.Title, page.PublishDate,
 		page.PublishStatus == wpparser.PublishStatusDraft || page.PublishStatus == wpparser.PublishStatusPending,
-		page.Categories, page.Tags, page.Footnotes, page.Content, page.GUID, page.FeaturedImageID)
+		page.Categories, page.Tags, page.Footnotes, page.Content, page.GUID, page.FeaturedImageID, page.PostFormat)
 }
 
 func (g Generator) downloadPageMedia(outputMediaDirPath string, p *hugopage.Page, pageURL *url.URL) error {
