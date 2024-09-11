@@ -91,17 +91,17 @@ $ make build_prod
 1. [x] WordPress page author
 1. [x] Ability to filter by author(s), useful for [WordPress multi-site](https://www.smashingmagazine.com/2020/01/complete-guide-wordpress-multisite/) migrations
 1. [x] Featured images - export featured image associations with pages and posts correctly
-1. [x] WordPoress [Post formats](https://developer.wordpress.org/advanced-administration/wordpress/post-formats/)
+1. [x] WordPress [Post formats](https://developer.wordpress.org/advanced-administration/wordpress/post-formats/)
 
 ### Why existing tools don't work
 
 [Existing tools](https://gohugo.io/tools/migrations/) do a half-baked job of migrating content.
-They rarely migrate the metadata like GUID, YouTube embeds, Google Map embeds, code embeds properly.
+They rarely migrate the metadata like GUID, YouTube embeds, Google Map embeds, and code embeds properly.
 
 ## Hugo Manager
 
 This repository contains an experimental tool `hugomanager`.
-I use this tool for automatic generation of URL from title as well as for knowing which blog posts are still
+I use this tool for the automatic generation of URLs from title as well as for knowing which blog posts are still
 marked draft or which ones are scheduled to be published soon.
 
 You can build that via
