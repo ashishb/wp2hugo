@@ -26,6 +26,38 @@ body {
 }
 `
 
+const _customCSS = `
+.gallery {
+	display: flex;
+	flex-wrap: wrap;
+}
+.gallery figure,
+.gallery figure img {
+	text-align: center;
+}
+.gallery figure img {
+	margin: 1rem auto;
+}
+.gallery-cols-1 figure {
+	width: 100%;
+}
+.gallery-cols-2 figure {
+	width: 50%;
+}
+.gallery-cols-3 figure {
+	width: 33.3333333333%;
+}
+.gallery-cols-4 figure {
+	width: 25%;
+}
+.gallery-cols-5 figure {
+	width: 25%;
+}
+.gallery-cols-6 figure {
+	width: 16.666666666%;
+}
+`
+
 const _outputCssFile = "themes/PaperMod/assets/css/extended/blank.css"
 
 // Custom font for Hugo's papermod theme
@@ -33,7 +65,8 @@ const _outputCssFile = "themes/PaperMod/assets/css/extended/blank.css"
 func setupFont(siteDir string, fontName string) error {
 	err1 := appendFile(filepath.Join(siteDir, _outputHeadFile), fmt.Sprintf(_extendedHeaderData, fontName))
 	err2 := appendFile(filepath.Join(siteDir, _outputCssFile), fmt.Sprintf(_customFontCSS, fontName))
-	return errors.Join(err1, err2)
+	err3 := appendFile(filepath.Join(siteDir, _outputCssFile), _customCSS)
+	return errors.Join(err1, err2, err3)
 }
 
 func appendFile(outputFilePath string, data string) error {
