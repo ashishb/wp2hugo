@@ -8,17 +8,14 @@ import (
 )
 
 // Example: Plain-text Youtube URLs on their own line in post content are turned by WP into embeds
-var _YoutubeRegEx = regexp.MustCompile(`(?m)(?:^|\s)https?://(?:m.|www.)?(?:youtu.be|youtube.com)/(?:watch|w)\?v=([^&\s]+)`)
+var _YoutubeRegEx = regexp.MustCompile(`(?m)(^|\s)https?://(?:m.|www.)?(?:youtu.be|youtube.com)/(?:watch|w)\?v=([^&\s]+)`)
 
-func replaceYoutubeURL(htmlData string) string {
+func replacePlaintextYoutubeURL(htmlData string) string {
 	log.Debug().
 		Msg("Replacing Youtube URLs with embeds")
-
-	htmlData = replaceAllStringSubmatchFunc(_YoutubeRegEx, htmlData, YoutubeReplacementFunction)
-
-	return htmlData
+	return replaceAllStringSubmatchFunc(_YoutubeRegEx, htmlData, YoutubeReplacementFunction)
 }
 
 func YoutubeReplacementFunction(groups []string) string {
-	return fmt.Sprintf(`{{< youtube %s >}}`, groups[1])
+	return fmt.Sprintf(`%s{{< youtube %s >}}`, groups[1], groups[2])
 }
