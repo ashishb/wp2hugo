@@ -62,7 +62,7 @@ func TestManualLineBreaks(t *testing.T) {
 func testMarkdownExtractor(t *testing.T, htmlInput string, markdownOutput string) {
 	url1, err := url.Parse("https://example.com")
 	assert.Nil(t, err)
-	page, err := NewPage(nil, *url1, "author", "Title", nil, false, nil, nil, nil, htmlInput, nil, nil)
+	page, err := NewPage(nil, *url1, "author", "Title", nil, false, nil, nil, nil, htmlInput, nil, nil, nil)
 	assert.Nil(t, err)
 	md, err := page.getMarkdown(nil, htmlInput, nil)
 	assert.Nil(t, err)

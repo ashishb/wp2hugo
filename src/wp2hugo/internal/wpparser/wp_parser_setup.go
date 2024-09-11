@@ -93,7 +93,7 @@ type CommonFields struct {
 	LastModifiedDate *time.Time
 	PublishStatus    PublishStatus // "publish", "draft", "pending" etc. may be make this a custom type
 	GUID             *rss.GUID
-	PostFormat       string
+	PostFormat       *string
 
 	Description string // how to use this?
 	Content     string
@@ -309,7 +309,7 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 	}
 	pageCategories := make([]string, 0, len(item.Categories))
 	pageTags := make([]string, 0, len(item.Categories))
-	var postFormat string
+	var postFormat *string
 
 	for _, category := range item.Categories {
 		if isCategory(category) {
@@ -317,7 +317,8 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 		} else if isTag(category) {
 			pageTags = append(pageTags, NormalizeCategoryName(category.Value))
 		} else if isPostFormat(category) {
-			postFormat = NormalizeCategoryName(category.Value)
+			tmp := NormalizeCategoryName(category.Value)
+			postFormat = &tmp
 		} else {
 			log.Warn().
 				Str("link", item.Link).
