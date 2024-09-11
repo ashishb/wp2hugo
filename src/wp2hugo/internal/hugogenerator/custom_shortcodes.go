@@ -3,9 +3,10 @@ package hugogenerator
 import (
 	"errors"
 	"fmt"
+	"path"
+
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
 	"github.com/rs/zerolog/log"
-	"path"
 )
 
 // This will go to  layouts/shortcodes/googlemaps.html enabling the use of the shortcode
@@ -126,7 +127,7 @@ func WriteCustomShortCodes(siteDir string) error {
 		writeSelectedPostsShortCode(siteDir),
 		writeParallaxBlurShortCode(siteDir),
 		writeAudioShortCode(siteDir),
-    writeGalleryShortCode(siteDir))
+		writeGalleryShortCode(siteDir))
 }
 
 func writeGoogleMapsShortCode(siteDir string) error {
@@ -148,7 +149,6 @@ func writeAudioShortCode(siteDir string) error {
 func writeGalleryShortCode(siteDir string) error {
 	return writeShortCode(siteDir, "gallery", _galleryShortCode)
 }
-
 
 func writeShortCode(siteDir string, shortCodeName string, fileContent string) error {
 	log.Debug().

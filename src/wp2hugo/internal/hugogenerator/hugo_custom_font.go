@@ -3,9 +3,10 @@ package hugogenerator
 import (
 	"errors"
 	"fmt"
-	"github.com/rs/zerolog/log"
 	"os"
 	"path/filepath"
+
+	"github.com/rs/zerolog/log"
 )
 
 const _extendedHeaderData = `

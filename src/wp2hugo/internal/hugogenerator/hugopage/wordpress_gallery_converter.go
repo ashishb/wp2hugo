@@ -56,7 +56,7 @@ func galleryReplacementFunction(provider ImageURLProvider, groups []string) stri
 	output.WriteString("<br>") // This will get converted to newline later on
 
 	// Opening tag :
-	output.WriteString(fmt.Sprintf(`{{%% gallery cols="%s" %%}}`,  col_nb))
+	output.WriteString(fmt.Sprintf(`{{%% gallery cols="%s" %%}}`, col_nb))
 
 	// For each image ID in WP gallery shortcode, get the URL
 	for _, s := range ids_array {
