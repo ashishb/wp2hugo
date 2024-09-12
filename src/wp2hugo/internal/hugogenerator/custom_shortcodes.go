@@ -107,10 +107,18 @@ const _ParallaxBlurShortCode = `{{ $imgURL := .Get "src" }}
 </div>
 `
 
+const _audioShortCode = `
+<audio controls preload="metadata">
+  <source src="{{ .Get "src" }}" type="audio/{{ replace (path.Ext (.Get "src")) "." ""}}">
+  Your browser does not support the audio element.
+</audio>
+`
+
 func WriteCustomShortCodes(siteDir string) error {
 	return errors.Join(writeGoogleMapsShortCode(siteDir),
 		writeSelectedPostsShortCode(siteDir),
-		writeParallaxBlurShortCode(siteDir))
+		writeParallaxBlurShortCode(siteDir),
+		writeAudioShortCode(siteDir))
 }
 
 func writeGoogleMapsShortCode(siteDir string) error {
@@ -123,6 +131,10 @@ func writeSelectedPostsShortCode(siteDir string) error {
 
 func writeParallaxBlurShortCode(siteDir string) error {
 	return writeShortCode(siteDir, "parallaxblur", _ParallaxBlurShortCode)
+}
+
+func writeAudioShortCode(siteDir string) error {
+	return writeShortCode(siteDir, "audio", _audioShortCode)
 }
 
 func writeShortCode(siteDir string, shortCodeName string, fileContent string) error {

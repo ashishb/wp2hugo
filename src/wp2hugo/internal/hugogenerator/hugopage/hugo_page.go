@@ -213,6 +213,7 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 	converter := getMarkdownConverter()
 	htmlContent = improvePreTagsWithCode(htmlContent)
 	htmlContent = replaceCaptionWithFigure(htmlContent)
+	htmlContent = replaceAudioShortCode(htmlContent)
 	htmlContent = replaceAWBWithParallaxBlur(provider, htmlContent)
 	htmlContent = strings.Replace(htmlContent, _WordPressMoreTag, _customMoreTag, 1)
 
