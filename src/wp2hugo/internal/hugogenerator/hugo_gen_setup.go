@@ -95,6 +95,9 @@ func (g Generator) Generate() error {
 	if err = g.writePosts(*siteDir, info); err != nil {
 		return err
 	}
+	if err = g.writeCustomPosts(*siteDir, info); err != nil {
+		return err
+	}
 	if err = setupArchivePage(*siteDir); err != nil {
 		return err
 	}
@@ -204,6 +207,31 @@ func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) e
 
 	// Write pages
 	for _, page := range info.Pages {
+		pagePath := getFilePath(pagesDir, page.Filename())
+		if err := g.writePage(outputDirPath, pagePath, page.CommonFields); err != nil {
+			return err
+		}
+		// Redirect from old URL to new URL
+		g.maybeAddNginxRedirect(page.CommonFields)
+	}
+
+	return nil
+}
+
+func (g Generator) writeCustomPosts(outputDirPath string, info wpparser.WebsiteInfo) error {
+	if len(info.CustomPosts) == 0 {
+		log.Info().Msg("No custom posts to write")
+		return nil
+	}
+
+	// Write custom posts
+	for _, page := range info.CustomPosts {
+		// Dynamically handle post type for target folder
+		pagesDir := path.Join(outputDirPath, "content", *page.PostType)
+		if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
+			return err
+		}
+
 		pagePath := getFilePath(pagesDir, page.Filename())
 		if err := g.writePage(outputDirPath, pagePath, page.CommonFields); err != nil {
 			return err

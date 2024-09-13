@@ -47,6 +47,7 @@ type WebsiteInfo struct {
 	Pages           []PageInfo
 	Posts           []PostInfo
 	NavigationLinks []NavigationLink
+	CustomPosts     []CustomPostInfo
 }
 
 type NavigationLink struct {
@@ -94,6 +95,7 @@ type CommonFields struct {
 	PublishStatus    PublishStatus // "publish", "draft", "pending" etc. may be make this a custom type
 	GUID             *rss.GUID
 	PostFormat       *string
+	PostType         *string // Custom post types, typically FAQ, portfolio, etc.
 
 	Description string // how to use this?
 	Content     string
@@ -142,6 +144,10 @@ func (i CommonFields) GetAttachmentURL() *string {
 }
 
 type PageInfo struct {
+	CommonFields
+}
+
+type CustomPostInfo struct {
 	CommonFields
 }
 
@@ -195,6 +201,7 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 	attachments := make([]AttachmentInfo, 0)
 	pages := make([]PageInfo, 0)
 	posts := make([]PostInfo, 0)
+	customPosts := make([]CustomPostInfo, 0)
 	var navigationLinks []NavigationLink
 
 	for _, item := range feed.Items {
@@ -228,6 +235,22 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 				}
 				posts = append(posts, *post)
 			}
+		case "avada_portfolio", "avada_faq":
+			// TODO: let user pass custom post types from CLI arguments ?
+			// Most custom post types are more or less regular posts handled with special templates
+			// and having their own archives, aside from blog posts.
+			// They fall within what Hugo calls sections and page bundles.
+			// Problem is some themes use custom post types for really weird stuff (layouts, etc.)
+			if customPost, err := getCustomPostInfo(item); err != nil && !errors.Is(err, errTrashItem) {
+				return nil, err
+			} else if customPost != nil {
+				if customPost.Content == "" {
+					log.Warn().
+						Str("title", customPost.Title).
+						Msg("Empty content")
+				}
+				customPosts = append(customPosts, *customPost)
+			}
 		case "wp_navigation":
 			var err error
 			navigationLinks, err = getNavigationLinks(item.Content)
@@ -258,6 +281,7 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 		Attachments:     attachments,
 		Pages:           pages,
 		Posts:           posts,
+		CustomPosts:     customPosts,
 		NavigationLinks: navigationLinks,
 	}
 	log.Info().
@@ -355,6 +379,11 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 		}
 	}
 
+	var postType *string
+	if len(item.Extensions["wp"]["post_type"]) > 0 {
+		postType = &item.Extensions["wp"]["post_type"][0].Value
+	}
+
 	return &CommonFields{
 		Author:           getAuthor(item),
 		PostID:           item.Extensions["wp"]["post_id"][0].Value,
@@ -365,6 +394,7 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 		LastModifiedDate: lastModifiedDate,
 		PublishStatus:    PublishStatus(publishStatus),
 		PostFormat:       postFormat,
+		PostType:         postType,
 		Excerpt:          item.Extensions["excerpt"]["encoded"][0].Value,
 
 		Description:     item.Description,
@@ -475,7 +505,7 @@ func getNavigationLink(match string) (*NavigationLink, error) {
 }
 
 func isCategory(category *rss.Category) bool {
-	return category.Domain == "category"
+	return category.Domain == "category" || category.Domain == "portfolio_category" || category.Domain == "product_cat"
 }
 
 func isPostFormat(category *rss.Category) bool {
@@ -483,7 +513,7 @@ func isPostFormat(category *rss.Category) bool {
 }
 
 func isTag(tag *rss.Category) bool {
-	return tag.Domain == "post_tag"
+	return tag.Domain == "post_tag" || tag.Domain == "portfolio_tags" || tag.Domain == "product_tag"
 }
 
 // NormalizeCategoryName removes space from the category name and converts it to lowercase
@@ -512,6 +542,18 @@ func getPostInfo(item *rss.Item) (*PostInfo, error) {
 	log.Trace().
 		Any("post", post).
 		Msg("Post")
+	return &post, nil
+}
+
+func getCustomPostInfo(item *rss.Item) (*CustomPostInfo, error) {
+	fields, err := getCommonFields(item)
+	if err != nil {
+		return nil, fmt.Errorf("error getting common fields: %w", err)
+	}
+	post := CustomPostInfo{*fields}
+	log.Trace().
+		Any(*post.PostType, post).
+		Msg("Custom Post")
 	return &post, nil
 }
 
