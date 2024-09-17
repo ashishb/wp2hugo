@@ -62,36 +62,60 @@ $ make build_prod
 
 ## Goals of `wp2hugo`
 
+### Migrate post types, taxonomies and their archive pages
+
 1. [x] Migrate posts
 1. [x] Migrate pages
 1. [x] Migrate tags
 1. [x] Migrate categories
-1. [x] Migrate all the URLs including media URLs correctly
-1. [x] Generate Ngninx config containing GUID -> relative URL mapping
-1. [x] Migrate iframe(s) like YouTube embeds
-1. [x] Migrate "Excerpt"
-1. [x] Migrate "catlist"
+1. [x] Migrate [Avada](https://themeforest.net/item/avada-responsive-multipurpose-theme/2833226) custom post types (FAQ, Portfolios)
 1. [x] Set the WordPress homepage correctly
+1. [x] Create WordPress author page
+
+### Migrate permalinks
+
+1. [x] Migrate all the URLs including media URLs correctly
+1. [x] Generate Nginx config containing GUID -> relative URL mapping
 1. [x] Migrate the RSS feed with existing UUIDs, so that entries appear the same - this is important for anyone with a significant feed following, see more details of a [failed migration](https://theorangeone.net/posts/rss-guids/)
-1. [x] Migrate favicon.ico
-1. [x] Migrate [YouTube embeds](https://support.google.com/youtube/answer/171780), including WordPress-style plain-text URLs [pasted](https://wordpress.org/documentation/article/youtube-embed/) into the content
-1. [x] Migrate [Google Map embed](https://developers.google.com/maps/documentation/embed/get-started) via a custom shortcode `googlemaps`
-1. [x] Migrate [GitHub gists](https://gist.github.com/)
-1. [x] Migrate `caption` (WordPress) to `figure` (Hugo)
+1. [x] Map WordPress's RSS `feed.xml` to Hugo's RSS `feed.xml`
+
+### Migrate post content and shortcodes
+
+1. [x] Migrate "Excerpt"
 1. [x] Migrate "Show more..." of WordPress -> `Summary` in Hugo
-1. [x] Support for parallax blur (similar to [WordPress Advanced Backgrounds](https://wordpress.org/plugins/advanced-backgrounds/))
+1. [x] Migrate "catlist"
 1. [x] Migrate WordPress table of content -> Hugo
-1. [x] Custom font - defaults to Lexend
-1. [x] Use draft date as a fallback date for draft posts
-1. [x] Maintain the draft status for draft and pending posts
 1. [x] Migrate code blocks correctly - migrate existing code class information if available
-1. [x] Download embedded photos while maintaining relative URLs
-1. [x] Map WordPress's `feed.xml` to Hugo's `feed.xml`
-1. [x] WordPress [footnotes](https://github.com/ashishb/wp2hugo/issues/24)
-1. [x] WordPress page author
-1. [x] Ability to filter by author(s), useful for [WordPress multi-site](https://www.smashingmagazine.com/2020/01/complete-guide-wordpress-multisite/) migrations
+1. Migrate embeds:
+    1. [x] Migrate iframe(s) like YouTube embeds
+    1. [x] Migrate [YouTube embeds](https://support.google.com/youtube/answer/171780), including WordPress-style plain-text URLs [pasted](https://wordpress.org/documentation/article/youtube-embed/) into the content
+    1. [x] Migrate [Google Map embed](https://developers.google.com/maps/documentation/embed/get-started) via a custom shortcode `googlemaps`
+    1. [x] Migrate [GitHub gists](https://gist.github.com/)
+1. Migrate WordPress shortcodes:
+    1. [x] Migrate `[caption]` shortcode (WordPress) to `{{< figure >}}` (Hugo) ([reference](https://codex.wordpress.org/Caption_Shortcode))
+    1. [x] Migrate `[audio]` shortcode ([reference](https://wordpress.org/documentation/article/audio-shortcode/))
+1. Migrate Gutenberg blocks and features:
+    1. [x] WordPress [footnotes](https://github.com/ashishb/wp2hugo/issues/24)
+
+### Migrate post metadata and attributes
+
+1. [x] Maintain the draft status for draft and pending posts
+1. [x] Use draft date as a fallback date for draft posts
 1. [x] Featured images - export featured image associations with pages and posts correctly
 1. [x] WordPress [Post formats](https://developer.wordpress.org/advanced-administration/wordpress/post-formats/)
+
+### Migrate media attachments
+
+1. [x] Migrate favicon.ico
+1. [x] Migrate `wp-content/uploads` images embedded in pages to Hugo static files while maintaining relative URLs
+1. [x] Migrate external images (on different hosts) to Hugo static files
+
+### Misc
+
+1. [x] Ability to filter posts by author(s), useful for [WordPress multi-site](https://www.smashingmagazine.com/2020/01/complete-guide-wordpress-multisite/) migrations
+1. [x] Custom font - defaults to Lexend
+1. [x] Support for parallax blur backgrounds (similar to [WordPress Advanced Backgrounds](https://wordpress.org/plugins/advanced-backgrounds/))
+
 
 ### Why existing tools don't work
 
