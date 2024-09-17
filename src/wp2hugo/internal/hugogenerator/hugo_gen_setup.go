@@ -436,6 +436,7 @@ func (g Generator) downloadPageMedia(outputMediaDirPath string, p *hugopage.Page
 					Err(err).
 					Str("mediaLink", link).
 					Str("pageLink", pageURL.String()).
+					Str("outputFilePath", outputFilePath).
 					Msg("error fetching media file")
 				continue
 			}
