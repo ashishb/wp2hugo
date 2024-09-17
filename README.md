@@ -116,7 +116,6 @@ $ make build_prod
 1. [x] Custom font - defaults to Lexend
 1. [x] Support for parallax blur backgrounds (similar to [WordPress Advanced Backgrounds](https://wordpress.org/plugins/advanced-backgrounds/))
 
-
 ### Why existing tools don't work
 
 [Existing tools](https://gohugo.io/tools/migrations/) do a half-baked job of migrating content.
