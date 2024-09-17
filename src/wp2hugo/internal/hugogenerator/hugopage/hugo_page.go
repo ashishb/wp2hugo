@@ -57,10 +57,14 @@ var (
 
 // Extracts "src" from Hugo figure shortcode
 // {{< figure align=aligncenter width=905 src="/wp-content/uploads/2023/01/Stollemeyer-castle-1024x768.jpg" alt="" >}}
-var _hugoFigureLinks = regexp.MustCompile(`{{< figure.*?src="(.+?)".*? >}}`)
+var _hugoFigureLinks = regexp.MustCompile(`{{< figure.*?src="([^\"]+?)".*? >}}`)
+
+// Extracts "src" from Hugo audio shortcode
+// {{< audio src="/wp-content/uploads/2023/01/session.mp3" alt="" >}}
+var _hugoAudioLinks = regexp.MustCompile(`{{< audio.*?src="([^\"]+?)".*? >}}`)
 
 // {{< parallaxblur src="/wp-content/uploads/2018/12/bora%5Fbora%5F5%5Fresized.jpg" >}}
-var _hugoParallaxBlurLinks = regexp.MustCompile(`{{< parallaxblur.*?src="(.+?)".*? >}}`)
+var _hugoParallaxBlurLinks = regexp.MustCompile(`{{< parallaxblur.*?src="([^\"]+?)".*? >}}`)
 
 func NewPage(provider ImageURLProvider, pageURL url.URL, author string, title string, publishDate *time.Time,
 	isDraft bool, categories []string, tags []string, footnotes []wpparser.Footnote,
@@ -98,12 +102,13 @@ func (page Page) Write(w io.Writer) error {
 	return nil
 }
 
-func (page *Page) WPImageLinks() []string {
+func (page *Page) WPMediaLinks() []string {
 	arr1 := getMarkdownLinks(_markdownImageLinks, page.markdown)
 	arr2 := getMarkdownLinks(_hugoFigureLinks, page.markdown)
 	arr3 := getMarkdownLinks(_hugoParallaxBlurLinks, page.markdown)
+	arr4 := getMarkdownLinks(_hugoAudioLinks, page.markdown)
 	coverImageURL := page.getCoverImageURL()
-	result := append(append(arr1, arr2...), arr3...)
+	result := append(append(append(arr1, arr2...), arr3...), arr4...)
 	if coverImageURL != nil {
 		result = append(result, *coverImageURL)
 	}

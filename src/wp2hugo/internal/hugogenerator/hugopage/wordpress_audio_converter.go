@@ -14,9 +14,13 @@ import (
 //  3. [audio mp3="source.mp3" ogg="source.ogg" wav="source.wav" m4a="source.m4a"]
 //  4. [audio] is allowed by WP but is not covered here since WP extracts the first link to mp3/ogg/wav/m4a found in post.
 //     this case is inconvenient for us and pretty niche.
+//  5. Gutenberg editor directly writes audio HTML, like :
+//     <figure class="wp-block-audio"><audio src="/wp-content/uploads/sites/3/2020/07/session_2020-07-02.mp3" controls="controls"></audio></figure>
+//     Gutenberg can optionnaly nest <figcaption> into <figure>, below <audio>. We disregard it here.
 //
 // Reference : https://wordpress.org/documentation/article/audio-shortcode/
-var _AudioRegEx = regexp.MustCompile(`\[audio ([^\]]+)\](.*)(?:\[\/audio\])?`)
+var _AudioShortCodeRegEx = regexp.MustCompile(`\[audio ([^\]]+)\](?:.*)(?:\[\/audio\])?`)
+var _AudioHTMLRegEx = regexp.MustCompile(`<figure (?:.*?)class="(?:.*?)wp-block-audio(?:.*?)">\s*<audio ([^<>]*?)\/?>(?:<\/audio>)?(?:[\s\S]*?)</figure>`)
 
 var _srcRegEx = regexp.MustCompile(`src="([^"]+)"`)
 var _mp3RegEx = regexp.MustCompile(`mp3="([^"]+)"`)
@@ -27,7 +31,9 @@ var _wavRegEx = regexp.MustCompile(`wav="([^"]+)"`)
 func replaceAudioShortCode(htmlData string) string {
 	log.Debug().
 		Msg("Replacing Audio shortcodes")
-	return replaceAllStringSubmatchFunc(_AudioRegEx, htmlData, AudioReplacementFunction)
+	htmlData = replaceAllStringSubmatchFunc(_AudioShortCodeRegEx, htmlData, AudioReplacementFunction)
+	htmlData = replaceAllStringSubmatchFunc(_AudioHTMLRegEx, htmlData, AudioReplacementFunction)
+	return htmlData
 }
 
 func printAudioShortCode(src string) string {

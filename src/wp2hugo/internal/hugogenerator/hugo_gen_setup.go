@@ -397,7 +397,7 @@ func (g Generator) newHugoPage(pageURL *url.URL, page wpparser.CommonFields) (*h
 }
 
 func (g Generator) downloadPageMedia(outputMediaDirPath string, p *hugopage.Page, pageURL *url.URL) error {
-	links := p.WPImageLinks()
+	links := p.WPMediaLinks()
 	log.Debug().
 		Str("page", pageURL.String()).
 		Int("links", len(links)).
