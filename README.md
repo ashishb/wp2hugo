@@ -90,14 +90,15 @@ $ make build_prod
 1. [x] Migrate code blocks correctly - migrate existing code class information if available
 1. Migrate embeds:
     1. [x] Migrate iframe(s) like YouTube embeds
-    1. [x] Migrate [YouTube embeds](https://support.google.com/youtube/answer/171780), including WordPress-style plain-text URLs [pasted](https://wordpress.org/documentation/article/youtube-embed/) into the content
+    1. [x] Migrate [YouTube embeds](https://support.google.com/youtube/answer/171780), including WordPress-style [plain-text URLs](https://wordpress.org/documentation/article/youtube-embed/) in the post body
     1. [x] Migrate [Google Map embed](https://developers.google.com/maps/documentation/embed/get-started) via a custom shortcode `googlemaps`
     1. [x] Migrate [GitHub gists](https://gist.github.com/)
 1. Migrate WordPress shortcodes:
     1. [x] Migrate `[caption]` shortcode (WordPress) to `{{< figure >}}` (Hugo) ([reference](https://codex.wordpress.org/Caption_Shortcode))
     1. [x] Migrate `[audio]` shortcode ([reference](https://wordpress.org/documentation/article/audio-shortcode/))
 1. Migrate Gutenberg blocks and features:
-    1. [x] WordPress [footnotes](https://github.com/ashishb/wp2hugo/issues/24)
+    1. [x] Migrate WordPress [footnotes](https://github.com/ashishb/wp2hugo/issues/24)
+    1. [x] Migrate WordPress [gallery](https://wordpress.com/support/wordpress-editor/blocks/gallery-block/)
 
 ### Migrate post metadata and attributes
 
