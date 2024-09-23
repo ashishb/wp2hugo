@@ -3,9 +3,10 @@ package hugogenerator
 import (
 	"errors"
 	"fmt"
+	"path"
+
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
 	"github.com/rs/zerolog/log"
-	"path"
 )
 
 // This will go to  layouts/shortcodes/googlemaps.html enabling the use of the shortcode
@@ -114,11 +115,19 @@ const _audioShortCode = `
 </audio>
 `
 
+const _galleryShortCode = `
+{{ $p := .Page }}
+<div class="gallery gallery-cols-{{ .Get "cols" | default 1 }}">
+{{- print .Inner | $p.RenderString  -}}
+</div>
+`
+
 func WriteCustomShortCodes(siteDir string) error {
 	return errors.Join(writeGoogleMapsShortCode(siteDir),
 		writeSelectedPostsShortCode(siteDir),
 		writeParallaxBlurShortCode(siteDir),
-		writeAudioShortCode(siteDir))
+		writeAudioShortCode(siteDir),
+		writeGalleryShortCode(siteDir))
 }
 
 func writeGoogleMapsShortCode(siteDir string) error {
@@ -135,6 +144,10 @@ func writeParallaxBlurShortCode(siteDir string) error {
 
 func writeAudioShortCode(siteDir string) error {
 	return writeShortCode(siteDir, "audio", _audioShortCode)
+}
+
+func writeGalleryShortCode(siteDir string) error {
+	return writeShortCode(siteDir, "gallery", _galleryShortCode)
 }
 
 func writeShortCode(siteDir string, shortCodeName string, fileContent string) error {
