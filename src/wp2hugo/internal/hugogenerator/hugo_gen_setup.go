@@ -419,6 +419,10 @@ func (g Generator) downloadPageMedia(outputMediaDirPath string, p *hugopage.Page
 		for _, prefix := range prefixes {
 			link = strings.TrimPrefix(link, prefix)
 		}
+		url, _ := url.Parse(link)
+
+		link = strings.TrimSuffix(link, fmt.Sprintf("?%s", url.RawQuery))
+
 		if !strings.HasPrefix(link, "/") {
 			log.Warn().
 				Str("link", link).
