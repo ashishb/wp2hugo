@@ -8,13 +8,16 @@ import (
 	"net/url"
 	"os"
 	"path"
-	"strings"
+	"regexp"
 )
 
 func writeFavicon(outputDirPath string, faviconData io.Reader) error {
 	log.Debug().Msg("Writing favicon")
 	return download(path.Join(outputDirPath, "favicon.ico"), faviconData)
 }
+
+// Match %dd
+var _hexPattern = regexp.MustCompile(`%[0-9a-fA-F]{2}`)
 
 func download(destFilePath string, reader io.Reader) error {
 	log.Debug().
@@ -24,7 +27,7 @@ func download(destFilePath string, reader io.Reader) error {
 		return err
 	}
 	fileName := path.Base(destFilePath)
-	if strings.Contains(fileName, "%5F") {
+	if _hexPattern.MatchString(fileName) {
 		tmp1, err := url.PathUnescape(fileName)
 		if err != nil {
 			return fmt.Errorf("error unescaping filename %s: %s", fileName, err)
@@ -39,7 +42,7 @@ func download(destFilePath string, reader io.Reader) error {
 
 	file, err := os.OpenFile(destFilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
-		return fmt.Errorf("error opening file %s: %s", file.Name(), err)
+		return fmt.Errorf("error opening file %s: %s", destFilePath, err)
 	}
 	defer file.Close()
 	_, err = io.Copy(file, reader)
