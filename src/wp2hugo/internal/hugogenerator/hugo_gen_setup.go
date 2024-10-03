@@ -183,6 +183,7 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 		log.Error().
 			Err(err).
 			Bytes("output", output).
+			Str("cmd", combinedCommand).
 			Msg("error running Hugo setup commands")
 		return nil, fmt.Errorf("error running Hugo setup commands: %s", err)
 	}
@@ -425,7 +426,8 @@ func (g Generator) downloadPageMedia(outputMediaDirPath string, p *hugopage.Page
 				Str("source", pageURL.String()).
 				Msg("non-relative link")
 		}
-		outputFilePath := fmt.Sprintf("%s/static/%s", outputMediaDirPath, strings.TrimSuffix(link, "/"))
+		outputFilePath := fmt.Sprintf("%s/static/%s", outputMediaDirPath,
+			strings.TrimSuffix(strings.Split(link, "?")[0], "/"))
 		if !strings.HasPrefix(link, "http") {
 			link = g.wpInfo.Link + link
 		}
