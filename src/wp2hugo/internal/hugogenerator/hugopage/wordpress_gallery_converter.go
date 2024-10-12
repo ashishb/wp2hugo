@@ -30,25 +30,36 @@ func replaceGalleryWithFigure(provider ImageURLProvider, htmlData string) string
 
 	htmlData = replaceAllStringSubmatchFunc(_GalleryRegEx, htmlData,
 		func(groups []string) string {
-			return galleryReplacementFunction(provider, groups)
+			info, err := galleryReplacementFunction(provider, groups[1])
+			if err != nil {
+				return fmt.Sprintf("[gallery %s]", info) // Return the original shortcode
+			}
+			return info
 		})
 
 	return htmlData
 }
 
-func galleryReplacementFunction(provider ImageURLProvider, groups []string) string {
+func galleryReplacementFunction(provider ImageURLProvider, galleryInfo string) (string, error) {
 	var output strings.Builder
 
 	// Find columns layout
-	cols := _colsRegEx.FindStringSubmatch(groups[1])
-	col_nb := "1"
+	cols := _colsRegEx.FindStringSubmatch(galleryInfo)
+	colNb := "1"
 	if cols != nil {
-		col_nb = cols[1]
+		colNb = cols[1]
 	}
 
 	// Find image IDs
-	ids := _idRegEx.FindStringSubmatch(groups[1])
-	ids_array := strings.Split(ids[1], ",")
+	ids := _idRegEx.FindStringSubmatch(galleryInfo)
+	if len(ids) == 0 {
+		log.Warn().
+			Str("galleryInfo", galleryInfo).
+			Msg("No image IDs found in gallery shortcode")
+		return "", fmt.Errorf("no image IDs found in gallery shortcode")
+	}
+
+	idsArray := strings.Split(ids[1], ",")
 
 	// TODO: maybe handle `order="ASC|DESC"` in conjunction with `orderby="..."`, so reorder ids_array here.
 
@@ -56,10 +67,10 @@ func galleryReplacementFunction(provider ImageURLProvider, groups []string) stri
 	output.WriteString("<br>") // This will get converted to newline later on
 
 	// Opening tag :
-	output.WriteString(fmt.Sprintf(`{{< gallery cols="%s" >}}`, col_nb))
+	output.WriteString(fmt.Sprintf(`{{< gallery cols="%s" >}}`, colNb))
 
 	// For each image ID in WP gallery shortcode, get the URL
-	for _, s := range ids_array {
+	for _, s := range idsArray {
 		tmp, err := provider.GetImageInfo(s)
 		if tmp != nil {
 			src := tmp.ImageURL
@@ -83,5 +94,5 @@ func galleryReplacementFunction(provider ImageURLProvider, groups []string) stri
 	// Closing tag for main gallery shortcode
 	output.WriteString(`{{< /gallery >}}`)
 	output.WriteString("<br>") // This will get converted to newline later on
-	return output.String()
+	return output.String(), nil
 }

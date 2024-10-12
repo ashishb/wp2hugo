@@ -31,7 +31,7 @@ func replaceAllStringSubmatchFunc(re *regexp.Regexp, str string, repl func([]str
 	lastIndex := 0
 
 	for _, v := range re.FindAllSubmatchIndex([]byte(str), -1) {
-		groups := []string{}
+		var groups []string
 		for i := 0; i < len(v); i += 2 {
 			groups = append(groups, str[v[i]:v[i+1]])
 		}
