@@ -78,7 +78,9 @@ func galleryReplacementFunction(provider ImageURLProvider, galleryInfo string) (
 			src = strings.ReplaceAll(src, " ", "%20")
 			src = strings.ReplaceAll(src, "_", "%5F")
 
-			title := tmp.Title
+			// Escape weird characters in title
+			title := strings.ReplaceAll(tmp.Title, `"`, `\"`)
+			title = strings.ReplaceAll(title, "\n", " ")
 
 			output.WriteString("<br>") // This will get converted to newline later on
 			output.WriteString(fmt.Sprintf(`{{< figure src="%s" title="%s" alt="%s" >}}`, src, title, title))
