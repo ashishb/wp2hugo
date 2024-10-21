@@ -165,29 +165,36 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 	}
 
 	commands := []string{
+		"git version",
 		"hugo version",
-		"cd " + outputDirPath,
 		// Use YAML file as it is easier to edit it afterward than TOML
-		fmt.Sprintf("hugo new site %s --format yaml", siteName),
-		"cd " + siteName,
-		"git clone https://github.com/adityatelange/hugo-PaperMod themes/PaperMod --depth=1",
-		`rm -rf themes/PaperMod/.git themes/PaperMod/.github`,
-		`echo "theme: 'PaperMod'">> hugo.yaml`,
-		// Verify that the site is setup correctly
+		fmt.Sprintf("cd %s && hugo new site %s --format yaml", outputDirPath, siteName),
+		fmt.Sprintf("cd %s && git clone https://github.com/adityatelange/hugo-PaperMod themes/PaperMod --depth=1",
+			path.Join(outputDirPath, siteName)),
+		fmt.Sprintf("cd %s && rm -rf themes/PaperMod/.git themes/PaperMod/.github", path.Join(outputDirPath, siteName)),
+		// Set theme to PaperMod
+		fmt.Sprintf(`echo "theme: 'PaperMod'">> %s/hugo.yaml`, path.Join(outputDirPath, siteName)),
+		// Verify that the site is set up correctly
 		"hugo",
 	}
-	combinedCommand := strings.Join(commands, " && ")
-	log.Debug().Msg("Running Hugo setup commands")
-	output, err := exec.Command("bash", "-c", combinedCommand).Output()
-	if err != nil {
-		log.Error().
-			Err(err).
-			Bytes("output", output).
-			Str("cmd", combinedCommand).
-			Msg("error running Hugo setup commands")
-		return nil, fmt.Errorf("error running Hugo setup commands: %s", err)
+	for i, command := range commands {
+		log.Debug().
+			Int("step", i+1).
+			Int("totalSteps", len(commands)).
+			Str("cmd", command).
+			Msg("Running Hugo setup command")
+		output, err := exec.Command("bash", "-c", command).Output()
+		if err != nil {
+			log.Error().
+				Err(err).
+				Bytes("output", output).
+				Str("cmd", command).
+				Msg("error running Hugo setup command")
+			return nil, fmt.Errorf("error running Hugo setup command '%s' -> %s", command, err)
+		}
+		log.Debug().Msgf("Hugo setup output: %s", output)
 	}
-	log.Debug().Msgf("Hugo setup output: %s", output)
+
 	siteDir := path.Join(outputDirPath, siteName)
 	log.Info().
 		Str("location", siteDir).
