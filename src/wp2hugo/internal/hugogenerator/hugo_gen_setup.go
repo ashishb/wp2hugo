@@ -175,7 +175,7 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 		// Set theme to PaperMod
 		fmt.Sprintf(`echo "theme: 'PaperMod'">> %s/hugo.yaml`, path.Join(outputDirPath, siteName)),
 		// Verify that the site is set up correctly
-		"hugo",
+		fmt.Sprintf("cd %s && hugo", path.Join(outputDirPath, siteName)),
 	}
 	for i, command := range commands {
 		log.Debug().
