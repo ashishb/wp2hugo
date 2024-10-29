@@ -337,7 +337,7 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 
 	for _, category := range item.Categories {
 		if isCategory(category) {
-			pageCategories = append(pageTags, NormalizeCategoryName(category.Value))
+			pageCategories = append(pageCategories, NormalizeCategoryName(category.Value))
 		} else if isTag(category) {
 			pageTags = append(pageTags, NormalizeCategoryName(category.Value))
 		} else if isPostFormat(category) {
