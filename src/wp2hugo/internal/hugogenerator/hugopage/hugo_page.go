@@ -39,7 +39,7 @@ const _customMoreTag = "{{< more >}}"
 const _wordPressTocTag = "[toc]"
 
 var (
-	_markdownPdfLinks = regexp.MustCompile(`\[.*?]\((.+?\.pdf).*?\)`)
+	_markdownPdfLinks   = regexp.MustCompile(`\[.*?]\((.+?\.pdf).*?\)`)
 	_markdownImageLinks = regexp.MustCompile(`!\[.*?]\((.+?)\)`)
 	// E.g. <pre class="EnlighterJSRAW" data-enlighter-language="golang">
 	_preTagExtractor1 = regexp.MustCompile(`<pre class="EnlighterJSRAW" data-enlighter-language="([^"]+?)".*?>([\s\S]*?)</pre>`)
@@ -110,7 +110,7 @@ func (page *Page) WPMediaLinks() []string {
 	arr4 := getMarkdownLinks(_hugoAudioLinks, page.markdown)
 	arr5 := getMarkdownLinks(_markdownPdfLinks, page.markdown)
 	coverImageURL := page.getCoverImageURL()
-	result := append(append(append(append(arr1, arr2...), arr3...), arr4...),arr5...)
+	result := append(append(append(append(arr1, arr2...), arr3...), arr4...), arr5...)
 	if coverImageURL != nil {
 		result = append(result, *coverImageURL)
 	}
