@@ -8,7 +8,7 @@ import (
 )
 
 // Example: Plain-text Youtube URLs on their own line in post content are turned by WP into embeds
-var _YoutubeRegEx = regexp.MustCompile(`(?m)(^|\s)https?://(?:m\.|www\.)?(?:youtu\.be|youtube\.com)/(?:watch|w)\?v=([^&\s]+)`)
+var _YoutubeRegEx = regexp.MustCompile(`(?m)(^|\s)http[sav]?://(?:m\.|www\.)?(?:youtu\.be|youtube\.com)/(?:watch|w)\?v=([^&\s]+)`)
 
 func replacePlaintextYoutubeURL(htmlData string) string {
 	log.Debug().
