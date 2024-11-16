@@ -92,7 +92,7 @@ $ make build_prod
     1. [x] Migrate iframe(s) like YouTube embeds
     1. [x] Migrate [YouTube embeds](https://support.google.com/youtube/answer/171780)
     1. [x] Migrate WordPress-style [plain-text YouTube embeds](https://wordpress.org/documentation/article/youtube-embed/) in the post body
-    1. [x] Migrate [WP YouTube Lyte](https://wordpress.org/plugins/wp-youtube-lyte/) YouTube embeds 
+    1. [x] Migrate [WP YouTube Lyte](https://wordpress.org/plugins/wp-youtube-lyte/) YouTube embeds
     1. [x] Migrate [Google Map embed](https://developers.google.com/maps/documentation/embed/get-started) via a custom shortcode `googlemaps`
     1. [x] Migrate [GitHub gists](https://gist.github.com/)
 1. Migrate WordPress shortcodes:
