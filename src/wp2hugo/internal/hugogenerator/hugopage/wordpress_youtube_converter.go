@@ -9,7 +9,7 @@ import (
 
 // Example: Plain-text Youtube URLs on their own line in post content are turned by WP into embeds
 // The YouTube Lyte plug-in additionally uses "httpa://" for audio and "httpv://" for video embeds:
-// https://wordpress.com/plugins/wp-youtube-lyte 
+// https://wordpress.com/plugins/wp-youtube-lyte
 var _YoutubeRegEx = regexp.MustCompile(`(?m)(^|\s)http[sav]?://(?:m\.|www\.)?(?:youtu\.be|youtube\.com)/(?:watch|w)\?v=([^&\s]+)`)
 
 func replacePlaintextYoutubeURL(htmlData string) string {
