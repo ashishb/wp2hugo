@@ -434,7 +434,8 @@ func (g Generator) downloadPageMedia(outputMediaDirPath string, p *hugopage.Page
 			log.Warn().
 				Str("link", link).
 				Str("source", pageURL.String()).
-				Msg("non-relative link")
+				Msg("non-relative link (skipped for download)")
+			continue
 		}
 		outputFilePath := fmt.Sprintf("%s/static/%s", outputMediaDirPath,
 			strings.TrimSuffix(strings.Split(link, "?")[0], "/"))
