@@ -2,6 +2,9 @@ package hugopage
 
 import (
 	"fmt"
+	"github.com/gomarkdown/markdown"
+	"github.com/gomarkdown/markdown/ast"
+	"github.com/gomarkdown/markdown/parser"
 	"io"
 	"net/url"
 	"regexp"
@@ -39,8 +42,6 @@ const _customMoreTag = "{{< more >}}"
 const _wordPressTocTag = "[toc]"
 
 var (
-	_markdownPdfLinks   = regexp.MustCompile(`\[.*?]\((.+?\.pdf).*?\)`)
-	_markdownImageLinks = regexp.MustCompile(`!\[.*?]\((.+?)\)`)
 	// E.g. <pre class="EnlighterJSRAW" data-enlighter-language="golang">
 	_preTagExtractor1 = regexp.MustCompile(`<pre class="EnlighterJSRAW" data-enlighter-language="([^"]+?)".*?>([\s\S]*?)</pre>`)
 	// E.g. <pre class="lang:bash" nums="false">
@@ -104,17 +105,58 @@ func (page Page) Write(w io.Writer) error {
 }
 
 func (page *Page) WPMediaLinks() []string {
-	arr1 := getMarkdownLinks(_markdownImageLinks, page.markdown)
+	arr1 := getImageLinks([]byte(page.markdown))
 	arr2 := getMarkdownLinks(_hugoFigureLinks, page.markdown)
 	arr3 := getMarkdownLinks(_hugoParallaxBlurLinks, page.markdown)
 	arr4 := getMarkdownLinks(_hugoAudioLinks, page.markdown)
-	arr5 := getMarkdownLinks(_markdownPdfLinks, page.markdown)
+	arr5 := getPDFLinks([]byte(page.markdown))
 	coverImageURL := page.getCoverImageURL()
 	result := append(append(append(append(arr1, arr2...), arr3...), arr4...), arr5...)
 	if coverImageURL != nil {
 		result = append(result, *coverImageURL)
 	}
 	return result
+}
+
+func getImageLinks(content []byte) []string {
+	extensions := parser.CommonExtensions | parser.AutoHeadingIDs
+	p := parser.NewWithExtensions(extensions)
+	doc := markdown.Parse(content, p)
+
+	var links []string
+	ast.WalkFunc(doc, func(node ast.Node, entering bool) ast.WalkStatus {
+		if img, ok := node.(*ast.Image); ok && entering {
+			links = append(links, string(img.Destination))
+		}
+		return ast.GoToNext
+	})
+
+	log.Debug().
+		Int("count", len(links)).
+		Msg("Image links")
+	return links
+}
+
+func getPDFLinks(content []byte) []string {
+	extensions := parser.CommonExtensions | parser.AutoHeadingIDs
+	p := parser.NewWithExtensions(extensions)
+	doc := markdown.Parse(content, p)
+
+	var links []string
+	ast.WalkFunc(doc, func(node ast.Node, entering bool) ast.WalkStatus {
+		if link, ok := node.(*ast.Link); ok && entering {
+			destination := string(link.Destination)
+			if strings.HasSuffix(strings.ToLower(destination), ".pdf") {
+				links = append(links, destination)
+			}
+		}
+		return ast.GoToNext
+	})
+
+	log.Debug().
+		Int("count", len(links)).
+		Msg("PDF links")
+	return links
 }
 
 func getMarkdownLinks(regex *regexp.Regexp, markdown string) []string {
