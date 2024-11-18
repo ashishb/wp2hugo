@@ -359,6 +359,13 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 
 	var attachmentURL *string
 	tmp1 := item.Extensions["wp"]["attachment_url"]
+	if len(tmp1) > 1 {
+		log.Warn().
+			Str("link", item.Link).
+			Any("attachmentURL", tmp1).
+			Msg("Multiple attachment URLs")
+	}
+
 	if len(tmp1) > 0 {
 		attachmentURL = &tmp1[0].Value
 		log.Debug().
