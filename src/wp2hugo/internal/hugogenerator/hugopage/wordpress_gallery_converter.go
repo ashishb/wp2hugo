@@ -1,6 +1,7 @@
 package hugopage
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -13,11 +14,13 @@ import (
 // the important field to extract is "ids", but others might come in handy
 // `size` is legacy from pre-responsive design and should be discarded now
 // `link` is probably something to enforce in Hugo figure shortcode,
-// for us it's mostly "file" to handle, since "attachment_page" makes no sense for Hugo.
+// It is mostly "file" to handle, since "attachment_page" makes no sense for Hugo.
 var _GalleryRegEx = regexp.MustCompile(`\[gallery ([^\[\]]*)\]`)
 
 var _idRegEx = regexp.MustCompile(`ids="([^"]+)"`)
 var _colsRegEx = regexp.MustCompile(`columns="([^"]+)"`)
+
+var galleryWithNoIDsErr = errors.New("no image IDs found in gallery shortcode")
 
 // TODO: should we handle `order="ASC|DESC"` when `orderby="ID"` ?
 // Seems to me that people mostly order pictures in galleries arbitrarily.
@@ -56,7 +59,7 @@ func galleryReplacementFunction(provider ImageURLProvider, galleryInfo string) (
 		log.Warn().
 			Str("galleryInfo", galleryInfo).
 			Msg("No image IDs found in gallery shortcode")
-		return "", fmt.Errorf("no image IDs found in gallery shortcode")
+		return "", galleryWithNoIDsErr
 	}
 
 	idsArray := strings.Split(ids[1], ",")
