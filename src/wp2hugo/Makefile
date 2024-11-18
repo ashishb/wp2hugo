@@ -14,15 +14,11 @@ build_hugo_manager:
 go_lint:
 	go mod tidy
 	go vet ./...
-	# Deprecated
-	# golint -set_exit_status ./...
-	go tool fix ./..
 	golangci-lint run
 
 go_format:
 	go fmt ./...
 	go mod tidy
-	go tool fix .
 	golangci-lint run --fix
 
 format: go_format
