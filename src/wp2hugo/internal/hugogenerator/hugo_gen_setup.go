@@ -167,6 +167,7 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 	commands := []string{
 		"git version",
 		"hugo version",
+		fmt.Sprintf("mkdir -p %s", outputDirPath),
 		// Use YAML file as it is easier to edit it afterward than TOML
 		fmt.Sprintf("cd %s && hugo new site %s --format yaml", outputDirPath, siteName),
 		fmt.Sprintf("cd %s && git clone https://github.com/adityatelange/hugo-PaperMod themes/PaperMod --depth=1",
