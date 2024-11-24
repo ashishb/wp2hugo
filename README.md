@@ -83,10 +83,10 @@ $ make build_prod
 
 ### Migrate post content and shortcodes
 
-1. [x] Migrate "Excerpt"
-1. [x] Migrate "Show more..." of WordPress -> `Summary` in Hugo
-1. [x] Migrate "catlist"
-1. [x] Migrate WordPress table of content -> Hugo
+1. [x] Migrate [page excerpt](https://wordpress.com/support/excerpts/)
+1. [x] Migrate ["Show more..." of WordPress](https://wordpress.com/support/wordpress-editor/blocks/more-block/) -> `Summary` in Hugo
+1. [x] Migrate [List Category posts(catlist)](https://wordpress.com/plugins/list-category-posts)
+1. [x] Migrate [WordPress table of content](https://wordpress.com/support/wordpress-editor/blocks/table-of-contents-block/) -> Hugo
 1. [x] Migrate code blocks correctly - migrate existing code class information if available
 1. Migrate embeds:
     1. [x] Migrate iframe(s) like YouTube embeds
@@ -96,11 +96,11 @@ $ make build_prod
     1. [x] Migrate [Google Map embed](https://developers.google.com/maps/documentation/embed/get-started) via a custom shortcode `googlemaps`
     1. [x] Migrate [GitHub gists](https://gist.github.com/)
 1. Migrate WordPress shortcodes:
-    1. [x] Migrate `[caption]` shortcode (WordPress) to `{{< figure >}}` (Hugo) ([reference](https://codex.wordpress.org/Caption_Shortcode))
-    1. [x] Migrate `[audio]` shortcode ([reference](https://wordpress.org/documentation/article/audio-shortcode/))
+    1. [x] Migrate [WordPress [caption] shortcode](https://codex.wordpress.org/Caption_Shortcode) to [Hugo's {{< figure >}}](https://codex.wordpress.org/Caption_Shortcode))
+    1. [x] Migrate [WordPress [audio] shortcode](https://wordpress.org/documentation/article/audio-shortcode/))
 1. Migrate Gutenberg blocks and features:
     1. [x] Migrate WordPress [footnotes](https://github.com/ashishb/wp2hugo/issues/24)
-    1. [x] Migrate WordPress [gallery](https://wordpress.com/support/wordpress-editor/blocks/gallery-block/)
+    1. [x] Migrate WordPress [gallery](https://wordpress.com/support/wordpress-editor/blocks/gallery-block/) including [empty Gallery](https://github.com/ashishb/wp2hugo/issues/68)
 
 ### Migrate post metadata and attributes
 
