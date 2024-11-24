@@ -116,7 +116,7 @@ func (g Generator) Generate() error {
 	}
 
 	if g.downloadMedia {
-		url1 := info.Link + "/favicon.ico"
+		url1 := info.Link() + "/favicon.ico"
 		media, err := g.mediaProvider.GetReader(url1)
 		if err != nil {
 			log.Error().
@@ -204,7 +204,7 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 }
 
 func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) error {
-	if len(info.Pages) == 0 {
+	if len(info.Pages()) == 0 {
 		log.Info().Msg("No pages to write")
 		return nil
 	}
@@ -215,7 +215,7 @@ func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) e
 	}
 
 	// Write pages
-	for _, page := range info.Pages {
+	for _, page := range info.Pages() {
 		pagePath := getFilePath(pagesDir, page.Filename())
 		if err := g.writePage(outputDirPath, pagePath, page.CommonFields); err != nil {
 			return err
@@ -228,13 +228,13 @@ func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) e
 }
 
 func (g Generator) writeCustomPosts(outputDirPath string, info wpparser.WebsiteInfo) error {
-	if len(info.CustomPosts) == 0 {
+	if len(info.CustomPosts()) == 0 {
 		log.Info().Msg("No custom posts to write")
 		return nil
 	}
 
 	// Write custom posts
-	for _, page := range info.CustomPosts {
+	for _, page := range info.CustomPosts() {
 		// Dynamically handle post type for target folder
 		pagesDir := path.Join(outputDirPath, "content", *page.PostType)
 		if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
@@ -275,7 +275,7 @@ func (g Generator) maybeAddNginxRedirect(page wpparser.CommonFields) {
 		log.Warn().
 			Err(err).
 			Str("url", page.Link).
-			Msg("error parsing Link as URL")
+			Msg("error parsing link as URL")
 		return
 	}
 
@@ -319,7 +319,7 @@ func getFilePath(pagesDir string, baseFileName string) string {
 }
 
 func (g Generator) writePosts(outputDirPath string, info wpparser.WebsiteInfo) error {
-	if len(info.Posts) == 0 {
+	if len(info.Posts()) == 0 {
 		log.Info().Msg("No posts to write")
 		return nil
 	}
@@ -330,7 +330,7 @@ func (g Generator) writePosts(outputDirPath string, info wpparser.WebsiteInfo) e
 	}
 
 	// Write posts
-	for _, post := range info.Posts {
+	for _, post := range info.Posts() {
 		postPath := getFilePath(postsDir, post.Filename())
 		if err := g.writePage(outputDirPath, postPath, post.CommonFields); err != nil {
 			return err
@@ -441,7 +441,7 @@ func (g Generator) downloadPageMedia(outputMediaDirPath string, p *hugopage.Page
 		outputFilePath := fmt.Sprintf("%s/static/%s", outputMediaDirPath,
 			strings.TrimSuffix(strings.Split(link, "?")[0], "/"))
 		if !strings.HasPrefix(link, "http") {
-			link = g.wpInfo.Link + link
+			link = g.wpInfo.Link() + link
 		}
 		media, err := g.mediaProvider.GetReader(link)
 		if err != nil {

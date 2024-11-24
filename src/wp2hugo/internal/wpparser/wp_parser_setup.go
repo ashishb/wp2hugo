@@ -234,30 +234,32 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 	}
 
 	websiteInfo := WebsiteInfo{
-		Title:       feed.Title,
-		Link:        feed.Link,
+		title:       feed.Title,
+		link:        feed.Link,
 		Description: feed.Description,
-		PubDate:     feed.PubDateParsed,
-		Language:    feed.Language,
+		pubDate:     feed.PubDateParsed,
+		language:    feed.Language,
 
-		Categories: categories,
-		Tags:       tags,
+		categories: categories,
+		tags:       tags,
 
-		Attachments:     attachments,
-		Pages:           pages,
-		Posts:           posts,
-		CustomPosts:     customPosts,
-		NavigationLinks: navigationLinks,
+		attachments:     attachments,
+		pages:           pages,
+		posts:           posts,
+		customPosts:     customPosts,
+		navigationLinks: navigationLinks,
 
 		postIDToAttachmentCache: getPostIDToAttachmentsMap(attachments),
 	}
 	log.Info().
-		Int("numAttachments", len(websiteInfo.Attachments)).
-		Int("numPages", len(websiteInfo.Pages)).
-		Int("numPosts", len(websiteInfo.Posts)).
+		Int("numAttachments", len(websiteInfo.attachments)).
+		Int("numPages", len(websiteInfo.pages)).
+		Int("numPosts", len(websiteInfo.posts)).
+		Int("numCustomPosts", len(websiteInfo.customPosts)).
+		Int("numNavigationLinks", len(websiteInfo.navigationLinks)).
 		Int("numCategories", len(categories)).
 		Int("numTags", len(tags)).
-		Msgf("WebsiteInfo: %s", websiteInfo.Title)
+		Msgf("WebsiteInfo: %s", websiteInfo.title)
 	return &websiteInfo, nil
 }
 

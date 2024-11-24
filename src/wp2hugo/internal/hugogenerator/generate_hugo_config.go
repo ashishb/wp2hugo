@@ -89,9 +89,9 @@ func updateConfig(siteDir string, info wpparser.WebsiteInfo) error {
 		return fmt.Errorf("error: theme is not set in the config file")
 	}
 	// Ref: https://adityatelange.github.io/hugo-PaperMod/posts/papermod/papermod-faq/
-	config.Title = info.Title
-	config.BaseURL = info.Link
-	config.LanguageCode = info.Language
+	config.Title = info.Title()
+	config.BaseURL = info.Link()
+	config.LanguageCode = info.Language()
 	config.Taxonomies.Category = hugopage.CategoryName
 	config.Taxonomies.Tag = hugopage.TagName
 	config.Params.Description = info.Description
@@ -134,17 +134,17 @@ func updateConfig(siteDir string, info wpparser.WebsiteInfo) error {
 }
 
 func addNavigationLinks(info wpparser.WebsiteInfo, config *_HugoConfig) error {
-	if len(info.NavigationLinks) <= 0 {
+	if len(info.NavigationLinks()) <= 0 {
 		return nil
 	}
-	hostName, err := url.Parse(info.Link)
+	hostName, err := url.Parse(info.Link())
 	if err != nil {
 		return fmt.Errorf("error parsing host name: %s", err)
 	}
 
 	searchPresent := false
 
-	for i, link := range info.NavigationLinks {
+	for i, link := range info.NavigationLinks() {
 		config.Menu.Main = append(config.Menu.Main, _HugoNavMenu{
 			Name:   link.Title,
 			URL:    hugopage.ReplaceAbsoluteLinksWithRelative(hostName.Host, link.URL),
@@ -160,7 +160,7 @@ func addNavigationLinks(info wpparser.WebsiteInfo, config *_HugoConfig) error {
 		config.Menu.Main = append(config.Menu.Main, _HugoNavMenu{
 			Name:   "🔍",
 			URL:    "/search/",
-			Weight: len(info.NavigationLinks) + 1,
+			Weight: len(info.NavigationLinks()) + 1,
 		})
 	}
 	return nil

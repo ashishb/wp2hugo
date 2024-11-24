@@ -5,26 +5,27 @@ import (
 )
 
 type WebsiteInfo struct {
-	Title       string
-	Link        string
+	title       string
+	link        string
 	Description string
 
-	PubDate  *time.Time
-	Language string
+	pubDate  *time.Time
+	language string
 
-	Categories []CategoryInfo
-	Tags       []TagInfo
+	categories []CategoryInfo
+	tags       []TagInfo
 
-	// Collecting attachments is mostly useless but we are doing it for completeness
+	// Collecting attachments is mostly useless, but we are doing it for completeness
 	// Only the ones that are actually used in posts/pages are useful
-	Attachments     []AttachmentInfo
-	Pages           []PageInfo
-	Posts           []PostInfo
-	NavigationLinks []NavigationLink
-	CustomPosts     []CustomPostInfo
+	attachments     []AttachmentInfo
+	pages           []PageInfo
+	posts           []PostInfo
+	navigationLinks []NavigationLink
+	customPosts     []CustomPostInfo
 
 	postIDToAttachmentCache map[string][]AttachmentInfo
 }
+
 type NavigationLink struct {
 	// Fallback to Label if title is empty
 	Title string
@@ -44,8 +45,40 @@ type TagInfo struct {
 	Slug string
 }
 
+func (w *WebsiteInfo) Title() string {
+	return w.title
+}
+
+func (w *WebsiteInfo) Link() string {
+	return w.link
+}
+
+func (w *WebsiteInfo) Language() string {
+	return w.language
+}
+
+func (w *WebsiteInfo) Attachments() []AttachmentInfo {
+	return w.attachments
+}
+
+func (w *WebsiteInfo) NavigationLinks() []NavigationLink {
+	return w.navigationLinks
+}
+
 func (w *WebsiteInfo) GetAttachmentsForPost(postID string) []AttachmentInfo {
 	return w.postIDToAttachmentCache[postID]
+}
+
+func (w *WebsiteInfo) Pages() []PageInfo {
+	return w.pages
+}
+
+func (w *WebsiteInfo) Posts() []PostInfo {
+	return w.posts
+}
+
+func (w *WebsiteInfo) CustomPosts() []CustomPostInfo {
+	return w.customPosts
 }
 
 func getPostIDToAttachmentsMap(attachments []AttachmentInfo) map[string][]AttachmentInfo {

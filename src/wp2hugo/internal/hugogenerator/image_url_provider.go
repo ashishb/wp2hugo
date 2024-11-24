@@ -13,7 +13,7 @@ type WordPressImageURLProvider struct {
 
 func (w WordPressImageURLProvider) GetImageInfo(imageID string) (*hugopage.ImageInfo, error) {
 	log.Debug().Str("imageID", imageID).Msg("GetImageURL")
-	for _, attachment := range w.info.Attachments {
+	for _, attachment := range w.info.Attachments() {
 		if attachment.PostID == imageID {
 			attachmentURL := attachment.GetAttachmentURL()
 			log.Info().
