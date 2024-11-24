@@ -30,45 +30,6 @@ func NewParser() *Parser {
 	return &Parser{}
 }
 
-type WebsiteInfo struct {
-	Title       string
-	Link        string
-	Description string
-
-	PubDate  *time.Time
-	Language string
-
-	Categories []CategoryInfo
-	Tags       []TagInfo
-
-	// Collecting attachments is mostly useless but we are doing it for completeness
-	// Only the ones that are actually used in posts/pages are useful
-	Attachments     []AttachmentInfo
-	Pages           []PageInfo
-	Posts           []PostInfo
-	NavigationLinks []NavigationLink
-	CustomPosts     []CustomPostInfo
-}
-
-type NavigationLink struct {
-	// Fallback to Label if title is empty
-	Title string
-	URL   string
-	Type  string
-}
-
-type CategoryInfo struct {
-	ID       string
-	Name     string
-	NiceName string
-}
-
-type TagInfo struct {
-	ID   string
-	Name string
-	Slug string
-}
-
 type PublishStatus string
 
 // See some discussion here https://github.com/ashishb/wp2hugo/issues/26
@@ -96,6 +57,10 @@ type CommonFields struct {
 	GUID             *rss.GUID
 	PostFormat       *string
 	PostType         *string // Custom post types, typically FAQ, portfolio, etc.
+
+	// 1. Only attachments seem to have this
+	// 2. "0" seems to be reserved for no parent, we replace that with nil
+	PostParentID *string // ID of the parent post, if any
 
 	Description string // how to use this?
 	Content     string
@@ -283,6 +248,8 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 		Posts:           posts,
 		CustomPosts:     customPosts,
 		NavigationLinks: navigationLinks,
+
+		postIDToAttachmentCache: getPostIDToAttachmentsMap(attachments),
 	}
 	log.Info().
 		Int("numAttachments", len(websiteInfo.Attachments)).
@@ -391,6 +358,16 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 		postType = &item.Extensions["wp"]["post_type"][0].Value
 	}
 
+	var postParent *string
+	tmp := item.Extensions["wp"]["post_parent"][0].Value
+	if tmp != "0" && tmp != "" {
+		log.Debug().
+			Str("link", item.Link).
+			Str("post_parent", tmp).
+			Msg("Item has a parent")
+		postParent = &tmp
+	}
+
 	return &CommonFields{
 		Author:           getAuthor(item),
 		PostID:           item.Extensions["wp"]["post_id"][0].Value,
@@ -402,6 +379,7 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 		PublishStatus:    PublishStatus(publishStatus),
 		PostFormat:       postFormat,
 		PostType:         postType,
+		PostParentID:     postParent,
 		Excerpt:          item.Extensions["excerpt"]["encoded"][0].Value,
 
 		Description:     item.Description,
