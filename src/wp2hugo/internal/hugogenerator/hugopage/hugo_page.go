@@ -31,8 +31,10 @@ const (
 type Page struct {
 	// This is the original URL of the page from the WordPress site
 	absoluteURL url.URL
-	metadata    map[string]any
-	markdown    string
+	attachments []wpparser.AttachmentInfo
+
+	metadata map[string]any
+	markdown string
 }
 
 const _WordPressMoreTag = "<!--more-->"
@@ -69,7 +71,8 @@ var _hugoAudioLinks = regexp.MustCompile(`{{< audio.*?src="([^\"]+?)".*? >}}`)
 var _hugoParallaxBlurLinks = regexp.MustCompile(`{{< parallaxblur.*?src="([^\"]+?)".*? >}}`)
 
 func NewPage(provider ImageURLProvider, pageURL url.URL, author string, title string, publishDate *time.Time,
-	isDraft bool, categories []string, tags []string, footnotes []wpparser.Footnote,
+	isDraft bool, categories []string, tags []string, attachments []wpparser.AttachmentInfo,
+	footnotes []wpparser.Footnote,
 	htmlContent string, guid *rss.GUID, featuredImageID *string, postFormat *string) (*Page, error) {
 	metadata, err := getMetadata(provider, pageURL, author, title, publishDate, isDraft, categories, tags, guid,
 		featuredImageID, postFormat)
@@ -79,6 +82,7 @@ func NewPage(provider ImageURLProvider, pageURL url.URL, author string, title st
 	page := Page{
 		absoluteURL: pageURL,
 		metadata:    metadata,
+		attachments: attachments,
 	}
 	// htmlContent is the HTML content of the page that will be
 	// transformed to Markdown
@@ -259,11 +263,16 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 		msg := ""
 		return &msg, nil
 	}
+	attachmentIDs := make([]string, 0, len(page.attachments))
+	for _, attachment := range page.attachments {
+		attachmentIDs = append(attachmentIDs, attachment.PostID)
+	}
+
 	converter := getMarkdownConverter()
 	htmlContent = improvePreTagsWithCode(htmlContent)
 	htmlContent = replaceCaptionWithFigure(htmlContent)
 	htmlContent = replaceAudioShortCode(htmlContent)
-	htmlContent = replaceGalleryWithFigure(provider, htmlContent)
+	htmlContent = replaceGalleryWithFigure(provider, attachmentIDs, htmlContent)
 	htmlContent = replaceAWBWithParallaxBlur(provider, htmlContent)
 	htmlContent = strings.Replace(htmlContent, _WordPressMoreTag, _customMoreTag, 1)
 

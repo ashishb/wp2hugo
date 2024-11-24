@@ -27,13 +27,13 @@ var galleryWithNoIDsErr = errors.New("no image IDs found in gallery shortcode")
 
 // Converts the WordPress's caption shortcode to Hugo shortcode "figure"
 // https://adityatelange.github.io/hugo-PaperMod/posts/papermod/papermod-faq/#centering-image-in-markdown
-func replaceGalleryWithFigure(provider ImageURLProvider, htmlData string) string {
+func replaceGalleryWithFigure(provider ImageURLProvider, attachmentIDs []string, htmlData string) string {
 	log.Debug().
 		Msg("Replacing gallery with figures")
 
 	htmlData = replaceAllStringSubmatchFunc(_GalleryRegEx, htmlData,
 		func(groups []string) string {
-			info, err := galleryReplacementFunction(provider, groups[1])
+			info, err := galleryReplacementFunction(provider, attachmentIDs, groups[1])
 			if err != nil {
 				return fmt.Sprintf("[gallery %s]", info) // Return the original shortcode
 			}
@@ -43,7 +43,7 @@ func replaceGalleryWithFigure(provider ImageURLProvider, htmlData string) string
 	return htmlData
 }
 
-func galleryReplacementFunction(provider ImageURLProvider, galleryInfo string) (string, error) {
+func galleryReplacementFunction(provider ImageURLProvider, attachmentIDs []string, galleryInfo string) (string, error) {
 	var output strings.Builder
 
 	// Find columns layout
@@ -56,10 +56,17 @@ func galleryReplacementFunction(provider ImageURLProvider, galleryInfo string) (
 	// Find image IDs
 	ids := _idRegEx.FindStringSubmatch(galleryInfo)
 	if len(ids) == 0 {
-		log.Warn().
-			Str("galleryInfo", galleryInfo).
-			Msg("No image IDs found in gallery shortcode")
-		return "", galleryWithNoIDsErr
+		if len(attachmentIDs) > 0 {
+			ids = []string{"", strings.Join(attachmentIDs, ",")}
+			log.Info().
+				Str("galleryInfo", galleryInfo).
+				Strs("attachmentIDs", attachmentIDs).
+				Msg("No image IDs found in gallery shortcode, fallback to page attachments")
+		} else {
+			log.Warn().
+				Msg("No image IDs found in gallery shortcode and no page attachments")
+			return "", galleryWithNoIDsErr
+		}
 	}
 
 	idsArray := strings.Split(ids[1], ",")
