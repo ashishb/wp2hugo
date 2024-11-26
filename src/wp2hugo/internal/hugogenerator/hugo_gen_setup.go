@@ -9,6 +9,7 @@ import (
 	"path"
 	"strings"
 	"time"
+	"runtime"
 
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugogenerator/hugopage"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/nginxgenerator"
@@ -164,17 +165,18 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 		return nil, fmt.Errorf("hugo not found, install it from https://gohugo.io/: %s", err)
 	}
 
+	// Create output directory
+	os.MkdirAll(outputDirPath, 0700)
+
 	commands := []string{
 		"git version",
 		"hugo version",
-		fmt.Sprintf("mkdir -p %s", outputDirPath),
 		// Use YAML file as it is easier to edit it afterward than TOML
 		fmt.Sprintf("cd %s && hugo new site %s --format yaml", outputDirPath, siteName),
 		fmt.Sprintf("cd %s && git clone https://github.com/adityatelange/hugo-PaperMod themes/PaperMod --depth=1",
 			path.Join(outputDirPath, siteName)),
-		fmt.Sprintf("cd %s && rm -rf themes/PaperMod/.git themes/PaperMod/.github", path.Join(outputDirPath, siteName)),
 		// Set theme to PaperMod
-		fmt.Sprintf(`echo "theme: 'PaperMod'">> %s/hugo.yaml`, path.Join(outputDirPath, siteName)),
+		fmt.Sprintf(`echo theme: 'PaperMod'>> %s/hugo.yaml`, path.Join(outputDirPath, siteName)),
 		// Verify that the site is set up correctly
 		fmt.Sprintf("cd %s && hugo", path.Join(outputDirPath, siteName)),
 	}
@@ -184,7 +186,16 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 			Int("totalSteps", len(commands)).
 			Str("cmd", command).
 			Msg("Running Hugo setup command")
-		output, err := exec.Command("bash", "-c", command).Output()
+		var (
+			output []byte
+			err error
+		)
+		if runtime.GOOS == "windows" {
+			output, err = exec.Command("cmd", "/C", command).Output()
+		} else {
+			// mac & Linux
+			output, err = exec.Command("bash", "-c", command).Output()
+		}
 		if err != nil {
 			log.Error().
 				Err(err).
@@ -195,6 +206,10 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 		}
 		log.Debug().Msgf("Hugo setup output: %s", output)
 	}
+
+	// Delete .git directory
+	os.RemoveAll(path.Join(outputDirPath, siteName, "themes/PaperMod/.git"))
+	os.RemoveAll(path.Join(outputDirPath, siteName, "themes/PaperMod/.github"))
 
 	siteDir := path.Join(outputDirPath, siteName)
 	log.Info().
