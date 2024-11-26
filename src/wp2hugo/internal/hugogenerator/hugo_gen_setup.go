@@ -7,9 +7,9 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"runtime"
 	"strings"
 	"time"
-	"runtime"
 
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugogenerator/hugopage"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/nginxgenerator"
@@ -166,7 +166,14 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 	}
 
 	// Create output directory
-	os.MkdirAll(outputDirPath, 0700)
+	err = os.MkdirAll(outputDirPath, 0700)
+	if err != nil {
+		log.Fatal().
+			Err(err).
+			Str("outputDirPath", outputDirPath).
+			Msg("error creating output directory")
+		return nil, fmt.Errorf("error creating output directory '%s': %s", outputDirPath, err)
+	}
 
 	commands := []string{
 		"git version",
@@ -188,7 +195,7 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 			Msg("Running Hugo setup command")
 		var (
 			output []byte
-			err error
+			err    error
 		)
 		if runtime.GOOS == "windows" {
 			output, err = exec.Command("cmd", "/C", command).Output()
@@ -208,8 +215,20 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 	}
 
 	// Delete .git directory
-	os.RemoveAll(path.Join(outputDirPath, siteName, "themes/PaperMod/.git"))
-	os.RemoveAll(path.Join(outputDirPath, siteName, "themes/PaperMod/.github"))
+	deleteDirs := []string{
+		path.Join(outputDirPath, siteName, ".git"),
+		path.Join(outputDirPath, siteName, "themes/PaperMod/.git"),
+	}
+	for _, dir := range deleteDirs {
+		err := os.RemoveAll(dir)
+		if err != nil {
+			log.Error().
+				Err(err).
+				Str("dir", dir).
+				Msg("error removing directory")
+			return nil, fmt.Errorf("error removing directory '%s': %s", dir, err)
+		}
+	}
 
 	siteDir := path.Join(outputDirPath, siteName)
 	log.Info().
