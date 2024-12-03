@@ -493,6 +493,9 @@ func (g Generator) downloadPageMedia(outputMediaDirPath string, p *hugopage.Page
 			// If full-res image not found, try again with resized one.
 
 			media, err = g.mediaProvider.GetReader(link)
+		} else {
+			// If full-res image found, update target file path too
+			outputFilePath = _resizedMedia.ReplaceAllString(outputFilePath, "$1.$2")
 		}
 
 		if err != nil {
