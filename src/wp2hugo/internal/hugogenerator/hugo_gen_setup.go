@@ -491,11 +491,20 @@ func (g Generator) downloadPageMedia(outputMediaDirPath string, p *hugopage.Page
 
 		if err != nil {
 			// If full-res image not found, try again with resized one.
-
-			media, err = g.mediaProvider.GetReader(link)
+			if strings.Compare(fullResLink, link) != 0 {
+				log.Info().
+					Str("fullResLink", fullResLink).
+					Str("link", link).
+					Msg("full-resolution image file not found, falling back to resized thumbnail")
+				media, err = g.mediaProvider.GetReader(link)
+			} // else fullResLink == link, so no need to retry
 		} else {
 			// If full-res image found, update target file path too
 			outputFilePath = _resizedMedia.ReplaceAllString(outputFilePath, "$1.$2")
+			log.Info().
+			Str("fullResLink", fullResLink).
+			Str("link", link).
+			Msg("resized thumbnail was replaced by full-resolution image")
 		}
 
 		if err != nil {
