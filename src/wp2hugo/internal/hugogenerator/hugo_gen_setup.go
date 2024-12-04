@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"regexp"
 	"runtime"
 	"strings"
 	"time"
@@ -36,6 +37,9 @@ url: "/search/"
 placeholder: "placeholder text in search input box"
 ---
 `
+
+// Find image media thumbnails resized by WP, like `some-file-1920x1080.jpg`
+var _resizedMedia = regexp.MustCompile(`(.*)-\d+x\d+\.(jpg|jpeg|png|webp|gif)`)
 
 type Generator struct {
 	fontName         string
@@ -478,7 +482,31 @@ func (g Generator) downloadPageMedia(outputMediaDirPath string, p *hugopage.Page
 		if !strings.HasPrefix(link, "http") {
 			link = g.wpInfo.Link() + link
 		}
-		media, err := g.mediaProvider.GetReader(link)
+
+		// Try full-res images first.
+		// It is assumed here that Hugo will handle responsive sizes and such internally.
+		// see https://discourse.gohugo.io/t/hugo-image-processing-and-responsive-images/43110/4
+		fullResLink := _resizedMedia.ReplaceAllString(link, "$1.$2")
+		media, err := g.mediaProvider.GetReader(fullResLink)
+
+		if err != nil {
+			// If full-res image not found, try again with resized one.
+			if strings.Compare(fullResLink, link) != 0 {
+				log.Info().
+					Str("fullResLink", fullResLink).
+					Str("link", link).
+					Msg("full-resolution image file not found, falling back to resized thumbnail")
+				media, err = g.mediaProvider.GetReader(link)
+			} // else fullResLink == link, so no need to retry
+		} else {
+			// If full-res image found, update target file path too
+			outputFilePath = _resizedMedia.ReplaceAllString(outputFilePath, "$1.$2")
+			log.Info().
+				Str("fullResLink", fullResLink).
+				Str("link", link).
+				Msg("resized thumbnail was replaced by full-resolution image")
+		}
+
 		if err != nil {
 			if g.continueOnMediaDownloadFailure {
 				log.Error().
