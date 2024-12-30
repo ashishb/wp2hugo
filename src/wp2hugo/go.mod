@@ -6,7 +6,7 @@ toolchain go1.23.1
 
 require (
 	github.com/JohannesKaufmann/html-to-markdown v1.6.0
-	github.com/PuerkitoBio/goquery v1.10.0
+	github.com/PuerkitoBio/goquery v1.10.1
 	github.com/adrg/frontmatter v0.2.0
 	github.com/go-enry/go-enry/v2 v2.9.1
 	github.com/gomarkdown/markdown v0.0.0-20241105142532-d03b89096d81
@@ -37,7 +37,7 @@ require (
 
 require (
 	github.com/BurntSushi/toml v1.4.0 // indirect
-	github.com/andybalholm/cascadia v1.3.2 // indirect
+	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/go-enry/go-oniguruma v1.2.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
@@ -48,7 +48,7 @@ require (
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.19.0
-	golang.org/x/net v0.31.0 // indirect
-	golang.org/x/sys v0.27.0 // indirect
+	golang.org/x/net v0.33.0 // indirect
+	golang.org/x/sys v0.28.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
