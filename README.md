@@ -3,10 +3,12 @@
 [![Featured on Hacker News](https://hackerbadge.now.sh/api?id=41377331)](https://news.ycombinator.com/item?id=41377331)
 
 [![Build Go](https://github.com/ashishb/wp2hugo/actions/workflows/build-go.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/build-go.yaml)
-
 [![Lint Go](https://github.com/ashishb/wp2hugo/actions/workflows/lint-go.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/lint-go.yaml)
-[![Lint Markdown](https://github.com/ashishb/wp2hugo/actions/workflows/lint-markdown.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/lint-markdown.yaml)
 [![Validate Go code formatting](https://github.com/ashishb/wp2hugo/actions/workflows/format-go.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/format-go.yaml)
+
+[![Lint Markdown](https://github.com/ashishb/wp2hugo/actions/workflows/lint-markdown.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/lint-markdown.yaml)
+[![Lint YAML](https://github.com/ashishb/wp2hugo/actions/workflows/lint-yaml.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/lint-yaml.yaml)
+[![Lint GitHub Actions](https://github.com/ashishb/wp2hugo/actions/workflows/lint-github-actions.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/lint-github-actions.yaml)
 
 This is the best migrator for migrating WordPress export to Hugo.
 It handles several weird edge cases that I encountered while trying to migrate my [personal website](https://v1.ashishb.net) to [Hugo-based site](https://v2.ashishb.net/).
