@@ -8,7 +8,7 @@ require (
 	github.com/JohannesKaufmann/html-to-markdown v1.6.0
 	github.com/PuerkitoBio/goquery v1.10.1
 	github.com/adrg/frontmatter v0.2.0
-	github.com/go-enry/go-enry/v2 v2.9.1
+	github.com/go-enry/go-enry/v2 v2.9.2
 	github.com/gomarkdown/markdown v0.0.0-20241105142532-d03b89096d81
 	github.com/mergestat/timediff v0.0.3
 	github.com/mmcdole/gofeed v1.3.0
