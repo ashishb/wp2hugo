@@ -1,7 +1,6 @@
 module github.com/ashishb/wp2hugo/src/wp2hugo
 
 go 1.23
-
 toolchain go1.23.1
 
 require (
@@ -48,7 +47,7 @@ require (
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.6 // indirect
 	github.com/spf13/viper v1.19.0
-	golang.org/x/net v0.35.0 // indirect
+	golang.org/x/net v0.36.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
