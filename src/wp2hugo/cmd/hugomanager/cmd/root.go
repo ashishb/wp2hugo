@@ -41,24 +41,6 @@ func init() {
 		log.Fatal().Err(err).Msg("Error binding viper flag")
 	}
 	viper.SetDefault("author", "Ashish Bhatia")
-
-	urlSuggestCmd.Flags().StringVarP(&HugoDir, "hugo-dir", "", "", "Hugo base directory or any directory containing Hugo markdown files")
-	urlSuggestCmd.Flags().BoolVarP(&UpdateInline, "in-place", "", false, "Update titles in in markdown files")
-	urlSuggestCmd.PersistentFlags().BoolVarP(&ColorLogOutput, "color-log-output", "", true,
-		"enable colored log output, set false to structured JSON log")
-	rootCmd.AddCommand(urlSuggestCmd)
-
-	siteSummaryCmd.Flags().StringVarP(&HugoDir, "hugo-dir", "", "", "Hugo base directory or any directory containing Hugo markdown files")
-	siteSummaryCmd.PersistentFlags().BoolVarP(&ColorLogOutput, "color-log-output", "", true,
-		"enable colored log output, set false to structured JSON log")
-	rootCmd.AddCommand(siteSummaryCmd)
-
-	relativeLinksCmd.Flags().StringVarP(&HugoDir, "hugo-dir", "", "", "Hugo base directory or any directory containing Hugo markdown files")
-	relativeLinksCmd.Flags().BoolVarP(&UpdateInline, "in-place", "", false, "Update titles in in markdown files")
-	relativeLinksCmd.PersistentFlags().BoolVarP(&ColorLogOutput, "color-log-output", "", true,
-		"enable colored log output, set false to structured JSON log")
-	relativeLinksCmd.Flags().StringVarP(&Hostname, "hostname", "", "", "All hostname under this will be considered internal links")
-	rootCmd.AddCommand(relativeLinksCmd)
 }
 
 func initConfig() {
