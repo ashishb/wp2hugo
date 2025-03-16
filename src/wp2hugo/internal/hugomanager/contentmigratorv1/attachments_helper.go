@@ -9,7 +9,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"strings"
 )
 
 func hasAttachments(path string) (*bool, error) {
@@ -17,20 +16,11 @@ func hasAttachments(path string) (*bool, error) {
 }
 
 func hasImageAttachments(path string) (*bool, error) {
-	data, err := os.ReadFile(path)
+	urls, err := getAllImageAttachmentURLs(path)
 	if err != nil {
-		return nil, fmt.Errorf("error reading file '%s': %s", path, err)
+		return nil, fmt.Errorf("error getting image attachment URLs for file '%s': %s", path, err)
 	}
-
-	if strings.Contains(string(data), "{{< figure") {
-		return lo.ToPtr(true), nil
-	}
-
-	if strings.Contains(string(data), "![](") {
-		return lo.ToPtr(true), nil
-	}
-
-	return lo.ToPtr(false), nil
+	return lo.ToPtr(len(urls) > 0), nil
 }
 
 func getAllImageAttachmentURLs(path string) ([]string, error) {
