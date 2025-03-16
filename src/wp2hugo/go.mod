@@ -1,7 +1,6 @@
 module github.com/ashishb/wp2hugo/src/wp2hugo
 
 go 1.24.1
-
 require (
 	github.com/JohannesKaufmann/html-to-markdown v1.6.0
 	github.com/PuerkitoBio/goquery v1.10.2
@@ -12,7 +11,7 @@ require (
 	github.com/mmcdole/gofeed v1.3.0
 	github.com/rs/zerolog v1.33.0
 	github.com/stretchr/testify v1.10.0
-	golang.org/x/text v0.22.0
+	golang.org/x/text v0.23.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
