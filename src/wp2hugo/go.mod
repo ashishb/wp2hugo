@@ -10,7 +10,7 @@ require (
 	github.com/gomarkdown/markdown v0.0.0-20241105142532-d03b89096d81
 	github.com/mergestat/timediff v0.0.3
 	github.com/mmcdole/gofeed v1.3.0
-	github.com/rs/zerolog v1.33.0
+	github.com/rs/zerolog v1.34.0
 	github.com/samber/lo v1.49.1
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/text v0.23.0
