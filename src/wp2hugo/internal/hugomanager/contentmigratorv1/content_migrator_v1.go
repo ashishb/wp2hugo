@@ -17,8 +17,8 @@ func ProcessFile(path string, updateInline bool) (*bool, error) {
 		return lo.ToPtr(false), nil
 	}
 
-	// Ignore all non-post paths
-	if !strings.Contains(path, "content/post") {
+	// Ignore all non-content paths
+	if !strings.Contains(path, "content") {
 		return lo.ToPtr(false), nil
 	}
 
