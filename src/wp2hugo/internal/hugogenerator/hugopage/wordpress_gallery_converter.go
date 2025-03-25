@@ -20,7 +20,7 @@ var _GalleryRegEx = regexp.MustCompile(`\[gallery ([^\[\]]*)\]`)
 var _idRegEx = regexp.MustCompile(`ids="([^"]+)"`)
 var _colsRegEx = regexp.MustCompile(`columns="([^"]+)"`)
 
-var galleryWithNoIDsErr = errors.New("no image IDs found in gallery shortcode")
+var errGalleryWithNoIDs = errors.New("no image IDs found in gallery shortcode")
 
 // TODO: should we handle `order="ASC|DESC"` when `orderby="ID"` ?
 // Seems to me that people mostly order pictures in galleries arbitrarily.
@@ -65,7 +65,7 @@ func galleryReplacementFunction(provider ImageURLProvider, attachmentIDs []strin
 		} else {
 			log.Warn().
 				Msg("No image IDs found in gallery shortcode and no page attachments")
-			return "", galleryWithNoIDsErr
+			return "", errGalleryWithNoIDs
 		}
 	}
 

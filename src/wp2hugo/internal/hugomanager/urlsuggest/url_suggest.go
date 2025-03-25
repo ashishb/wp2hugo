@@ -227,8 +227,8 @@ func getPrefix(matter FrontMatter) string {
 
 func normalize(s string) string {
 	s = strings.ToLower(s)
-	s = strings.Replace(s, " ", "-", -1)
-	s = strings.Replace(s, "_", "-", -1)
+	s = strings.ReplaceAll(s, " ", "-")
+	s = strings.ReplaceAll(s, "_", "-")
 	// Remove all non-alphanumeric characters
 	s = regexp.MustCompile("[^a-z0-9-]").ReplaceAllString(s, "")
 	// Remove successive hyphens
