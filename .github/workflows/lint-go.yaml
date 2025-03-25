@@ -58,7 +58,7 @@ jobs:
 
 
       - name: Run golangci-lint on src/wp2hugo
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v7
         with:
           # We use cache provided by "actions/setup-go@v5"
           skip-cache: true
