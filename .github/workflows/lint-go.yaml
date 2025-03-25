@@ -3,15 +3,20 @@
 name: Lint Go
 
 on:  # yamllint disable-line rule:truthy
+  workflow_dispatch:
   push:
     branches: [main, master]
     paths:
       - "**.go"
+      - "**/go.mod"
+      - "**/go.sum"
       - ".github/workflows/lint-go.yaml"
   pull_request:
     branches: [main, master]
     paths:
       - "**.go"
+      - "**/go.mod"
+      - "**/go.sum"
       - ".github/workflows/lint-go.yaml"
 
 
