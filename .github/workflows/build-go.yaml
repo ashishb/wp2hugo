@@ -34,20 +34,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
-    strategy:
-      matrix:
-        # Without quotes, 1.20 becomes 1.2!
-        go-version: ["1.23"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           persist-credentials: false
 
-      - name: Set up Go ${{ matrix.go-version }}
+      - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go-version }}
+          go-version-file: src/wp2hugo/go.mod
 
       # Ref: https://github.com/actions/cache/blob/main/examples.md#go---modules
       # Warning: This is Linux specific
