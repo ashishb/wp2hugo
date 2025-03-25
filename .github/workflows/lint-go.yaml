@@ -24,8 +24,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-jobs:
+permissions:
+  contents: read
 
+jobs:
   # Run it locally with https://github.com/nektos/act
   # act -j lintGo
   lintGo:
