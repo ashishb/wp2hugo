@@ -151,12 +151,18 @@ A tool for managing Hugo sites e.g. adding URL suggestions, generating site stat
 Usage:
   hugomanager [command]
 
+Usage:
+  hugomanager [command]
+
 Available Commands:
-  completion  Generate the autocompletion script for the specified shell
-  help        Help about any command
-  sitesummary Print site stats (e.g. number of posts, number of drafts etc.)
-  urlsuggest  Suggests URLs for all the pending/future posts that are missing a URL
-  version     Print the version number of HugoManager
+  completion                            Generate the autocompletion script for the specified shell
+  help                                  Help about any command
+  make-absolute-internal-links-relative Converts all the absolute internal links to relative links
+  move-post-next-to-attachments         Move markdown blog posts with attachments to a single directory
+  sitesummary                           Print site stats (e.g. number of posts, number of drafts etc.)
+  suggest-description                   Suggests description for all the posts that are missing a description in the front matter
+  suggest-url                           Suggests URLs for all the pending/future posts that are missing a URL
+  version                               Print the version number of HugoManager
 
 Flags:
   -a, --author string    author name for copyright attribution (default "YOUR NAME")
