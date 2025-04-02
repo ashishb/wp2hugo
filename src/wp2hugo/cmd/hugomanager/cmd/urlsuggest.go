@@ -29,8 +29,9 @@ var urlSuggestCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Info().Msg("URL Suggest command called")
 		logger.ConfigureLogging(_colorLogOutput)
-		action := func(path string, updateInline bool) (*string, error) {
-			return urlsuggest.ProcessFile(path, updateInline)
+		action := func(path string, updateInline bool) error {
+			_, err := urlsuggest.ProcessFile(path, updateInline)
+			return err
 		}
 		scanDir(_hugoDir, _updateInline, action)
 	},

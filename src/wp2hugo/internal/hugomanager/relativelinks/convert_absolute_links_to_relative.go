@@ -8,10 +8,10 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func ConvertAbsoluteLinksToRelative(path string, updateInline bool, hostname string) (*string, error) {
+func ConvertAbsoluteLinksToRelative(path string, updateInline bool, hostname string) error {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("failed to read file %s: %w", path, err)
 	}
 
 	re1 := regexp.MustCompile(fmt.Sprintf(`(http|https)://%s/([^\?]+)`, hostname))
@@ -26,7 +26,7 @@ func ConvertAbsoluteLinksToRelative(path string, updateInline bool, hostname str
 		if updateInline {
 			err := os.WriteFile(path, data, 0644)
 			if err != nil {
-				return nil, err
+				return fmt.Errorf("failed to write file %s: %w", path, err)
 			}
 		}
 	}
@@ -44,5 +44,5 @@ func ConvertAbsoluteLinksToRelative(path string, updateInline bool, hostname str
 	// 		urlsuggest.UpdateFrontmatter(path, "summary", matter.Summary)
 	// 	}
 	// }
-	return nil, nil
+	return nil
 }
