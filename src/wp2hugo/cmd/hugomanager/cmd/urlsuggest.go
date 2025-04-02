@@ -1,10 +1,11 @@
 package cmd
 
 import (
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/urlsuggest"
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/logger"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
+
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/urlsuggest"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/logger"
 )
 
 var (
@@ -14,15 +15,15 @@ var (
 )
 
 func init() {
-	urlSuggestCmd.Flags().StringVarP(&_hugoDir, "hugo-dir", "", "", "Hugo base directory or any directory containing Hugo markdown files")
-	urlSuggestCmd.Flags().BoolVarP(&_updateInline, "in-place", "", false, "Update titles in in markdown files")
-	urlSuggestCmd.PersistentFlags().BoolVarP(&_colorLogOutput, "color-log-output", "", true,
+	_urlSuggestCmd.Flags().StringVarP(&_hugoDir, "hugo-dir", "", "", "Hugo base directory or any directory containing Hugo markdown files")
+	_urlSuggestCmd.Flags().BoolVarP(&_updateInline, "in-place", "", false, "Update URLs in markdown files")
+	_urlSuggestCmd.PersistentFlags().BoolVarP(&_colorLogOutput, "color-log-output", "", true,
 		"enable colored log output, set false to structured JSON log")
-	rootCmd.AddCommand(urlSuggestCmd)
+	rootCmd.AddCommand(_urlSuggestCmd)
 
 }
 
-var urlSuggestCmd = &cobra.Command{
+var _urlSuggestCmd = &cobra.Command{
 	Use:   "suggest-url",
 	Short: "Suggests URLs for all the pending/future posts that are missing a URL",
 	Long:  "Suggests URLs for all the pending/future posts that are missing a URL",

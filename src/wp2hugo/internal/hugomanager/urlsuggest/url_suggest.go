@@ -2,42 +2,16 @@ package urlsuggest
 
 import (
 	"fmt"
+	"github.com/adrg/frontmatter"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/frontmatterhelper"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
+	"github.com/rs/zerolog/log"
+	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
-	"time"
-
-	"github.com/adrg/frontmatter"
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
-	"github.com/rs/zerolog/log"
-	"gopkg.in/yaml.v3"
 )
-
-type FrontMatter struct {
-	URL         string   `yaml:"url"`
-	PublishDate string   `yaml:"date"`
-	Draft       string   `yaml:"draft"`
-	Title       string   `yaml:"title"`
-	Categories  []string `yaml:"category"`
-	Tags        []string `yaml:"tag"`
-	Summary     string   `yaml:"summary"`
-}
-
-func (f *FrontMatter) IsDraft() bool {
-	return strings.ToLower(f.Draft) == "true"
-}
-
-func (matter *FrontMatter) IsInFuture() (bool, error) {
-	if matter.PublishDate == "" {
-		return false, nil
-	}
-	t1, err := time.Parse(time.RFC3339, matter.PublishDate)
-	if err != nil {
-		return false, err
-	}
-	return t1.After(time.Now()), nil
-}
 
 func ProcessFile(path string, updateInline bool) (*string, error) {
 	if !strings.HasSuffix(path, ".md") {
@@ -47,7 +21,7 @@ func ProcessFile(path string, updateInline bool) (*string, error) {
 	if !utils.FileExists(path) {
 		return nil, fmt.Errorf("file does not exist: %s", path)
 	}
-	matter, err := GetSelectiveFrontMatter(path)
+	matter, err := frontmatterhelper.GetSelectiveFrontMatter(path)
 	if err != nil {
 		return nil, err
 	}
@@ -139,27 +113,6 @@ func UpdateFrontmatter(path string, key string, value string) error {
 	return nil
 }
 
-func GetSelectiveFrontMatter(path string) (*FrontMatter, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		_ = file.Close()
-	}()
-
-	var matter FrontMatter
-	_, err = frontmatter.MustParse(file, &matter)
-	if err != nil {
-		log.Error().
-			Err(err).
-			Str("path", path).
-			Msg("Error parsing front matter")
-		return nil, err
-	}
-	return &matter, nil
-}
-
 func getFullFrontMatter(path string) (map[string]any, []byte, error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -181,7 +134,7 @@ func getFullFrontMatter(path string) (map[string]any, []byte, error) {
 	return matter, restOfTheFile, nil
 }
 
-func suggestURL(matter FrontMatter, path string) (*string, error) {
+func suggestURL(matter frontmatterhelper.FrontMatter, path string) (*string, error) {
 	prefix := getPrefix(matter)
 	suffix := getSuffix(matter, path)
 	if prefix == "" {
@@ -199,7 +152,7 @@ func suggestURL(matter FrontMatter, path string) (*string, error) {
 	return &url, nil
 }
 
-func getSuffix(matter FrontMatter, path string) string {
+func getSuffix(matter frontmatterhelper.FrontMatter, path string) string {
 	if matter.Title != "" {
 		return matter.Title
 	}
@@ -209,7 +162,7 @@ func getSuffix(matter FrontMatter, path string) string {
 
 // getPrefix returns the first category or tag that is not generic.
 // It might return an empty string if no category or tag is found.
-func getPrefix(matter FrontMatter) string {
+func getPrefix(matter frontmatterhelper.FrontMatter) string {
 	genericCategories := map[string]bool{
 		"uncategorized": true,
 		"all":           true,
