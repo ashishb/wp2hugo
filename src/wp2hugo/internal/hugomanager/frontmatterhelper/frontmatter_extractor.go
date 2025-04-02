@@ -40,6 +40,7 @@ func (f *FrontMatter) HasDescription() bool {
 	return f.Description != nil && strings.TrimSpace(*f.Description) != ""
 }
 
+// GetSelectiveFrontMatter reads the front matter from a file and returns it as a FrontMatter struct.
 func GetSelectiveFrontMatter(path string) (*FrontMatter, error) {
 	file, err := os.Open(path)
 	if err != nil {
