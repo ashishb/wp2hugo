@@ -2,7 +2,7 @@
 
 [![Featured on Hacker News](https://hackerbadge.now.sh/api?id=41377331)](https://news.ycombinator.com/item?id=41377331)
 
-![GitHub contributors](https://img.shields.io/github/contributors/ashishb/wp2hugo)
+![GitHub contributors](https://img.shields.io/github/contributors/ashishb/wp2hugo?style=flat)
 
 [![Build wp2hugo](https://github.com/ashishb/wp2hugo/actions/workflows/build-go.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/build-go.yaml)
 [![Validate Go code formatting](https://github.com/ashishb/wp2hugo/actions/workflows/format-go.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/format-go.yaml)
