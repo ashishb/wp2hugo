@@ -2,13 +2,13 @@ package sitesummary
 
 import (
 	"fmt"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/frontmatterhelper"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 	"time"
 
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/urlsuggest"
 	"github.com/mergestat/timediff"
 	"github.com/rs/zerolog/log"
 )
@@ -94,7 +94,7 @@ func ScanDir(dir string) (*SiteSummary, error) {
 		}
 
 		// Process file
-		postInfo, err := urlsuggest.GetSelectiveFrontMatter(path)
+		postInfo, err := frontmatterhelper.GetSelectiveFrontMatter(path)
 		if err != nil {
 			return fmt.Errorf("error getting front matter for %s: %w", path, err)
 		}
