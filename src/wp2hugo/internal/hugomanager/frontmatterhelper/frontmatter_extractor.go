@@ -3,6 +3,7 @@ package frontmatterhelper
 import (
 	"github.com/adrg/frontmatter"
 	"github.com/rs/zerolog/log"
+	"gopkg.in/yaml.v2"
 	"os"
 	"strings"
 	"time"
@@ -19,6 +20,19 @@ type FrontMatter struct {
 	Categories []string `yaml:"category"`
 	Draft      string   `yaml:"draft"`
 	Tags       []string `yaml:"tag"`
+
+	Layout      *string  `yaml:"layout"`      // Used by Hugo papermod theme
+	Placeholder *string  `yaml:"placeholder"` // Used by Hugo papermod theme for search page
+	GUID        string   `yaml:"guid"`        // For RSS and Atom feeds
+	Author      []string `yaml:"author"`
+	Cover       struct {
+		Alt     *string `yaml:"alt"`
+		Caption *string `yaml:"caption"`
+		Image   string  `yaml:"image"`
+	} `yaml:"cover"`
+	Aliases []string `yaml:"aliases"` // For redirects
+	ShowToc *bool    `yaml:"ShowToc"` // For Hugo papermod theme
+	TocOpen *bool    `yaml:"TocOpen"` // For Hugo papermod theme
 }
 
 func (f *FrontMatter) IsDraft() bool {
@@ -51,7 +65,15 @@ func GetSelectiveFrontMatter(path string) (*FrontMatter, error) {
 	}()
 
 	var matter FrontMatter
-	_, err = frontmatter.MustParse(file, &matter)
+	if false { // Set this to true for strict parsing and this catches typos in the front matter
+		// Ref: https://github.com/adrg/frontmatter/issues/50
+		formats := []*frontmatter.Format{
+			frontmatter.NewFormat("---", "---", yaml.UnmarshalStrict),
+		}
+		_, err = frontmatter.MustParse(file, &matter, formats...)
+	} else {
+		_, err = frontmatter.Parse(file, &matter)
+	}
 	if err != nil {
 		log.Error().
 			Err(err).
