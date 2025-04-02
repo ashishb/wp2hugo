@@ -144,7 +144,9 @@ func GetSelectiveFrontMatter(path string) (*FrontMatter, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	var matter FrontMatter
 	_, err = frontmatter.Parse(file, &matter)
@@ -163,7 +165,9 @@ func getFullFrontMatter(path string) (map[string]any, []byte, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	var matter map[string]any
 	restOfTheFile, err := frontmatter.Parse(file, &matter)

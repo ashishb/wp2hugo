@@ -44,7 +44,15 @@ func download(destFilePath string, reader io.Reader) error {
 	if err != nil {
 		return fmt.Errorf("error opening file %s: %s", destFilePath, err)
 	}
-	defer file.Close()
+
 	_, err = io.Copy(file, reader)
+	if err != nil {
+		return fmt.Errorf("error writing to file %s: %s", destFilePath, err)
+	}
+
+	if err := file.Close(); err != nil {
+		return fmt.Errorf("error closing file %s: %s", destFilePath, err)
+	}
+
 	return err
 }

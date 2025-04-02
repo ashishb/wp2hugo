@@ -78,8 +78,10 @@ func appendFile(outputFilePath string, data string) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
 	if _, err := f.WriteString(data); err != nil {
+		return err
+	}
+	if err := f.Close(); err != nil {
 		return err
 	}
 	return nil
