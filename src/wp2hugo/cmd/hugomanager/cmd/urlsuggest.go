@@ -23,7 +23,7 @@ func init() {
 }
 
 var urlSuggestCmd = &cobra.Command{
-	Use:   "urlsuggest",
+	Use:   "suggest-url",
 	Short: "Suggests URLs for all the pending/future posts that are missing a URL",
 	Long:  "Suggests URLs for all the pending/future posts that are missing a URL",
 	Run: func(cmd *cobra.Command, args []string) {
