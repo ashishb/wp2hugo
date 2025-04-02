@@ -398,20 +398,17 @@ func writeFile(filePath string, content []byte) error {
 	if err != nil {
 		return fmt.Errorf("error opening archive file: %s", err)
 	}
-	defer w.Close()
 	if _, err := w.Write(content); err != nil {
 		return fmt.Errorf("error writing to archive file: %s", err)
+	}
+
+	if err := w.Close(); err != nil {
+		return fmt.Errorf("error closing archive file: %s", err)
 	}
 	return nil
 }
 
 func (g Generator) writePage(outputMediaDirPath string, pagePath string, page wpparser.CommonFields) error {
-	w, err := os.OpenFile(pagePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
-	if err != nil {
-		return fmt.Errorf("error opening page file: %s", err)
-	}
-	defer w.Close()
-
 	pageURL, err := url.Parse(page.Link)
 	if err != nil {
 		return fmt.Errorf("error parsing page URL: %s", err)
@@ -421,9 +418,20 @@ func (g Generator) writePage(outputMediaDirPath string, pagePath string, page wp
 	if err != nil {
 		return fmt.Errorf("error creating Hugo page: %s", err)
 	}
-	if err = p.Write(w); err != nil {
-		return err
+
+	w, err := os.OpenFile(pagePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		return fmt.Errorf("error opening page file: %s", err)
 	}
+
+	if err = p.Write(w); err != nil {
+		return fmt.Errorf("error writing page file: %s", err)
+	}
+
+	if err = w.Close(); err != nil {
+		return fmt.Errorf("error closing page file: %s", err)
+	}
+
 	log.Info().Msgf("Page written: %s", pagePath)
 
 	if g.downloadMedia {

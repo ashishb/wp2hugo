@@ -79,7 +79,9 @@ func updateConfig(siteDir string, info wpparser.WebsiteInfo) error {
 	if err != nil {
 		return fmt.Errorf("error opening config file: %s", err)
 	}
-	defer r.Close()
+	defer func() {
+		_ = r.Close()
+	}()
 
 	var config _HugoConfig
 	if err := yaml.NewDecoder(r).Decode(&config); err != nil {
