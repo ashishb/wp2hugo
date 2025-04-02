@@ -9,11 +9,14 @@ import (
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/logger"
 )
 
+var _limit int
+
 func init() {
 	_suggestDescriptionCmd.Flags().StringVarP(&_hugoDir, "hugo-dir", "", "", "Hugo base directory or any directory containing Hugo markdown files")
 	_suggestDescriptionCmd.Flags().BoolVarP(&_updateInline, "in-place", "", false, "Add description in markdown files")
 	_suggestDescriptionCmd.PersistentFlags().BoolVarP(&_colorLogOutput, "color-log-output", "", true,
 		"enable colored log output, set false to structured JSON log")
+	_suggestDescriptionCmd.Flags().IntVarP(&_limit, "limit", "n", 10, "Limit the number of files to update")
 	rootCmd.AddCommand(_suggestDescriptionCmd)
 
 }
@@ -28,16 +31,36 @@ var _suggestDescriptionCmd = &cobra.Command{
 
 		numHasDescription := 0
 		numMissingDescription := 0
+		numUpdated := 0
+		ctx := cmd.Context()
 		action := func(path string, updateInline bool) error {
-			err := descriptionsuggest.ProcessFile(path, updateInline)
-			if err == nil {
-				numHasDescription++
+			if numUpdated >= _limit {
+				log.Info().
+					Int("numUpdated", numUpdated).
+					Msg("Limit reached, stopping further updates")
 				return nil
 			}
 
-			if errors.Is(err, descriptionsuggest.ErrFrontMatterMissingDescription) {
-				numMissingDescription++
-				return nil
+			err := descriptionsuggest.ProcessFile(ctx, path, updateInline)
+			if err != nil {
+				if errors.Is(err, descriptionsuggest.ErrFrontMatterMissingDescription) {
+					numMissingDescription++
+					return nil
+				}
+				if errors.Is(err, descriptionsuggest.ErrFrontMatterHasDescription) {
+					numHasDescription++
+					return nil
+				}
+				return err
+			}
+
+			if updateInline {
+				log.Debug().
+					Str("path", path).
+					Msg("Updated description in front matter")
+				numUpdated++
+			} else {
+				numHasDescription++
 			}
 
 			return err
@@ -46,6 +69,7 @@ var _suggestDescriptionCmd = &cobra.Command{
 		log.Info().
 			Int("numHasDescription", numHasDescription).
 			Int("numMissingDescription", numMissingDescription).
+			Int("numUpdated", numUpdated).
 			Msg("suggest-description command completed")
 	},
 }
