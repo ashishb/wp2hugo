@@ -96,7 +96,7 @@ func ScanDir(dir string) (*SiteSummary, error) {
 		// Process file
 		postInfo, err := urlsuggest.GetSelectiveFrontMatter(path)
 		if err != nil {
-			return err
+			return fmt.Errorf("error getting front matter for %s: %w", path, err)
 		}
 
 		summary.numPosts++

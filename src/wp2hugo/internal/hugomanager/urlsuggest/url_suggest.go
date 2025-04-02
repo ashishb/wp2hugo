@@ -149,7 +149,7 @@ func GetSelectiveFrontMatter(path string) (*FrontMatter, error) {
 	}()
 
 	var matter FrontMatter
-	_, err = frontmatter.Parse(file, &matter)
+	_, err = frontmatter.MustParse(file, &matter)
 	if err != nil {
 		log.Error().
 			Err(err).
