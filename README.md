@@ -11,6 +11,7 @@
 [![Lint Markdown](https://github.com/ashishb/wp2hugo/actions/workflows/lint-markdown.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/lint-markdown.yaml)
 [![Lint YAML](https://github.com/ashishb/wp2hugo/actions/workflows/lint-yaml.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/lint-yaml.yaml)
 [![Lint GitHub Actions](https://github.com/ashishb/wp2hugo/actions/workflows/lint-github-actions.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/lint-github-actions.yaml)
+[![Validate Release config](https://github.com/ashishb/wp2hugo/actions/workflows/check-goreleaser-config.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/check-goreleaser-config.yaml)
 
 This is the best migrator for migrating WordPress export to Hugo.
 It handles several weird edge cases that I encountered while trying to migrate my [personal website](https://v1.ashishb.net) to [Hugo-based site](https://v2.ashishb.net/).

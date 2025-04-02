@@ -1,0 +1,52 @@
+---
+name: Check Go Releaser config
+
+on:  # yamllint disable-line rule:truthy
+  push:
+    branches: [main, master]
+    paths:
+      - ".goreleaser.yaml"
+      - ".github/workflows/check-goreleaser-config.yaml"
+  pull_request:
+    branches: [main, master]
+    paths:
+      - ".goreleaser.yaml"
+      - ".github/workflows/check-goreleaser-config.yaml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Ref: https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/controlling-permissions-for-github_token
+permissions:
+  contents: read
+
+jobs:
+
+  checkGoReleaserConfig:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: "src/wp2hugo/go.mod"
+          cache: false  # Disable caching to avoid cache poisoning
+
+      - name: Install Go Releaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: latest
+          install-only: true
+
+      - name: Check Go Releaser config is valid
+        run: goreleaser check --config .goreleaser.yaml
+
+      - name: Build (not release) binaries with Go Releaser
+        run: goreleaser build --snapshot --clean
