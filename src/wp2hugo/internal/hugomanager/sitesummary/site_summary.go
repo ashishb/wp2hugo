@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/urlsuggest"
@@ -82,14 +83,22 @@ func ScanDir(dir string) (*SiteSummary, error) {
 		if err != nil {
 			return err
 		}
+
 		if info.IsDir() {
 			return nil
 		}
+
+		// Skip if not a markdown file
+		if !strings.HasSuffix(strings.ToLower(path), ".md") {
+			return nil
+		}
+
 		// Process file
 		postInfo, err := urlsuggest.GetSelectiveFrontMatter(path)
 		if err != nil {
 			return err
 		}
+
 		summary.numPosts++
 		if postInfo.IsDraft() {
 			summary.numDrafts++
