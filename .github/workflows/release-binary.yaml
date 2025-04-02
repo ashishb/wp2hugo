@@ -33,7 +33,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: stable
+          go-version-file: src/wp2hugo/go.mod
           cache-dependency-path: src/wp2hugo/go.sum
 
       - name: Read version name
