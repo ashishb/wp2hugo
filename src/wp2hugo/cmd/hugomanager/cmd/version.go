@@ -15,6 +15,6 @@ var versionCmd = &cobra.Command{
 	Short: "Print the version number of HugoManager",
 	Long:  `All software has versions. This is HugoManager's`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Hugo version manager - v1.6.0")
+		fmt.Println("Hugo version manager - v0.1.0 (unstable API)")
 	},
 }
