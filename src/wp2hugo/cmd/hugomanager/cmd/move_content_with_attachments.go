@@ -25,10 +25,10 @@ var moveContentWithAttachmentsCmd = &cobra.Command{
 		log.Info().Msg("Move content with attachments command called")
 
 		modifiedCount := 0
-		action := func(path string, updateInline bool) (*string, error) {
+		action := func(path string, updateInline bool) error {
 			processedFile, err := contentmigratorv1.ProcessFile(path, updateInline)
 			if err != nil {
-				return nil, err
+				return err
 			}
 			if *processedFile {
 				modifiedCount++
@@ -38,7 +38,7 @@ var moveContentWithAttachmentsCmd = &cobra.Command{
 				Bool("updateInline", updateInline).
 				Int("modifiedCount", modifiedCount).
 				Msg("Processed file")
-			return nil, nil
+			return nil
 		}
 		scanDir(_hugoDir, _updateInline, action)
 	},

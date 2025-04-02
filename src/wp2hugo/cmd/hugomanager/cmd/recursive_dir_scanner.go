@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func scanDir(dir string, updateInline bool, action func(string, bool) (*string, error)) {
+func scanDir(dir string, updateInline bool, action func(string, bool) error) {
 	if dir == "" {
 		log.Fatal().Msg("Hugo directory not provided")
 	}
@@ -39,8 +39,7 @@ func scanDir(dir string, updateInline bool, action func(string, bool) (*string, 
 		log.Trace().
 			Str("path", path).
 			Msg("Processing file")
-		_, err = action(path, updateInline)
-		if err != nil {
+		if err = action(path, updateInline); err != nil {
 			log.Warn().
 				Err(err).
 				Str("path", path).
