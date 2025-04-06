@@ -6,12 +6,16 @@ import (
 	"fmt"
 	"github.com/adrg/frontmatter"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/frontmatterhelper"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/llmhelper"
 	"github.com/openai/openai-go"
-	"github.com/openai/openai-go/option"
 	"github.com/rs/zerolog/log"
 	"os"
 	"strings"
 )
+
+const _seoDescriptionSystemPrompt = "Extract a compelling and SEO-friendly meta description (under 160 characters) from the following" +
+	" Markdown blog post. Summarize the key topic concisely while making it engaging for search engines" +
+	" and readers. Ensure it is clear, relevant, and encourages clicks. Here is the blog post:"
 
 var (
 	ErrFrontMatterHasDescription     = errors.New("front matter already has a description")
@@ -64,29 +68,14 @@ func suggestDescription(ctx context.Context, markdownFilePath string) (*string, 
 		return nil, errors.New("OPENAI_API_KEY environment variable is not set")
 	}
 
-	client := openai.NewClient(option.WithAPIKey(openAIKey))
-	param := openai.ChatCompletionNewParams{
-		Messages: []openai.ChatCompletionMessageParamUnion{
-			openai.SystemMessage(
-				"Extract a compelling and SEO-friendly meta description (under 160 characters) from the following" +
-					" Markdown blog post. Summarize the key topic concisely while making it engaging for search engines" +
-					" and readers. Ensure it is clear, relevant, and encourages clicks. Here is the blog post:",
-			),
-			openai.UserMessage(string(markdownData)),
-		},
-		Seed:  openai.Int(1),
-		Model: openai.ChatModelGPT4o,
-	}
-
-	completion, err := client.Chat.Completions.New(ctx, param)
+	suggestion, err := llmhelper.CallLLM(ctx, openai.ChatModelGPT4o, _seoDescriptionSystemPrompt, string(markdownData))
 	if err != nil {
-		return nil, fmt.Errorf("error getting completion: %w", err)
+		return nil, fmt.Errorf("error calling LLM: %w", err)
 	}
 
-	suggestion := completion.Choices[0].Message.Content
 	log.Debug().
 		Str("markdownFilePath", markdownFilePath).
-		Str("description", suggestion).
+		Str("description", *suggestion).
 		Msg("Description")
-	return &suggestion, nil
+	return suggestion, nil
 }
