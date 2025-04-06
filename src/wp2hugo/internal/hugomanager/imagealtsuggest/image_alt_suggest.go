@@ -2,12 +2,23 @@ package imagealtsuggest
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"github.com/adrg/frontmatter"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/llmhelper"
+	"github.com/openai/openai-go"
 	"github.com/rs/zerolog/log"
+	"github.com/samber/lo"
 	"os"
+	"path"
 	"regexp"
+	"strings"
 )
+
+const _imageAltSystemPrompt = `
+Provide a functional, objective description of the image in under 30 words.
+Focus on the main object, its action, and context. Transcribe important text if present,
+avoiding quotation marks. Do not start with "The image.`
 
 // Parse "{{< figure align=aligncenter width=768 src="Cedar_trail_waterfall-768x1024.jpg" alt="" >}}"
 // and extract "src" and "alt" attributes using regular expressions
@@ -33,10 +44,10 @@ func (r Result) NumImageUpdated() int {
 	return r.numImageUpdated
 }
 
-func ProcessFile(ctx context.Context, path string, updateInline bool) (*Result, error) {
-	f, err := os.OpenFile(path, os.O_RDONLY, 0o644)
+func ProcessFile(ctx context.Context, mdFilePath string, updateInline bool) (*Result, error) {
+	f, err := os.OpenFile(mdFilePath, os.O_RDONLY, 0o644)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open file %s: %w", path, err)
+		return nil, fmt.Errorf("failed to open file %s: %w", mdFilePath, err)
 	}
 
 	defer func() {
@@ -44,58 +55,122 @@ func ProcessFile(ctx context.Context, path string, updateInline bool) (*Result, 
 	}()
 	var frontmatterData any
 	log.Debug().
-		Str("path", path).
+		Str("mdFilePath", mdFilePath).
 		Msg("Parsing frontmatter")
-	mdBody, err := frontmatter.Parse(f, &frontmatterData)
+	mdBodyBytes, err := frontmatter.Parse(f, &frontmatterData)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse frontmatter in file %s: %w", path, err)
+		return nil, fmt.Errorf("failed to parse frontmatter in file %s: %w", mdFilePath, err)
 	}
-	if len(mdBody) == 0 {
+	if len(mdBodyBytes) == 0 {
 		log.Debug().
-			Str("path", path).
+			Str("mdFilePath", mdFilePath).
 			Msg("No markdown body found, skipping")
 		return &Result{}, nil
 	}
 
+	mdBody := string(mdBodyBytes)
 	numImageWithAlt := 0
 	numImageMissingAlt := 0
+	numUpdated := 0
 	// Check if the body contains images
 	// and if they are missing alt text
-	figureMatches := _figureShortCodeRegEx.FindAll(mdBody, -1)
+	figureMatches := _figureShortCodeRegEx.FindAllString(mdBody, -1)
 	for _, figureMatch := range figureMatches {
-		srcMatches := _figureShortCodeSrcRegEx.FindAllSubmatch(figureMatch, -1)
+		srcMatches := _figureShortCodeSrcRegEx.FindAllStringSubmatch(figureMatch, -1)
 		if len(srcMatches) == 0 {
 			log.Warn().
-				Str("path", path).
+				Str("mdFilePath", mdFilePath).
 				Msg("No src attribute found in figure shortcode")
 			continue
 		}
-		src := string(srcMatches[0][1])
+		src := srcMatches[0][1]
 		if len(src) == 0 {
 			log.Warn().
-				Str("path", path).
+				Str("mdFilePath", mdFilePath).
 				Msg("Empty src attribute found in figure shortcode")
 			continue
 		}
 
-		altMatches := _figureShortCodeAltRegEx.FindAllSubmatch(figureMatch, -1)
+		altMatches := _figureShortCodeAltRegEx.FindAllStringSubmatch(figureMatch, -1)
 		if len(altMatches) == 0 || len(altMatches[0]) < 2 || string(altMatches[0][1]) == "" {
 			log.Warn().
-				Str("path", path).
+				Str("mdFilePath", mdFilePath).
 				Msg("No alt attribute found in figure shortcode")
 			numImageMissingAlt++
+			if updateInline {
+				// This assumes that the images are in the same directory as the markdown file
+				// Which is not historically true.
+				// The images could be in the static directory or could be in another
+				// directory being referenced via URL of the post that owns that image.
+				// For now, this does not handle those two cases.
+				imgFilePath := path.Join(path.Dir(mdFilePath), src)
+
+				// Get 100 characters before and after the "figureMatch"
+				// to get the context of the image
+				start := strings.Index(mdBody, figureMatch)
+				start = max(0, start-100)
+				end := strings.Index(mdBody, figureMatch) + len(figureMatch) + 100
+				end = min(len(mdBody), end)
+				contextForImage := mdBody[start:end]
+				alt, err := getAlt(ctx, imgFilePath, contextForImage)
+				if err != nil {
+					return nil, fmt.Errorf("failed to get alt text for image %s: %w", src, err)
+				}
+				figureMatchWithAlt := _figureShortCodeAltRegEx.ReplaceAllString(
+					figureMatch, fmt.Sprintf(`alt="%s"`, *alt))
+				if err := replaceInFile(mdFilePath, figureMatch, figureMatchWithAlt); err != nil {
+					return nil, fmt.Errorf("failed to update file %s: %w", mdFilePath, err)
+				}
+				numUpdated++
+			}
 		} else {
 			numImageWithAlt++
 		}
 	}
 
-	if updateInline {
-		return nil, fmt.Errorf("inline update not supported yet")
-	}
-
 	return &Result{
 		numImageWithAlt:    numImageWithAlt,
 		numImageMissingAlt: numImageMissingAlt,
-		numImageUpdated:    0,
+		numImageUpdated:    numUpdated,
 	}, nil
+}
+
+func replaceInFile(filePath string, old string, new string) error {
+	fileData, err := os.ReadFile(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to read file %s: %w", filePath, err)
+	}
+
+	modifiedBody := strings.Replace(string(fileData), old, new, 1)
+	if err := os.WriteFile(filePath, []byte(modifiedBody), 0o644); err != nil {
+		return fmt.Errorf("failed to write updated file %s: %w", filePath, err)
+	}
+
+	return nil
+}
+
+func getAlt(ctx context.Context, imgPath string, textAroundImage string) (*string, error) {
+	data, err := os.ReadFile(imgPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read image file %s: %w", imgPath, err)
+	}
+
+	// Convert to base64
+	base64Data := base64.URLEncoding.EncodeToString(data)
+	// Call the LLM to get the alt text for the image
+	// This is a placeholder implementation
+	// Replace this with actual LLM call
+	altText, err := llmhelper.CallLLM(ctx, openai.ChatModelGPT4o, _imageAltSystemPrompt,
+		"text around image: "+textAroundImage+"\n image: "+base64Data)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get alt text for image %s: %w", imgPath, err)
+	}
+
+	altText = lo.ToPtr(strings.ReplaceAll(*altText, `"`, `'`))
+	altText = lo.ToPtr(strings.ReplaceAll(*altText, "  ", " "))
+	log.Debug().
+		Str("imgPath", imgPath).
+		Str("altText", *altText).
+		Msg("Generated alt text for image")
+	return altText, nil
 }
