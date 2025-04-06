@@ -157,11 +157,18 @@ func getAlt(ctx context.Context, imgPath string, textAroundImage string) (*strin
 
 	// Convert to base64
 	base64Data := base64.URLEncoding.EncodeToString(data)
-	// Call the LLM to get the alt text for the image
-	// This is a placeholder implementation
-	// Replace this with actual LLM call
-	altText, err := llmhelper.CallLLM(ctx, openai.ChatModelGPT4o, _imageAltSystemPrompt,
-		"text around image: "+textAroundImage+"\n image: "+base64Data)
+	var altText *string
+
+	if len(base64Data) > 100_000 && strings.TrimSpace(textAroundImage) != "" {
+		log.Warn().
+			Str("imgPath", imgPath).
+			Msg("Generating alt using the text around the image instead")
+		altText, err = llmhelper.CallLLM(ctx, openai.ChatModelGPT4o, _imageAltSystemPrompt,
+			"text around image: "+textAroundImage)
+	} else {
+		altText, err = llmhelper.CallLLM(ctx, openai.ChatModelGPT4o, _imageAltSystemPrompt,
+			"text around image: "+textAroundImage+"\n image: "+base64Data)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to get alt text for image %s: %w", imgPath, err)
 	}
