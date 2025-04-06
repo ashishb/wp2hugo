@@ -13,7 +13,7 @@ var _limit int
 
 func init() {
 	_suggestDescriptionCmd.Flags().StringVarP(&_hugoDir, "hugo-dir", "", "", "Hugo base directory or any directory containing Hugo markdown files")
-	_suggestDescriptionCmd.Flags().BoolVarP(&_updateInline, "in-place", "", false, "Add description in markdown files")
+	_suggestDescriptionCmd.Flags().BoolVarP(&_updateInline, "inline", "i", false, "Add description in markdown files")
 	_suggestDescriptionCmd.PersistentFlags().BoolVarP(&_colorLogOutput, "color-log-output", "", true,
 		"enable colored log output, set false to structured JSON log")
 	_suggestDescriptionCmd.Flags().IntVarP(&_limit, "limit", "n", 10, "Limit the number of files to update")
