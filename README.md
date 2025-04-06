@@ -161,6 +161,7 @@ Available Commands:
   move-post-next-to-attachments         Move markdown blog posts with attachments to a single directory
   sitesummary                           Print site stats (e.g. number of posts, number of drafts etc.)
   suggest-description                   Suggests description for all the posts that are missing a description in the front matter
+  suggest-image-alt                     Suggests image alt text for all the images if missing
   suggest-url                           Suggests URLs for all the pending/future posts that are missing a URL
   version                               Print the version number of HugoManager
 

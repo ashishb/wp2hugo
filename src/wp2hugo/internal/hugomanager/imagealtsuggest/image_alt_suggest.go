@@ -116,8 +116,10 @@ func ProcessFile(ctx context.Context, mdFilePath string, updateInline bool) (*Re
 				if err != nil {
 					return nil, fmt.Errorf("failed to get alt text for image %s: %w", src, err)
 				}
-				figureMatchWithAlt := _figureShortCodeAltRegEx.ReplaceAllString(
-					figureMatch, fmt.Sprintf(`alt="%s"`, *alt))
+				figureMatchWithAlt := _figureShortCodeAltRegEx.ReplaceAllString(figureMatch, fmt.Sprintf(`alt="%s"`, *alt))
+				if figureMatchWithAlt == figureMatch { // figureMatch is missing "alt" attribute altogether
+					figureMatchWithAlt = strings.Replace(figureMatch, ">", fmt.Sprintf(` alt="%s">`, *alt), 1)
+				}
 				if err := replaceInFile(mdFilePath, figureMatch, figureMatchWithAlt); err != nil {
 					return nil, fmt.Errorf("failed to update file %s: %w", mdFilePath, err)
 				}
