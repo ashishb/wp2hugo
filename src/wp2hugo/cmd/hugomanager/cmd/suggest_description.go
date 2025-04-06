@@ -26,7 +26,7 @@ var _suggestDescriptionCmd = &cobra.Command{
 	Short: "Suggests description for all the posts that are missing a description in the front matter",
 	Long:  "Suggests description for all the posts that are missing a description in the front matter",
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Info().Msg("URL Suggest command called")
+		log.Info().Msg("suggest-description command called")
 		logger.ConfigureLogging(_colorLogOutput)
 
 		numHasDescription := 0
