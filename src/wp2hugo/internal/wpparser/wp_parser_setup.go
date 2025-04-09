@@ -547,11 +547,19 @@ func getCustomPostInfo(item *rss.Item) (*CustomPostInfo, error) {
 func getCategories(inputs []ext.Extension) []CategoryInfo {
 	categories := make([]CategoryInfo, 0, len(inputs))
 	for _, input := range inputs {
+		categoryName := ""
+		if len(input.Children["cat_name"]) > 0 {
+			categoryName = NormalizeCategoryName(input.Children["cat_name"][0].Value)
+		}
+		categoryNiceName := ""
+		if len(input.Children["category_nicename"]) > 0 {
+			categoryNiceName = input.Children["category_nicename"][0].Value
+		}
 		category := CategoryInfo{
 			// ID is usually int but for safety let's assume string
 			ID:       input.Children["term_id"][0].Value,
-			Name:     NormalizeCategoryName(input.Children["cat_name"][0].Value),
-			NiceName: input.Children["category_nicename"][0].Value,
+			Name:     categoryName,
+			NiceName: categoryNiceName,
 			// We are ignoring "category_parent" for now as I have never used it
 		}
 		log.Trace().Msgf("category: %+v", category)
