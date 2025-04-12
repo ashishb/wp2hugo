@@ -1,10 +1,12 @@
 package frontmatterhelper
 
 import (
+	"fmt"
 	"github.com/adrg/frontmatter"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
 	"os"
+	"strings"
 )
 
 func UpdateFrontmatter(path string, key string, value string) error {
@@ -13,7 +15,28 @@ func UpdateFrontmatter(path string, key string, value string) error {
 		return err
 	}
 
-	fullmatter[key] = value
+	if !strings.Contains(key, ".") {
+		fullmatter[key] = value
+	} else if strings.Count(key, ".") == 1 {
+		key0 := strings.Split(key, ".")[0]
+		key1 := strings.Split(key, ".")[1]
+		if fullmatter[key0] == nil {
+			log.Fatal().
+				Str("key", key).
+				Msg("Key is nil")
+		}
+		map1, ok := fullmatter[key0].(map[any]any)
+		if !ok {
+			log.Fatal().
+				Str("key", key).
+				Any("map1", map1).
+				Any("fullmatter", fullmatter).
+				Msg("Key is not a map")
+		}
+		map1[key1] = value
+	} else {
+		return fmt.Errorf("key '%s' is not supported", key)
+	}
 	file, err := os.OpenFile(path, os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		return err
