@@ -1,11 +1,14 @@
 package imagealtsuggest
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"fmt"
 	"github.com/adrg/frontmatter"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/frontmatterhelper"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/llmhelper"
+	"github.com/disintegration/imaging"
 	"github.com/openai/openai-go"
 	"github.com/rs/zerolog/log"
 	"github.com/samber/lo"
@@ -45,6 +48,82 @@ func (r Result) NumImageUpdated() int {
 }
 
 func ProcessFile(ctx context.Context, mdFilePath string, updateInline bool) (*Result, error) {
+	r1, err1 := processImagesInFrontmatter(ctx, mdFilePath, updateInline)
+	if err1 != nil {
+		return nil, err1
+	}
+
+	r2, err2 := processImagesInMarkdown(ctx, mdFilePath, updateInline)
+	if err2 != nil {
+		return nil, err2
+	}
+
+	return &Result{
+		numImageWithAlt:    r1.numImageWithAlt + r2.numImageWithAlt,
+		numImageMissingAlt: r1.numImageMissingAlt + r2.numImageMissingAlt,
+		numImageUpdated:    r1.numImageUpdated + r2.numImageUpdated,
+	}, nil
+}
+
+// Only "cover" image is handle for now
+func processImagesInFrontmatter(ctx context.Context, mdFilePath string, updateInline bool) (*Result, error) {
+	fm, err := frontmatterhelper.GetSelectiveFrontMatter(mdFilePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get frontmatter for file %s: %w", mdFilePath, err)
+	}
+
+	if fm.Cover.Image == "" {
+		log.Debug().
+			Str("mdFilePath", mdFilePath).
+			Msg("No cover image found, skipping")
+		return &Result{
+			numImageWithAlt:    0,
+			numImageMissingAlt: 0,
+			numImageUpdated:    0,
+		}, nil
+	}
+
+	if fm.Cover.Alt != nil && strings.TrimSpace(*fm.Cover.Alt) != "" {
+		log.Debug().
+			Str("mdFilePath", mdFilePath).
+			Msg("Cover image already has alt text, skipping")
+		return &Result{
+			numImageWithAlt:    1,
+			numImageMissingAlt: 0,
+			numImageUpdated:    0,
+		}, nil
+	}
+
+	log.Warn().
+		Str("mdFilePath", mdFilePath).
+		Msg("No alt text found for cover image")
+	if updateInline {
+		// Use the title as the cover image alt text
+		alt := fm.Title
+		alt = strings.TrimPrefix(alt, "Summary:")
+		alt = strings.TrimPrefix(alt, "Book Summary:")
+		alt = strings.TrimPrefix(alt, "Book summary:")
+		alt = strings.TrimPrefix(alt, "Book Summary -")
+		alt = strings.TrimSpace(alt)
+		alt = strings.Trim(alt, `"`)
+		alt = strings.Trim(alt, `'`)
+		if err := frontmatterhelper.UpdateFrontmatter(mdFilePath, "cover.alt", alt); err != nil {
+			return nil, fmt.Errorf("failed to write frontmatter for file %s: %w", mdFilePath, err)
+		}
+		return &Result{
+			numImageWithAlt:    0,
+			numImageMissingAlt: 1,
+			numImageUpdated:    1,
+		}, nil
+	}
+	return &Result{
+		numImageWithAlt:    0,
+		numImageMissingAlt: 1,
+		numImageUpdated:    0,
+	}, nil
+}
+
+func processImagesInMarkdown(ctx context.Context, mdFilePath string, updateInline bool) (*Result, error) {
 	f, err := os.OpenFile(mdFilePath, os.O_RDONLY, 0o644)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file %s: %w", mdFilePath, err)
@@ -152,13 +231,22 @@ func replaceInFile(filePath string, old string, new string) error {
 }
 
 func getAlt(ctx context.Context, imgPath string, textAroundImage string) (*string, error) {
-	data, err := os.ReadFile(imgPath)
+	// Read images in smaller size
+	srcImage, err := imaging.Open(imgPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read image file %s: %w", imgPath, err)
+		return nil, fmt.Errorf("failed to open image file '%s': %w", imgPath, err)
+	}
+
+	w := bytes.NewBuffer([]byte{})
+	dstImage128 := imaging.Resize(srcImage, 128, 128, imaging.Lanczos)
+
+	// Convert to PNG
+	if err := imaging.Encode(w, dstImage128, imaging.PNG); err != nil {
+		return nil, fmt.Errorf("failed to encode image file '%s': %w", imgPath, err)
 	}
 
 	// Convert to base64
-	base64Data := base64.URLEncoding.EncodeToString(data)
+	base64Data := base64.URLEncoding.EncodeToString(w.Bytes())
 	var altText *string
 
 	if len(base64Data) > 100_000 && strings.TrimSpace(textAroundImage) != "" {
