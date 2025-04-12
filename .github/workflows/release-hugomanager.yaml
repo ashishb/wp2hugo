@@ -46,7 +46,7 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.2
         with:
           custom_tag: "${{ steps.read-version.outputs.version }}-hugomanager"
-          tag_prefix: ""  # To prevent extra "v" in the prefix
+          tag_prefix: ""
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
   releaseBinary:
@@ -68,7 +68,9 @@ jobs:
           persist-credentials: true
 
       - name: Fetch git tags
-        run: git fetch --force --tags origin 'refs/tags/*-hugomanager:refs/tags/*-hugomanager'
+        run: |
+          git fetch --force --tags origin 'refs/tags/*-hugomanager:refs/tags/*-hugomanager'
+          git tag -d $(git tag -l | grep -v 'hugomanager$')
 
       - uses: actions/setup-go@v5
         with:
