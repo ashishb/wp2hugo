@@ -67,7 +67,7 @@ jobs:
           persist-credentials: true
 
       - name: Fetch git tags
-        run: git fetch --force --tags
+        run: git fetch --force --tags origin 'refs/tags/*-hugomanager:refs/tags/*-hugomanager'
 
       - uses: actions/setup-go@v5
         with:
