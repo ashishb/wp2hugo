@@ -1,5 +1,5 @@
 ---
-name: Create release
+name: Create wp2hugo release
 
 on:
   push:
