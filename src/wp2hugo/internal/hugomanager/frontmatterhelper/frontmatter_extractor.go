@@ -21,18 +21,18 @@ type FrontMatter struct {
 	Draft      string   `yaml:"draft"`
 	Tags       []string `yaml:"tag"`
 
-	Layout      *string  `yaml:"layout"`      // Used by Hugo papermod theme
-	Placeholder *string  `yaml:"placeholder"` // Used by Hugo papermod theme for search page
-	GUID        string   `yaml:"guid"`        // For RSS and Atom feeds
+	Layout      *string  `yaml:"layout,omitempty"`      // Used by Hugo papermod theme
+	Placeholder *string  `yaml:"placeholder,omitempty"` // Used by Hugo papermod theme for search page
+	GUID        string   `yaml:"guid"`                  // For RSS and Atom feeds
 	Author      []string `yaml:"author"`
 	Cover       struct {
-		Alt     *string `yaml:"alt"`
-		Caption *string `yaml:"caption"`
-		Image   string  `yaml:"image"`
+		Alt     *string `yaml:"alt,omitempty"`
+		Caption *string `yaml:"caption,omitempty"`
+		Image   string  `yaml:"image,omitempty"`
 	} `yaml:"cover"`
-	Aliases []string `yaml:"aliases"` // For redirects
-	ShowToc *bool    `yaml:"ShowToc"` // For Hugo papermod theme
-	TocOpen *bool    `yaml:"TocOpen"` // For Hugo papermod theme
+	Aliases []string `yaml:"aliases"`           // For redirects
+	ShowToc *bool    `yaml:"ShowToc,omitempty"` // For Hugo papermod theme
+	TocOpen *bool    `yaml:"TocOpen,omitempty"` // For Hugo papermod theme
 }
 
 func (f *FrontMatter) IsDraft() bool {
