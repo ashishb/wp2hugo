@@ -6,11 +6,13 @@ on:  # yamllint disable-line rule:truthy
     branches: [main, master]
     paths:
       - ".goreleaser.yaml"
+      - ".hugomanager.goreleaser.yaml"
       - ".github/workflows/check-goreleaser-config.yaml"
   pull_request:
     branches: [main, master]
     paths:
       - ".goreleaser.yaml"
+      - ".hugomanager.goreleaser.yaml"
       - ".github/workflows/check-goreleaser-config.yaml"
 
 concurrency:
@@ -45,8 +47,14 @@ jobs:
           version: latest
           install-only: true
 
-      - name: Check Go Releaser config is valid
+      - name: Check wp2hugo release config is valid
         run: goreleaser check --config .goreleaser.yaml
 
-      - name: Build (not release) binaries with Go Releaser
-        run: goreleaser build --snapshot --clean
+      - name: Check hugomanager release config is valid
+        run: goreleaser check --config .hugomanager.goreleaser.yaml
+
+      - name: Build (not release) wp2hugo with Go Releaser
+        run: goreleaser build --config .goreleaser.yaml --snapshot --clean
+
+      - name: Build (not release) hugomanager with Go Releaser
+        run: goreleaser build --config .hugomanager.goreleaser.yaml --snapshot --clean
