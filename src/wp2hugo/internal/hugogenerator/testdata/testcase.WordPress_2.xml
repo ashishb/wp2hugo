@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0"
+  xmlns:excerpt="http://wordpress.org/export/1.2/excerpt/"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:wp="http://wordpress.org/export/1.2/"
+  >
+
+<channel>
+  <title>Example</title>
+  <link>https://example.net</link>
+  <description>Example</description>
+  <pubDate>Mon, 01 Jul 2024 08:49:45 +0000</pubDate>
+  <language>de-DE</language>
+  <wp:wxr_version>1.2</wp:wxr_version>
+  <wp:base_site_url>https://example.net</wp:base_site_url>
+  <wp:base_blog_url>https://example.net</wp:base_blog_url>
+
+  <wp:author><wp:author_id>1</wp:author_id><wp:author_login><![CDATA[jdoe]]></wp:author_login><wp:author_email><![CDATA[john@example.net]]></wp:author_email><wp:author_display_name><![CDATA[jdoe]]></wp:author_display_name><wp:author_first_name><![CDATA[John]]></wp:author_first_name><wp:author_last_name><![CDATA[Doe]]></wp:author_last_name></wp:author>
+
+
+  <generator>https://wordpress.org/?v=6.5.5</generator>
+
+  <item>
+    <title><![CDATA[Kurz angemerkt zum Tag der Schachtels��tze]]></title>
+    <link>https://tuxproject.de/blog/2025/02/kurz-angemerkt-zum-tag-der-schachtelsaetze/</link>
+    <pubDate>Tue, 25 Feb 2025 22:40:35 +0000</pubDate>
+    <dc:creator><![CDATA[myusername]]></dc:creator>
+    <guid isPermaLink="false">https://tuxproject.de/blog/?p=22887</guid>
+    <description></description>
+    <content:encoded><![CDATA[Noch wenige Minuten lang, wie <a href="https://noemix.wordpress.com/2025/02/25/25-februar-hypotaxisches-ii/">n��mix</a> zu meiner Erbauung zu meiner Kenntnis gab, begeht <em>(wie so'n Kleiderschrank)</em> man in Deutschland den <a href="https://www.kleiner-kalender.de/event/tag-der-schachtelsaetze/105503.html">Tag der Schachtels��tze</a>, was mich ein wenig ��rgert, denn nicht nur bin ich aus gesundheitlichen und ��hnlichen Gr��nden momentan einfach nicht geistig wach genug, um ihn mit einem derjenigen Schachtels��tze, f��r die die eigens hierf��r eingerichtete Quasikategorie ���Kurz angemerkt���, deren Sinn es ist, dass mir manche Themen nicht mehr als einen Satz wert sind, aber ich mich infolge innerer Rebellion weigere, die L��nge dieses einen Satzes unn��tig zu verknappen, mittlerweile wohl bekannt <em>(ber��chtigt?)</em> ist, angemessen zu w��rdigen, zumal ich die Teilnahme an kalendarisch empfohlenen Festlichkeiten bekannterma��en sowieso f��r albern halte - und nichts l��ge mir ferner als Albernheit -, sondern ��berdies h��tte ich auch andernfalls den Beitrag viel zu sp��t gesehen, um auch bei vollem Bewusstsein angemessen zu reagieren; also mach' ich das auch nicht.]]></content:encoded>
+    <excerpt:encoded><![CDATA[]]></excerpt:encoded>
+    <wp:post_id>22887</wp:post_id>
+    <wp:post_date><![CDATA[2025-02-25 23:40:35]]></wp:post_date>
+    <wp:post_date_gmt><![CDATA[2025-02-25 22:40:35]]></wp:post_date_gmt>
+    <wp:post_modified><![CDATA[2025-02-25 23:40:35]]></wp:post_modified>
+    <wp:post_modified_gmt><![CDATA[2025-02-25 22:40:35]]></wp:post_modified_gmt>
+    <wp:comment_status><![CDATA[open]]></wp:comment_status>
+    <wp:ping_status><![CDATA[open]]></wp:ping_status>
+    <wp:post_name><![CDATA[kurz-angemerkt-zum-tag-der-schachtelsaetze]]></wp:post_name>
+    <wp:status><![CDATA[publish]]></wp:status>
+    <wp:post_parent>0</wp:post_parent>
+    <wp:menu_order>0</wp:menu_order>
+    <wp:post_type><![CDATA[post]]></wp:post_type>
+    <wp:post_password><![CDATA[]]></wp:post_password>
+    <wp:is_sticky>0</wp:is_sticky>
+    <category domain="category" nicename="netzfundstucke"><![CDATA[Netzfundst��cke]]></category>
+    <wp:postmeta>
+      <wp:meta_key><![CDATA[worthy_counter]]></wp:meta_key>
+      <wp:meta_value><![CDATA[981]]></wp:meta_value>
+    </wp:postmeta>
+    <wp:postmeta>
+      <wp:meta_key><![CDATA[_edit_last]]></wp:meta_key>
+      <wp:meta_value><![CDATA[1]]></wp:meta_value>
+    </wp:postmeta>
+    <wp:postmeta>
+      <wp:meta_key><![CDATA[_share_on_mastodon]]></wp:meta_key>
+      <wp:meta_value><![CDATA[1]]></wp:meta_value>
+    </wp:postmeta>
+    <wp:postmeta>
+      <wp:meta_key><![CDATA[_spost_short_title]]></wp:meta_key>
+      <wp:meta_value><![CDATA[]]></wp:meta_value>
+    </wp:postmeta>
+    <wp:postmeta>
+      <wp:meta_key><![CDATA[activitypub_status]]></wp:meta_key>
+      <wp:meta_value><![CDATA[federated]]></wp:meta_value>
+    </wp:postmeta>
+    <wp:postmeta>
+      <wp:meta_key><![CDATA[_share_on_mastodon_url]]></wp:meta_key>
+      <wp:meta_value><![CDATA[https://social.tchncs.de/@hirnfick_20/114066930889913473]]></wp:meta_value>
+    </wp:postmeta>
+    <wp:postmeta>
+      <wp:meta_key><![CDATA[_stcr@_basic.master@gmx.de]]></wp:meta_key>
+      <wp:meta_value><![CDATA[2025-03-02 00:06:12|Y]]></wp:meta_value>
+    </wp:postmeta>
+    <wp:comment>
+      <wp:comment_id>86913</wp:comment_id>
+      <wp:comment_author><![CDATA[ilwedritsch]]></wp:comment_author>
+      <wp:comment_author_email><![CDATA[(email address redacted)]]></wp:comment_author_email>
+      <wp:comment_author_url></wp:comment_author_url>
+      <wp:comment_author_IP><![CDATA[0]]></wp:comment_author_IP>
+      <wp:comment_date><![CDATA[2025-02-26 07:08:14]]></wp:comment_date>
+      <wp:comment_date_gmt><![CDATA[2025-02-26 06:08:14]]></wp:comment_date_gmt>
+      <wp:comment_content><![CDATA[Den Tag w��rdevoll gew��rdigt, das gef��llt mir. Danke<img alt='https://tuxproject.de/blog/wp-content/plugins/wp-monalisa/icons/smiley_emoticons_biggrin2.gif' src='https://tuxproject.de/blog/wp-content/plugins/wp-monalisa/icons/smiley_emoticons_biggrin2.gif' />]]></wp:comment_content>
+      <wp:comment_approved><![CDATA[1]]></wp:comment_approved>
+      <wp:comment_type><![CDATA[comment]]></wp:comment_type>
+      <wp:comment_parent>0</wp:comment_parent>
+      <wp:comment_user_id>0</wp:comment_user_id>
+    </wp:comment>
+  </item>
+
+</channel>
+</rss>
