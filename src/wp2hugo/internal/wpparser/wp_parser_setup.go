@@ -520,6 +520,11 @@ func getPageInfo(item *rss.Item) (*PageInfo, error) {
 	return &page, nil
 }
 
+// testing only
+func GetPostInfo(item *rss.Item) (*PostInfo, error) {
+	return getPostInfo(item)
+}
+
 func getPostInfo(item *rss.Item) (*PostInfo, error) {
 	fields, err := getCommonFields(item)
 	if err != nil {
