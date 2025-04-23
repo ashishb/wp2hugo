@@ -198,7 +198,7 @@ func getMetadata(provider ImageURLProvider, pageURL url.URL, author string, titl
 	}
 	if featuredImageID != nil {
 		if imageInfo, err := provider.GetImageInfo(*featuredImageID); err != nil {
-			log.Fatal().
+			log.Warn().
 				Err(err).
 				Str("imageID", *featuredImageID).
 				Msg("Image URL not found")
