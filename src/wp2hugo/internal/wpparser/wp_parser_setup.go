@@ -177,6 +177,10 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 				return nil, err
 			} else if attachment != nil && hasValidAuthor(authors, attachment.CommonFields) {
 				attachments = append(attachments, *attachment)
+				log.Debug().
+					Str("postID", attachment.PostID).
+					Str("postType", wpPostType).
+					Msg("processing attachment")
 			}
 		case "page":
 			if page, err := getPageInfo(item); err != nil && !errors.Is(err, errTrashItem) {
@@ -188,6 +192,10 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 						Msg("Empty content")
 				}
 				pages = append(pages, *page)
+				log.Debug().
+					Str("postID", page.PostID).
+					Str("postType", wpPostType).
+					Msg("processing page")
 			}
 		case "post":
 			if post, err := getPostInfo(item); err != nil && !errors.Is(err, errTrashItem) {
@@ -198,6 +206,10 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 						Str("title", post.Title).
 						Msg("Empty content")
 				}
+				log.Debug().
+					Str("postID", post.PostID).
+					Str("postType", wpPostType).
+					Msg("processing Post")
 				posts = append(posts, *post)
 			}
 		case "avada_portfolio", "avada_faq":
@@ -215,6 +227,10 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 						Msg("Empty content")
 				}
 				customPosts = append(customPosts, *customPost)
+				log.Debug().
+					Str("postID", customPost.PostID).
+					Str("postType", wpPostType).
+					Msg("processing post")
 			}
 		case "wp_navigation":
 			var err error
@@ -229,7 +245,7 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 			log.Info().
 				Str("title", item.Title).
 				Str("type", wpPostType).
-				Msg("Ignoring item")
+				Msg("Ignoring item due to unknown type")
 		}
 	}
 
