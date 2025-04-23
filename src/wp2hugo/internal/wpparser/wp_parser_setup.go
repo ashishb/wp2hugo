@@ -19,8 +19,9 @@ import (
 )
 
 var (
-	errTrashItem         = fmt.Errorf("item is in trash")
-	nonAlphanumericRegex = regexp.MustCompile(`[^a-zA-Z0-9]+`)
+	errTrashItem = fmt.Errorf("item is in trash")
+	// \p{L} matches any letter from any language while \w matches only ASCII letters
+	nonAlphanumericRegex = regexp.MustCompile(`[^\p{L}]+`)
 )
 
 type Parser struct {
@@ -101,6 +102,14 @@ func (i CommonFields) Filename() string {
 	if len(str1) > 1 {
 		str1 = strings.TrimSuffix(str1, "-")
 	}
+
+	if i.Title != str1 {
+		log.Debug().
+			Str("input", i.Title).
+			Str("output", str1).
+			Msg("Filename generated")
+	}
+
 	return str1
 }
 
