@@ -13,7 +13,7 @@ require (
 	github.com/mmcdole/gofeed v1.3.0
 	github.com/openai/openai-go v0.1.0-beta.10
 	github.com/rs/zerolog v1.34.0
-	github.com/samber/lo v1.49.1
+	github.com/samber/lo v1.50.0
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/text v0.24.0
 	gopkg.in/yaml.v3 v3.0.1
