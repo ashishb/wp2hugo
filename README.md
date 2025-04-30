@@ -152,9 +152,6 @@ A tool for managing Hugo sites e.g. adding URL suggestions, generating site stat
 Usage:
   hugomanager [command]
 
-Usage:
-  hugomanager [command]
-
 Available Commands:
   completion                            Generate the autocompletion script for the specified shell
   help                                  Help about any command
@@ -172,8 +169,6 @@ Flags:
   -h, --help             help for hugomanager
   -l, --license string   name of license for the project
       --viper            use Viper for configuration (default true)
-
-Use "hugomanager [command] --help" for more information about a command.
 ```
 
 Note:
