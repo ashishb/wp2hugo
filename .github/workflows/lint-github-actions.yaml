@@ -65,6 +65,7 @@ jobs:
           persist-credentials: false
           sparse-checkout: |
             .github/workflows
+            .github/zizmor_config.yaml
           sparse-checkout-cone-mode: false
 
       - name: Setup Rust
@@ -74,4 +75,4 @@ jobs:
         run: cargo install zizmor
 
       - name: Run zizmor on GitHub Actions
-        run: zizmor .github/workflows/*
+        run: zizmor --config .github/zizmor_config.yaml .github/workflows/*
