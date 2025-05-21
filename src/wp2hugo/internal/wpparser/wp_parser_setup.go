@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"regexp"
 	"strings"
 	"time"
@@ -258,9 +259,14 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 		}
 	}
 
+	linkURL, err := url.Parse(feed.Link)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing feed link: %w", err)
+	}
+
 	websiteInfo := WebsiteInfo{
 		title:       feed.Title,
-		link:        feed.Link,
+		link:        linkURL,
 		Description: feed.Description,
 		pubDate:     feed.PubDateParsed,
 		language:    feed.Language,

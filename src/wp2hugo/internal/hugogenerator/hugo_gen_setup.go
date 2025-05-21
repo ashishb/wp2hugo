@@ -121,7 +121,7 @@ func (g Generator) Generate() error {
 	}
 
 	if g.downloadMedia {
-		url1 := info.Link() + "/favicon.ico"
+		url1 := info.Link().Scheme + "://" + info.Link().Host + "/favicon.ico"
 		media, err := g.mediaProvider.GetReader(url1)
 		if err != nil {
 			log.Error().
@@ -458,9 +458,9 @@ func (g Generator) downloadPageMedia(outputMediaDirPath string, p *hugopage.Page
 		Str("page", pageURL.String()).
 		Int("links", len(links)).
 		Msgf("Embedded media links")
-
 	log.Debug().
 		Int("links", len(links)).
+		Strs("links", links).
 		Msg("Downloading media files")
 
 	hostname := pageURL.Host
@@ -487,8 +487,12 @@ func (g Generator) downloadPageMedia(outputMediaDirPath string, p *hugopage.Page
 		}
 		outputFilePath := fmt.Sprintf("%s/static/%s", outputMediaDirPath,
 			strings.TrimSuffix(strings.Split(link, "?")[0], "/"))
-		if !strings.HasPrefix(link, "http") {
-			link = g.wpInfo.Link() + link
+		if strings.HasPrefix(link, "http") {
+			// do nothing in case of absolute URL
+		} else if strings.HasPrefix(link, "/") { // relative URL to the base of the website
+			link = g.wpInfo.Link().Scheme + "://" + g.wpInfo.Link().Host + link
+		} else {
+			link = strings.TrimSuffix(g.wpInfo.Link().String(), "/") + "/" + link
 		}
 
 		// Try full-res images first.

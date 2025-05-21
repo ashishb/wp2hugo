@@ -7,7 +7,6 @@ import (
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
-	"net/url"
 	"os"
 	"path"
 	"strings"
@@ -92,7 +91,7 @@ func updateConfig(siteDir string, info wpparser.WebsiteInfo) error {
 	}
 	// Ref: https://adityatelange.github.io/hugo-PaperMod/posts/papermod/papermod-faq/
 	config.Title = info.Title()
-	config.BaseURL = info.Link()
+	config.BaseURL = info.Link().String()
 	config.LanguageCode = info.Language()
 	config.Taxonomies.Category = hugopage.CategoryName
 	config.Taxonomies.Tag = hugopage.TagName
@@ -139,17 +138,12 @@ func addNavigationLinks(info wpparser.WebsiteInfo, config *_HugoConfig) error {
 	if len(info.NavigationLinks()) <= 0 {
 		return nil
 	}
-	hostName, err := url.Parse(info.Link())
-	if err != nil {
-		return fmt.Errorf("error parsing host name: %s", err)
-	}
 
 	searchPresent := false
-
 	for i, link := range info.NavigationLinks() {
 		config.Menu.Main = append(config.Menu.Main, _HugoNavMenu{
 			Name:   link.Title,
-			URL:    hugopage.ReplaceAbsoluteLinksWithRelative(hostName.Host, link.URL),
+			URL:    hugopage.ReplaceAbsoluteLinksWithRelative(info.Link().Host, link.URL),
 			Weight: i + 1,
 		})
 		if strings.HasSuffix(link.URL, "/search/") {

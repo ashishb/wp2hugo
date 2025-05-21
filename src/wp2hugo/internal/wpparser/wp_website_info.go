@@ -1,12 +1,13 @@
 package wpparser
 
 import (
+	"net/url"
 	"time"
 )
 
 type WebsiteInfo struct {
 	title       string
-	link        string
+	link        *url.URL
 	Description string
 
 	pubDate  *time.Time
@@ -49,7 +50,7 @@ func (w *WebsiteInfo) Title() string {
 	return w.title
 }
 
-func (w *WebsiteInfo) Link() string {
+func (w *WebsiteInfo) Link() *url.URL {
 	return w.link
 }
 

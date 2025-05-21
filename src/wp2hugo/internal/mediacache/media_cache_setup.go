@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strings"
 )
 
 type MediaCache struct {
@@ -20,6 +21,12 @@ func New(cacheDirPath string) MediaCache {
 }
 
 func (m MediaCache) GetReader(url string) (io.Reader, error) {
+	if strings.Contains(url, "blog/blog") {
+		log.Panic().
+			Str("url", url).
+			Msg("media url contains blog/blog")
+	}
+
 	if err := utils.CreateDirIfNotExist(m.cacheDirPath); err != nil {
 		return nil, fmt.Errorf("error creating cache directory: %s", err)
 	}
@@ -27,10 +34,15 @@ func (m MediaCache) GetReader(url string) (io.Reader, error) {
 	key := getSHA256(url)
 	file, err := os.OpenFile(path.Join(m.cacheDirPath, key), os.O_RDONLY, 0644)
 	if err == nil {
-		log.Info().Msgf("media %s found in cache", url)
+		log.Info().
+			Str("url", url).
+			Msg("media found in cache")
 		return file, nil
 	}
-	log.Info().Msgf("media %s will be fetched", url)
+
+	log.Info().
+		Str("url", url).
+		Msg("media will be fetched")
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching media %s: %s", url, err)
