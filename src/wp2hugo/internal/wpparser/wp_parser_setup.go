@@ -19,6 +19,8 @@ import (
 	"golang.org/x/text/unicode/norm"
 )
 
+const _filenameSizeLimit = 200
+
 var (
 	errTrashItem = fmt.Errorf("item is in trash")
 	// \p{L} matches any letter from any language while \w matches only ASCII letters
@@ -102,6 +104,13 @@ func (i CommonFields) Filename() string {
 	}
 	if len(str1) > 1 {
 		str1 = strings.TrimSuffix(str1, "-")
+	}
+
+	if len(str1) > _filenameSizeLimit {
+		log.Warn().
+			Str("title", i.Title).
+			Msgf("Filename is too long, truncating to %d characters", _filenameSizeLimit)
+		str1 = str1[:_filenameSizeLimit]
 	}
 
 	if i.Title != str1 {
