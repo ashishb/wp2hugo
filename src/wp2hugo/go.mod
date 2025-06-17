@@ -11,7 +11,7 @@ require (
 	github.com/gomarkdown/markdown v0.0.0-20241105142532-d03b89096d81
 	github.com/mergestat/timediff v0.0.3
 	github.com/mmcdole/gofeed v1.3.0
-	github.com/openai/openai-go v1.2.0
+	github.com/openai/openai-go v1.5.0
 	github.com/rs/zerolog v1.34.0
 	github.com/samber/lo v1.50.0
 	github.com/stretchr/testify v1.10.0
