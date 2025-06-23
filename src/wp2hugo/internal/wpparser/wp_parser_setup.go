@@ -72,6 +72,7 @@ type CommonFields struct {
 
 	Categories      []string
 	Tags            []string
+	CustomMetaData  []CustomMetaDatum
 	Footnotes       []Footnote
 	FeaturedImageID *string // Optional WordPress attachment ID of the featured image
 
@@ -191,6 +192,10 @@ type AttachmentInfo struct {
 type Footnote struct {
 	ID      string `json:"id"`
 	Content string `json:"content"`
+}
+type CustomMetaDatum struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }
 
 // Parse parses the XML data and returns the WebsiteInfo.
@@ -404,6 +409,27 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 				Msgf("Unknown category: %s", category)
 		}
 	}
+
+	pageCustomMetaData := make([]CustomMetaDatum, 0, len(item.Extensions["wp"]["postmeta"]))
+	// Extract custom metadata from <wp:postmeta>
+	if len(item.Extensions["wp"]["postmeta"]) > 0 {
+		log.Info().Str("found postmeta", item.Link)
+		for _, meta := range item.Extensions["wp"]["postmeta"] {
+			var key, value string
+			if len(meta.Children["meta_key"]) > 0 {
+				key = meta.Children["meta_key"][0].Value
+			}
+			if len(meta.Children["meta_value"]) > 0 {
+				value = meta.Children["meta_value"][0].Value
+			}
+			if key != "" {
+				pageCustomMetaData = append(pageCustomMetaData, CustomMetaDatum{
+					Key:   key,
+					Value: value,
+				})
+			}
+		}
+	}
 	if len(item.Links) > 1 {
 		log.Warn().
 			Str("link", item.Link).
@@ -472,6 +498,7 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 		Description:     item.Description,
 		Content:         item.Content,
 		Categories:      pageCategories,
+		CustomMetaData:  pageCustomMetaData,
 		Tags:            pageTags,
 		Footnotes:       getFootnotes(item),
 		FeaturedImageID: getThumbnailID(item),

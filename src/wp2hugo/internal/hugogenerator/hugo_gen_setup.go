@@ -449,7 +449,7 @@ func (g Generator) newHugoPage(pageURL *url.URL, page wpparser.CommonFields) (*h
 		*pageURL, page.Author, page.Title, page.PublishDate,
 		page.PublishStatus == wpparser.PublishStatusDraft || page.PublishStatus == wpparser.PublishStatusPending,
 		page.Categories, page.Tags, g.wpInfo.GetAttachmentsForPost(page.PostID),
-		page.Footnotes, page.Content, page.GUID, page.FeaturedImageID, page.PostFormat)
+		page.Footnotes, page.Content, page.GUID, page.FeaturedImageID, page.PostFormat, page.CustomMetaData)
 }
 
 func (g Generator) downloadPageMedia(outputMediaDirPath string, p *hugopage.Page, pageURL *url.URL) error {

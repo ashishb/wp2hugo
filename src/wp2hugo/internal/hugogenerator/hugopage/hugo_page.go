@@ -18,6 +18,7 @@ import (
 	"github.com/go-enry/go-enry/v2"
 	"github.com/mmcdole/gofeed/rss"
 	"github.com/rs/zerolog/log"
+	"github.com/leeqvip/gophp"
 )
 
 const (
@@ -73,9 +74,10 @@ var _hugoParallaxBlurLinks = regexp.MustCompile(`{{< parallaxblur.*?src="([^\"]+
 func NewPage(provider ImageURLProvider, pageURL url.URL, author string, title string, publishDate *time.Time,
 	isDraft bool, categories []string, tags []string, attachments []wpparser.AttachmentInfo,
 	footnotes []wpparser.Footnote,
-	htmlContent string, guid *rss.GUID, featuredImageID *string, postFormat *string) (*Page, error) {
+	htmlContent string, guid *rss.GUID, featuredImageID *string, postFormat *string,
+	customMetaData []wpparser.CustomMetaDatum) (*Page, error) {
 	metadata, err := getMetadata(provider, pageURL, author, title, publishDate, isDraft, categories, tags, guid,
-		featuredImageID, postFormat)
+		featuredImageID, postFormat, customMetaData)
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +176,7 @@ func getMarkdownLinks(regex *regexp.Regexp, markdown string) []string {
 
 func getMetadata(provider ImageURLProvider, pageURL url.URL, author string, title string, publishDate *time.Time,
 	isDraft bool, categories []string, tags []string, guid *rss.GUID, featuredImageID *string,
-	postFormat *string) (map[string]any, error) {
+	postFormat *string, customMetaData []wpparser.CustomMetaDatum) (map[string]any, error) {
 	metadata := make(map[string]any)
 	metadata["url"] = pageURL.Path // Relative URL
 	metadata["author"] = author
@@ -192,6 +194,37 @@ func getMetadata(provider ImageURLProvider, pageURL url.URL, author string, titl
 	if len(tags) > 0 {
 		sort.Strings(tags)
 		metadata[TagName] = slices.Compact(tags)
+	}
+	for _, metadatum := range(customMetaData) {
+		if(strings.HasPrefix(metadatum.Value, "a:")) {
+			// Try to decode PHP serialized array
+			/* Ex:
+					a:2:{s:10:"taxonomies";s:32:"f166db6f0df2a3df4c2715a8bcc30eec";s:15:"postmeta_fields";s:32:"0edff5c6e53a54394f90f7b5a8fc1e76";}
+			*/
+			phpArray, err := gophp.Unserialize([]byte(metadatum.Value))
+			if err != nil {
+				log.Error().Err(err).Str("array", metadatum.Value).Msg("Failed to decode PHP serialized array")
+				metadata[metadatum.Key] = metadatum.Value
+			} else {
+				// Merge the PHP key: value "array" into Go dictionnary
+				// This should result in nested dict fields in the YAML header
+				if arr, ok := phpArray.(map[interface{}]interface{}); ok {
+					converted := make(map[string]interface{})
+					for k, v := range arr {
+						keyStr := fmt.Sprintf("%v", k)
+						converted[keyStr] = v
+					}
+					metadata[metadatum.Key] = converted
+				} else {
+					metadata[metadatum.Key] = phpArray
+				}
+			}
+		} else {
+			// Simple string
+			metadata[metadatum.Key] = metadatum.Value
+		}
+		// Note: if any step of the PHP array reading/decoding failed,
+		// now we got the original serialized array
 	}
 	if guid != nil {
 		metadata["guid"] = guid.Value
