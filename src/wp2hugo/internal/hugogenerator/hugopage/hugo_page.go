@@ -75,9 +75,9 @@ func NewPage(provider ImageURLProvider, pageURL url.URL, author string, title st
 	isDraft bool, categories []string, tags []string, attachments []wpparser.AttachmentInfo,
 	footnotes []wpparser.Footnote,
 	htmlContent string, guid *rss.GUID, featuredImageID *string, postFormat *string,
-	customMetaData []wpparser.CustomMetaDatum) (*Page, error) {
+	customMetaData []wpparser.CustomMetaDatum, taxinomies []wpparser.TaxonomyInfo) (*Page, error) {
 	metadata, err := getMetadata(provider, pageURL, author, title, publishDate, isDraft, categories, tags, guid,
-		featuredImageID, postFormat, customMetaData)
+		featuredImageID, postFormat, customMetaData, taxinomies)
 	if err != nil {
 		return nil, err
 	}
@@ -176,7 +176,8 @@ func getMarkdownLinks(regex *regexp.Regexp, markdown string) []string {
 
 func getMetadata(provider ImageURLProvider, pageURL url.URL, author string, title string, publishDate *time.Time,
 	isDraft bool, categories []string, tags []string, guid *rss.GUID, featuredImageID *string,
-	postFormat *string, customMetaData []wpparser.CustomMetaDatum) (map[string]any, error) {
+	postFormat *string, customMetaData []wpparser.CustomMetaDatum, taxinomies []wpparser.TaxonomyInfo) (map[string]any, error) {
+
 	metadata := make(map[string]any)
 	metadata["url"] = pageURL.Path // Relative URL
 	metadata["author"] = author
@@ -195,6 +196,20 @@ func getMetadata(provider ImageURLProvider, pageURL url.URL, author string, titl
 		sort.Strings(tags)
 		metadata[TagName] = slices.Compact(tags)
 	}
+
+	for _, taxinomy := range taxinomies {
+		if existing, ok := metadata[taxinomy.Taxonomy]; ok {
+			switch v := existing.(type) {
+			case []string:
+				metadata[taxinomy.Taxonomy] = append(v, taxinomy.Name)
+			default:
+				metadata[taxinomy.Taxonomy] = []string{taxinomy.Name}
+			}
+		} else {
+			metadata[taxinomy.Taxonomy] = []string{taxinomy.Name}
+		}
+	}
+
 	for _, metadatum := range(customMetaData) {
 		if(strings.HasPrefix(metadatum.Value, "a:")) {
 			// Try to decode PHP serialized array
@@ -226,9 +241,11 @@ func getMetadata(provider ImageURLProvider, pageURL url.URL, author string, titl
 		// Note: if any step of the PHP array reading/decoding failed,
 		// now we got the original serialized array
 	}
+
 	if guid != nil {
 		metadata["guid"] = guid.Value
 	}
+
 	if featuredImageID != nil {
 		if imageInfo, err := provider.GetImageInfo(*featuredImageID); err != nil {
 			log.Warn().
