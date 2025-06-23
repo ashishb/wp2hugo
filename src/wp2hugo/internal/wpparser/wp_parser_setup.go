@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 	"unicode"
+	"strconv"
 
 	ext "github.com/mmcdole/gofeed/extensions"
 	"github.com/mmcdole/gofeed/rss"
