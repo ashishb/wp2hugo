@@ -117,6 +117,8 @@ $ make build_prod
 1. [x] Use draft date as a fallback date for draft posts
 1. [x] Featured images - export featured image associations with pages and posts correctly
 1. [x] WordPress [Post formats](https://developer.wordpress.org/advanced-administration/wordpress/post-formats/)
+1. [x] WordPress [Custom fields](https://wordpress.org/documentation/article/assign-custom-fields/), including PHP array deserialization for fields using them
+1. [x] WordPress [Custom taxonomies](https://learn.wordpress.org/lesson/custom-taxonomies/)
 
 ### Migrate media attachments
 
