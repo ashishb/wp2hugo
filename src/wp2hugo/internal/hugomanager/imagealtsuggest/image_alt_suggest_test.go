@@ -1,8 +1,9 @@
 package imagealtsuggest
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func Test_regex1(t *testing.T) {
