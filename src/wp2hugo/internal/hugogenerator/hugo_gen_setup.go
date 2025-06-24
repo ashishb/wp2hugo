@@ -396,7 +396,13 @@ func getFilePath(pagesDir string, baseFileName string) string {
 				Str("baseFileName", baseFileName).
 				Str("pagePath", pagePath).
 				Msg("File already exists, trying another filename")
-			pagePath = path.Join(pagesDir, fmt.Sprintf("%s-%d.md", baseFileName, i))
+
+			fileNameParts := strings.SplitN(baseFileName, ".", 2)
+			if len(fileNameParts) == 2 {
+				pagePath = path.Join(pagesDir, fmt.Sprintf("%s-%d.%s.md", fileNameParts[0], i, fileNameParts[1]))
+			} else {
+				pagePath = path.Join(pagesDir, fmt.Sprintf("%s-%d.md", baseFileName, i))
+			}
 			if !utils.FileExists(pagePath) {
 				break
 			}
