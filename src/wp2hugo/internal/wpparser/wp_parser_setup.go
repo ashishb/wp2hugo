@@ -116,7 +116,6 @@ func titleToFilename(title string) string {
 	return str1
 }
 
-
 func findSlugAndParams(parts []string) (string, string) {
 	file := ""
 	params := ""
