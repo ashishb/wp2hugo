@@ -7,10 +7,10 @@ import (
 	"io"
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 	"unicode"
-	"strconv"
 
 	ext "github.com/mmcdole/gofeed/extensions"
 	"github.com/mmcdole/gofeed/rss"
@@ -511,7 +511,7 @@ func getCommonFields(item *rss.Item, taxonomies []TaxonomyInfo) (*CommonFields, 
 		Categories:      pageCategories,
 		CustomMetaData:  pageCustomMetaData,
 		Tags:            pageTags,
-		Taxonomies: 		 pageTaxonomies,
+		Taxonomies:      pageTaxonomies,
 		Footnotes:       getFootnotes(item),
 		FeaturedImageID: getThumbnailID(item),
 
@@ -761,11 +761,11 @@ func getTaxonomies(inputs []ext.Extension) []TaxonomyInfo {
 		}
 		taxonomies = append(taxonomies,
 			TaxonomyInfo{
-				ID: id,
+				ID:       id,
 				Taxonomy: taxonomy,
-				Parent: parent,
-				Name: name,
-				Slug: slug,
+				Parent:   parent,
+				Name:     name,
+				Slug:     slug,
 			})
 	}
 	return taxonomies

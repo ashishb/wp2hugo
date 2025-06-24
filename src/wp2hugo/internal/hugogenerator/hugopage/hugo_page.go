@@ -16,9 +16,9 @@ import (
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
 	"github.com/go-enry/go-enry/v2"
+	"github.com/leeqvip/gophp"
 	"github.com/mmcdole/gofeed/rss"
 	"github.com/rs/zerolog/log"
-	"github.com/leeqvip/gophp"
 )
 
 const (
@@ -210,11 +210,11 @@ func getMetadata(provider ImageURLProvider, pageURL url.URL, author string, titl
 		}
 	}
 
-	for _, metadatum := range(customMetaData) {
-		if(strings.HasPrefix(metadatum.Value, "a:")) {
+	for _, metadatum := range customMetaData {
+		if strings.HasPrefix(metadatum.Value, "a:") {
 			// Try to decode PHP serialized array
 			/* Ex:
-					a:2:{s:10:"taxonomies";s:32:"f166db6f0df2a3df4c2715a8bcc30eec";s:15:"postmeta_fields";s:32:"0edff5c6e53a54394f90f7b5a8fc1e76";}
+			a:2:{s:10:"taxonomies";s:32:"f166db6f0df2a3df4c2715a8bcc30eec";s:15:"postmeta_fields";s:32:"0edff5c6e53a54394f90f7b5a8fc1e76";}
 			*/
 			phpArray, err := gophp.Unserialize([]byte(metadatum.Value))
 			if err != nil {

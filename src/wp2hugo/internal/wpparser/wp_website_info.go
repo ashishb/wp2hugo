@@ -55,7 +55,6 @@ type TaxonomyInfo struct {
 	Name     string
 }
 
-
 func (w *WebsiteInfo) Title() string {
 	return w.title
 }

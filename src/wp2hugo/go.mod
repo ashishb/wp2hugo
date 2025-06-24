@@ -10,6 +10,7 @@ require (
 	github.com/go-enry/go-enry/v2 v2.9.2
 	github.com/gomarkdown/markdown v0.0.0-20241105142532-d03b89096d81
 	github.com/mergestat/timediff v0.0.4
+	github.com/leeqvip/gophp v1.2.0
 	github.com/mmcdole/gofeed v1.3.0
 	github.com/openai/openai-go v1.5.0
 	github.com/rs/zerolog v1.34.0
@@ -22,7 +23,6 @@ require (
 require (
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
-	github.com/leeqvip/gophp v1.2.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/sagikazarmark/locafero v0.7.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
