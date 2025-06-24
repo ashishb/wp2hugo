@@ -9,7 +9,7 @@ require (
 	github.com/disintegration/imaging v1.6.2
 	github.com/go-enry/go-enry/v2 v2.9.2
 	github.com/gomarkdown/markdown v0.0.0-20241105142532-d03b89096d81
-	github.com/mergestat/timediff v0.0.3
+	github.com/mergestat/timediff v0.0.4
 	github.com/mmcdole/gofeed v1.3.0
 	github.com/openai/openai-go v1.5.0
 	github.com/rs/zerolog v1.34.0
