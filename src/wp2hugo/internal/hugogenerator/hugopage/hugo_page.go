@@ -75,7 +75,7 @@ var _hugoParallaxBlurLinks = regexp.MustCompile(`{{< parallaxblur.*?src="([^\"]+
 func NewPage(provider ImageURLProvider, pageURL url.URL, author string, title string, publishDate *time.Time,
 	isDraft bool, categories []string, tags []string, attachments []wpparser.AttachmentInfo,
 	footnotes []wpparser.Footnote,
-	htmlContent string, guid *rss.GUID, featuredImageID *string, postFormat *string,
+	htmlContent string, guid *rss.GUID, featuredImageID int, postFormat *string,
 	customMetaData []wpparser.CustomMetaDatum, taxinomies []wpparser.TaxonomyInfo) (*Page, error) {
 	metadata, err := getMetadata(provider, pageURL, author, title, publishDate, isDraft, categories, tags, guid,
 		featuredImageID, postFormat, customMetaData, taxinomies)
@@ -192,7 +192,7 @@ func unserialiazePHParray(array string) interface{} {
 }
 
 func getMetadata(provider ImageURLProvider, pageURL url.URL, author string, title string, publishDate *time.Time,
-	isDraft bool, categories []string, tags []string, guid *rss.GUID, featuredImageID *string,
+	isDraft bool, categories []string, tags []string, guid *rss.GUID, featuredImageID int,
 	postFormat *string, customMetaData []wpparser.CustomMetaDatum, taxinomies []wpparser.TaxonomyInfo) (map[string]any, error) {
 
 	metadata := make(map[string]any)
@@ -249,11 +249,11 @@ func getMetadata(provider ImageURLProvider, pageURL url.URL, author string, titl
 		metadata["guid"] = guid.Value
 	}
 
-	if featuredImageID != nil {
-		if imageInfo, err := provider.GetImageInfo(*featuredImageID); err != nil {
+	if featuredImageID != 0 {
+		if imageInfo, err := provider.GetImageInfo(featuredImageID); err != nil {
 			log.Warn().
 				Err(err).
-				Str("imageID", *featuredImageID).
+				Int("imageID", featuredImageID).
 				Msg("Image URL not found")
 		} else {
 			coverInfo := make(map[string]string)
@@ -316,7 +316,7 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 		msg := ""
 		return &msg, nil
 	}
-	attachmentIDs := make([]string, 0, len(page.attachments))
+	attachmentIDs := make([]int, 0, len(page.attachments))
 	for _, attachment := range page.attachments {
 		attachmentIDs = append(attachmentIDs, attachment.PostID)
 	}

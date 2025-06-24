@@ -51,7 +51,7 @@ const (
 )
 
 type CommonFields struct {
-	PostID string
+	PostID int
 
 	Author           string
 	Title            string
@@ -63,9 +63,9 @@ type CommonFields struct {
 	PostFormat       *string
 	PostType         *string // Custom post types, typically FAQ, portfolio, etc.
 
-	// 1. Only attachments seem to have this
+	// 1. Attachments and hierachical pages have this
 	// 2. "0" seems to be reserved for no parent, we replace that with nil
-	PostParentID *string // ID of the parent post, if any
+	PostParentID int // ID of the parent post, if any
 
 	Description string // how to use this?
 	Content     string
@@ -76,7 +76,7 @@ type CommonFields struct {
 	Taxonomies      []TaxonomyInfo
 	CustomMetaData  []CustomMetaDatum
 	Footnotes       []Footnote
-	FeaturedImageID *string // Optional WordPress attachment ID of the featured image
+	FeaturedImageID int // Optional WordPress attachment ID of the featured image
 
 	attachmentURL *string
 }
@@ -251,7 +251,7 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 			} else if attachment != nil && hasValidAuthor(authors, attachment.CommonFields) {
 				attachments = append(attachments, *attachment)
 				log.Debug().
-					Str("postID", attachment.PostID).
+					Int("postID", attachment.PostID).
 					Str("postType", wpPostType).
 					Msg("processing attachment")
 			}
@@ -266,7 +266,7 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 				}
 				pages = append(pages, *page)
 				log.Debug().
-					Str("postID", page.PostID).
+					Int("postID", page.PostID).
 					Str("postType", wpPostType).
 					Msg("processing page")
 			}
@@ -280,12 +280,12 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 						Msg("Empty content")
 				}
 				log.Debug().
-					Str("postID", post.PostID).
+					Int("postID", post.PostID).
 					Str("postType", wpPostType).
 					Msg("processing Post")
 				posts = append(posts, *post)
 			}
-		case "avada_portfolio", "avada_faq":
+		case "avada_portfolio", "avada_faq", "product", "product_variation":
 			// TODO: let user pass custom post types from CLI arguments ?
 			// Most custom post types are more or less regular posts handled with special templates
 			// and having their own archives, aside from blog posts.
@@ -301,7 +301,7 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 				}
 				customPosts = append(customPosts, *customPost)
 				log.Debug().
-					Str("postID", customPost.PostID).
+					Int("postID", customPost.PostID).
 					Str("postType", wpPostType).
 					Msg("processing post")
 			}
@@ -482,19 +482,27 @@ func getCommonFields(item *rss.Item, taxonomies []TaxonomyInfo) (*CommonFields, 
 		postType = &item.Extensions["wp"]["post_type"][0].Value
 	}
 
-	var postParent *string
-	tmp := item.Extensions["wp"]["post_parent"][0].Value
-	if tmp != "0" && tmp != "" {
-		log.Debug().
-			Str("link", item.Link).
-			Str("post_parent", tmp).
-			Msg("Item has a parent")
-		postParent = &tmp
+	postIDStr := item.Extensions["wp"]["post_id"][0].Value
+	postID, err := strconv.Atoi(postIDStr)
+	if err != nil {
+		log.Warn().
+			Str("post_id", postIDStr).
+			Msg("Error converting post_id to int")
+		postID = 0
+	}
+
+	postParentIDStr := item.Extensions["wp"]["post_parent"][0].Value
+	postParentID, err := strconv.Atoi(postParentIDStr)
+	if err != nil {
+		log.Warn().
+			Str("post_parent", postParentIDStr).
+			Msg("Error converting post_parent to int")
+		postParentID = 0
 	}
 
 	return &CommonFields{
 		Author:           getAuthor(item),
-		PostID:           item.Extensions["wp"]["post_id"][0].Value,
+		PostID:           postID,
 		Title:            item.Title,
 		Link:             item.Link,
 		PublishDate:      pubDate,
@@ -503,7 +511,7 @@ func getCommonFields(item *rss.Item, taxonomies []TaxonomyInfo) (*CommonFields, 
 		PublishStatus:    PublishStatus(publishStatus),
 		PostFormat:       postFormat,
 		PostType:         postType,
-		PostParentID:     postParent,
+		PostParentID:     postParentID,
 		Excerpt:          item.Extensions["excerpt"]["encoded"][0].Value,
 
 		Description:     item.Description,
@@ -823,9 +831,9 @@ func getFootnotes(item *rss.Item) []Footnote {
 	return footnotes
 }
 
-func getThumbnailID(item *rss.Item) *string {
+func getThumbnailID(item *rss.Item) int {
 	if len(item.Extensions["wp"]["postmeta"]) == 0 {
-		return nil
+		return 0
 	}
 
 	for _, meta := range item.Extensions["wp"]["postmeta"] {
@@ -838,13 +846,20 @@ func getThumbnailID(item *rss.Item) *string {
 		if meta.Children["meta_key"][0].Value != "_thumbnail_id" {
 			continue
 		}
-		thumbnailID := meta.Children["meta_value"][0].Value
+		thumbnailIDStr := meta.Children["meta_value"][0].Value
+		thumbnailID, err := strconv.Atoi(thumbnailIDStr)
+		if err != nil {
+			log.Warn().
+				Str("thumbnailID", thumbnailIDStr).
+				Msg("Error converting thumbnailID to int")
+			return 0
+		}
 		log.Debug().
-			Str("thumbnailID", thumbnailID).
+			Int("thumbnailID", thumbnailID).
 			Msg("Thumbnail ID")
-		return &thumbnailID
+		return thumbnailID
 	}
-	return nil
+	return 0
 }
 
 func parseTime(utcTime string) (*time.Time, error) {
