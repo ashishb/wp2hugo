@@ -81,6 +81,7 @@ $ make build_prod
 1. [x] Migrate [Avada](https://themeforest.net/item/avada-responsive-multipurpose-theme/2833226) custom post types (FAQ, Portfolios)
 1. [x] Set the WordPress homepage correctly
 1. [x] Create WordPress author page
+1. [x] Migrate [WPML](https://wpml.org/) translated posts, pages and custom post types that use the [URL parameter scheme](https://wpml.org/documentation/getting-started-guide/language-setup/language-url-options/#language-name-added-as-a-parameter) (switch the WPML language URL option prior to exporting your blog content to XML).
 
 ### Migrate permalinks
 

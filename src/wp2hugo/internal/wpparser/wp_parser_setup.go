@@ -78,15 +78,15 @@ type CommonFields struct {
 	attachmentURL *string
 }
 
-func (i CommonFields) Filename() string {
-	str1 := strings.ToLower(i.Title)
+func titleToFilename(title string) string {
+	str1 := strings.ToLower(title)
 
 	// Remove diacritics
 	t := transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
 	result, _, err := transform.String(t, str1)
 	if err != nil {
 		log.Warn().
-			Str("title", i.Title).
+			Str("title", title).
 			Err(err).
 			Msgf("error removing diacritics from title")
 	} else {
@@ -108,19 +108,65 @@ func (i CommonFields) Filename() string {
 
 	if len(str1) > _filenameSizeLimit {
 		log.Warn().
-			Str("title", i.Title).
+			Str("title", title).
 			Msgf("Filename is too long, truncating to %d characters", _filenameSizeLimit)
 		str1 = str1[:_filenameSizeLimit]
 	}
 
-	if i.Title != str1 {
-		log.Debug().
-			Str("input", i.Title).
-			Str("output", str1).
-			Msg("Filename generated")
+	return str1
+}
+
+
+func findSlugAndParams(parts []string) (string, string) {
+	file := ""
+	params := ""
+
+	// The last chunk is either our page slug or URL parameters
+	for i := len(parts) - 1; i > 2; i-- {
+		part := parts[i]
+		if !strings.HasPrefix(part, "?") && part != "" {
+			file = part
+			if i+1 < len(parts) && strings.HasPrefix(parts[i+1], "?") {
+				params = parts[i+1]
+			}
+			return file, params
+		}
 	}
 
-	return str1
+	return file, params
+}
+
+func (i CommonFields) Filename() string {
+	// Split canonical link path on /
+	parts := strings.Split(strings.TrimRight(i.Link, "/"), "/")
+	file, params := findSlugAndParams(parts)
+
+	// WooCommerce products have ugly links like https://website.com/?post_type=product&p=666
+	// Nothing meaningful there, but their GUID uses pretty links. Retry then.
+	if len(file) == 0 {
+		parts = strings.Split(strings.TrimRight(i.GUID.Value, "/"), "/")
+		file, params = findSlugAndParams(parts)
+	}
+
+	// Remove leading and trailing "-"
+	if len(file) > 1 {
+		file = strings.TrimPrefix(file, "-")
+	}
+	if len(file) > 1 {
+		file = strings.TrimSuffix(file, "-")
+	}
+	if len(file) == 0 {
+		file = titleToFilename((i.Title))
+	}
+
+	// Append language suffix if found in link
+	langRegex := regexp.MustCompile(`(?:\?|&)lang=([^&$]+)`)
+	langMatch := langRegex.FindStringSubmatch(params)
+	if len(langMatch) > 1 {
+		file = fmt.Sprintf("%s.%s", file, langMatch[1])
+	}
+
+	return file
 }
 
 func (i CommonFields) GetAttachmentURL() *string {
