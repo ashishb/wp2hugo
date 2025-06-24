@@ -1,9 +1,10 @@
 package hugopage
 
 import (
-	"github.com/stretchr/testify/assert"
 	"net/url"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 const (
@@ -61,11 +62,11 @@ func TestManualLineBreaks(t *testing.T) {
 
 func testMarkdownExtractor(t *testing.T, htmlInput string, markdownOutput string) {
 	url1, err := url.Parse("https://example.com")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	page, err := NewPage(nil, *url1, "author", "Title", nil, false, nil, nil, nil, nil, htmlInput, nil, nil, nil)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	md, err := page.getMarkdown(nil, htmlInput, nil)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, markdownOutput, *md)
 }
 
@@ -78,7 +79,7 @@ func TestPreTagExtractor2(t *testing.T) {
 	assert.True(t, _preTagExtractor2.MatchString(example3))
 
 	result3 := _preTagExtractor2.FindAllStringSubmatch(example3, -1)
-	assert.Equal(t, 1, len(result3))
-	assert.Equal(t, 3, len(result3[0]))
+	assert.Len(t, result3, 1)
+	assert.Len(t, result3[0], 3)
 	assert.Equal(t, "sh", result3[0][1])
 }

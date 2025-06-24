@@ -1,12 +1,12 @@
 package hugogenerator
 
 import (
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
-	"github.com/stretchr/testify/require"
 	"net/url"
 	"os"
-	"strings"
 	"testing"
+
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFootnote(t *testing.T) {
@@ -16,10 +16,10 @@ func TestFootnote(t *testing.T) {
 	parser := wpparser.NewParser()
 	websiteInfo, err := parser.Parse(file, nil)
 	require.NoError(t, err)
-	require.Equal(t, 1, len(websiteInfo.Posts()))
+	require.Len(t, websiteInfo.Posts(), 1)
 
 	post := websiteInfo.Posts()[0]
-	require.Equal(t, 1, len(post.Footnotes))
+	require.Len(t, post.Footnotes, 1)
 	require.NotNil(t, post.CommonFields)
 
 	generator := NewGenerator("/tmp", "", nil, false, false, true, *websiteInfo)
@@ -29,7 +29,7 @@ func TestFootnote(t *testing.T) {
 	require.NoError(t, err)
 
 	const expectedMarkdown = "Some text[^1] with a footnote\n\n[^1]: Here we are: the footnote."
-	require.True(t, strings.Contains(hugoPage.Markdown(), expectedMarkdown))
+	require.Contains(t, hugoPage.Markdown(), expectedMarkdown)
 }
 
 func TestPost(t *testing.T) {
@@ -39,12 +39,12 @@ func TestPost(t *testing.T) {
 	parser := wpparser.NewParser()
 	websiteInfo, err := parser.Parse(file, nil)
 	require.NoError(t, err)
-	require.Equal(t, 1, len(websiteInfo.Posts()))
+	require.Len(t, websiteInfo.Posts(), 1)
 
 	post := websiteInfo.Posts()[0]
 	require.NotNil(t, post.CommonFields)
 	require.Equal(t, "Kurz angemerkt zum Tag der Schachtels��tze", post.Title)
-	require.Equal(t, 1, len(post.Categories))
+	require.Len(t, post.Categories, 1)
 	require.Equal(t, "netzfundst��cke", post.Categories[0])
-	require.Equal(t, 1276, len(post.Content))
+	require.Len(t, post.Content, 1276)
 }

@@ -46,7 +46,7 @@ func TestBlockGistDoesNotBreakImgParsing(t *testing.T) {
 	converter := getMarkdownConverter()
 	result, err := converter.ConvertString(_textWithImgFigureBlock)
 	assert.NoError(t, err)
-	assert.Equal(t, result, `[![](https://blog.gripdev.xyz/wp-content/uploads/2024/03/image.png?w=1024)](https://blog.gripdev.xyz/wp-content/uploads/2024/03/image.png)`)
+	assert.Equal(t, `[![](https://blog.gripdev.xyz/wp-content/uploads/2024/03/image.png?w=1024)](https://blog.gripdev.xyz/wp-content/uploads/2024/03/image.png)`, result)
 }
 
 func TestMarkdownGist(t *testing.T) {
