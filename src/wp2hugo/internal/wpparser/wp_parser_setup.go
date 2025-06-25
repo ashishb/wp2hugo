@@ -731,42 +731,46 @@ func getTags(inputs []ext.Extension) []TagInfo {
 	return categories
 }
 
+func buildTaxonomy(term ext.Extension) TaxonomyInfo {
+	var id int
+	var taxonomy, slug, parent, name string
+
+	if len(term.Children["term_slug"]) > 0 {
+		slug = term.Children["term_slug"][0].Value
+	}
+	if len(term.Children["term_name"]) > 0 {
+		name = term.Children["term_name"][0].Value
+	}
+	if len(term.Children["term_parent"]) > 0 {
+		parent = term.Children["term_parent"][0].Value
+	}
+	if len(term.Children["term_taxonomy"]) > 0 {
+		taxonomy = term.Children["term_taxonomy"][0].Value
+	}
+	if len(term.Children["term_id"]) > 0 {
+		idStr := term.Children["term_id"][0].Value
+		var err error
+		id, err = strconv.Atoi(idStr)
+		if err != nil {
+			log.Warn().
+				Str("term_id", idStr).
+				Msg("Error converting term_id to int")
+			id = 0
+		}
+	}
+ 	return TaxonomyInfo{
+		ID:       id,
+		Taxonomy: taxonomy,
+		Parent:   parent,
+		Name:     name,
+		Slug:     slug,
+	}
+}
+
 func getTaxonomies(inputs []ext.Extension) []TaxonomyInfo {
 	taxonomies := make([]TaxonomyInfo, 0, len(inputs))
 	for _, term := range inputs {
-		var id int
-		var taxonomy, slug, parent, name string
-		if len(term.Children["term_slug"]) > 0 {
-			slug = term.Children["term_slug"][0].Value
-		}
-		if len(term.Children["term_name"]) > 0 {
-			name = term.Children["term_name"][0].Value
-		}
-		if len(term.Children["term_parent"]) > 0 {
-			parent = term.Children["term_parent"][0].Value
-		}
-		if len(term.Children["term_taxonomy"]) > 0 {
-			taxonomy = term.Children["term_taxonomy"][0].Value
-		}
-		if len(term.Children["term_id"]) > 0 {
-			idStr := term.Children["term_id"][0].Value
-			var err error
-			id, err = strconv.Atoi(idStr)
-			if err != nil {
-				log.Warn().
-					Str("term_id", idStr).
-					Msg("Error converting term_id to int")
-				id = 0
-			}
-		}
-		taxonomies = append(taxonomies,
-			TaxonomyInfo{
-				ID:       id,
-				Taxonomy: taxonomy,
-				Parent:   parent,
-				Name:     name,
-				Slug:     slug,
-			})
+		taxonomies = append(taxonomies, buildTaxonomy(term))
 	}
 	return taxonomies
 }
