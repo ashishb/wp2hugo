@@ -50,7 +50,7 @@ func waitOrStop(resp *http.Response) (int, bool) {
 		stop = true
 
 	default:
-		
+
 	}
 
 	return timeout, stop
