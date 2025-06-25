@@ -260,7 +260,7 @@ func (g Generator) downloadAllMedia(outputDirPath string, info wpparser.WebsiteI
 	prefixes = append(prefixes, fmt.Sprintf("http://www.%s", hostname))
 
 	for _, attachment := range info.Attachments() {
-		if err := downloadMedia(*attachment.GetAttachmentURL(), outputDirPath, prefixes, g, info.Link()); err != nil {
+		if err, _ := downloadMedia(*attachment.GetAttachmentURL(), outputDirPath, prefixes, g, info.Link()); err != nil {
 			return err
 		}
 	}
@@ -446,6 +446,15 @@ func (g Generator) writePage(outputMediaDirPath string, pagePath string, page wp
 		return fmt.Errorf("error creating Hugo page: %s", err)
 	}
 
+	if g.downloadMedia {
+		err, urlReplacements := g.downloadPageMedia(outputMediaDirPath, p, pageURL)
+		if err != nil {
+			return err
+		} else {
+			p.Replace(urlReplacements)
+		}
+	}
+
 	w, err := os.OpenFile(pagePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return fmt.Errorf("error opening page file: %s", err)
@@ -461,12 +470,6 @@ func (g Generator) writePage(outputMediaDirPath string, pagePath string, page wp
 
 	log.Info().Msgf("Page written: %s", pagePath)
 
-	if g.downloadMedia {
-		err := g.downloadPageMedia(outputMediaDirPath, p, pageURL)
-		if err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
@@ -479,29 +482,38 @@ func (g Generator) newHugoPage(pageURL *url.URL, page wpparser.CommonFields) (*h
 		page.Footnotes, page.Content, page.GUID, page.FeaturedImageID, page.PostFormat)
 }
 
-func downloadMedia(link string, outputMediaDirPath string, prefixes []string, g Generator, pageURL *url.URL) error {
+func downloadMedia(link string, outputMediaDirPath string, prefixes []string, g Generator, pageURL *url.URL) (error, map[string]string) {
+
+	// Uniformize protocol-less links: add protocol
 	if strings.HasPrefix(link, "//") {
 		link = strings.Replace(link, "//", fmt.Sprintf("%s://", pageURL.Scheme), 1)
 	}
 
+	// Turn all absolute links pointing to current host into relative links
 	for _, prefix := range prefixes {
 		link = strings.TrimPrefix(link, prefix)
 	}
 
+	// Now, all absolute links point to external domains:
+	// bypass
 	if !strings.HasPrefix(link, "/") {
 		log.Warn().
 			Str("link", link).
 			Str("source", pageURL.String()).
 			Msg("non-relative link (skipped for download)")
-		return nil
+		return nil, nil
 	}
 
+	relativeLink := link
 	outputFilePath := fmt.Sprintf("%s/static/%s", outputMediaDirPath,
 		strings.TrimSuffix(strings.Split(link, "?")[0], "/"))
 
 	if strings.HasPrefix(link, "http") {
 		// do nothing in case of absolute URL
-	} else if strings.HasPrefix(link, "/") { // relative URL to the base of the website
+		// this case should not happen, the function would have returned already
+	} else if strings.HasPrefix(link, "/") {
+		// relative URL to the base of the website
+		// turn it to absolute URL
 		link = g.wpInfo.Link().Scheme + "://" + g.wpInfo.Link().Host + link
 	} else {
 		link = strings.TrimSuffix(g.wpInfo.Link().String(), "/") + "/" + link
@@ -513,6 +525,8 @@ func downloadMedia(link string, outputMediaDirPath string, prefixes []string, g 
 	fullResLink := _resizedMedia.ReplaceAllString(link, "$1.$2")
 	media, err := g.mediaProvider.GetReader(fullResLink)
 
+	urlReplacement := make(map[string]string)
+
 	if err != nil {
 		// If full-res image not found, try again with resized one.
 		if strings.Compare(fullResLink, link) != 0 {
@@ -521,7 +535,11 @@ func downloadMedia(link string, outputMediaDirPath string, prefixes []string, g 
 				Str("link", link).
 				Msg("full-resolution image file not found, falling back to resized thumbnail")
 			media, err = g.mediaProvider.GetReader(link)
-		} // else fullResLink == link, so no need to retry
+		} else {
+			new_link := _resizedMedia.ReplaceAllString(relativeLink, "$1.$2")
+			urlReplacement[relativeLink] = new_link
+			urlReplacement[link] = new_link
+		}
 	} else {
 		// If full-res image found, update target file path too
 		if strings.Compare(fullResLink, link) != 0 {
@@ -530,8 +548,16 @@ func downloadMedia(link string, outputMediaDirPath string, prefixes []string, g 
 				Str("fullResLink", fullResLink).
 				Str("link", link).
 				Msg("resized thumbnail was replaced by full-resolution image")
+
+			new_link := _resizedMedia.ReplaceAllString(relativeLink, "$1.$2")
+			urlReplacement[relativeLink] = new_link
+			urlReplacement[link] = new_link
 		}
 	}
+
+	// Note: we will substitute resized image links with full-res image links
+	// after all links are turned to relative in the generated Markdown.
+	// Thus we register URL replacements as relative links.
 
 	if err != nil {
 		if g.continueOnMediaDownloadFailure {
@@ -541,9 +567,9 @@ func downloadMedia(link string, outputMediaDirPath string, prefixes []string, g 
 				Str("pageLink", pageURL.String()).
 				Str("outputFilePath", outputFilePath).
 				Msg("error fetching media file")
-			return nil
+			return nil, urlReplacement
 		} else {
-			return fmt.Errorf("error fetching media file %s: %s", link, err)
+			return fmt.Errorf("error fetching media file %s: %s", link, err), nil
 		}
 	}
 
@@ -555,14 +581,14 @@ func downloadMedia(link string, outputMediaDirPath string, prefixes []string, g 
 				Str("pageLink", pageURL.String()).
 				Msg("error downloading media file")
 		} else {
-			return fmt.Errorf("error downloading media file: %s embedded in %s", err, pageURL.String())
+			return fmt.Errorf("error downloading media file: %s embedded in %s", err, pageURL.String()), nil
 		}
 	}
 
-	return nil
+	return nil, urlReplacement
 }
 
-func (g Generator) downloadPageMedia(outputMediaDirPath string, p *hugopage.Page, pageURL *url.URL) error {
+func (g Generator) downloadPageMedia(outputMediaDirPath string, p *hugopage.Page, pageURL *url.URL) (error, map[string]string) {
 	links := p.WPMediaLinks()
 	log.Debug().
 		Str("page", pageURL.String()).
@@ -581,10 +607,16 @@ func (g Generator) downloadPageMedia(outputMediaDirPath string, p *hugopage.Page
 	prefixes = append(prefixes, fmt.Sprintf("https://www.%s", hostname))
 	prefixes = append(prefixes, fmt.Sprintf("http://www.%s", hostname))
 
+	urlReplacements := make(map[string]string)
+
 	for _, link := range links {
-		if err := downloadMedia(link, outputMediaDirPath, prefixes, g, pageURL); err != nil {
-			return err
+		if err, replacement := downloadMedia(link, outputMediaDirPath, prefixes, g, pageURL); err != nil {
+			return err, nil
+		} else {
+			for k, v := range replacement {
+				urlReplacements[k] = v
+			}
 		}
 	}
-	return nil
+	return nil, urlReplacements
 }
