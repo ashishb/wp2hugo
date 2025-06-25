@@ -174,6 +174,33 @@ func getMarkdownLinks(regex *regexp.Regexp, markdown string) []string {
 	return links
 }
 
+func unserialiazePHParray(array string) map[string]interface{} {
+	/* Ex:
+	a:2:{s:10:"taxonomies";s:32:"f166db6f0df2a3df4c2715a8bcc30eec";s:15:"postmeta_fields";s:32:"0edff5c6e53a54394f90f7b5a8fc1e76";}
+	*/
+	phpArray, err := gophp.Unserialize([]byte(array))
+	if err != nil {
+		log.Error().
+			Err(err).
+			Str("array", array).
+			Msg("Failed to decode PHP serialized array")
+		return nil
+	} else {
+		// Merge the PHP key: value "array" into Go dictionnary
+		// This should result in nested dict fields in the YAML header
+		if arr, ok := phpArray.(map[interface{}]interface{}); ok {
+			converted := make(map[string]interface{})
+			for k, v := range arr {
+				keyStr := fmt.Sprintf("%v", k)
+				converted[keyStr] = v
+			}
+			return converted
+		} else {
+			return nil
+		}
+	}
+}
+
 func getMetadata(provider ImageURLProvider, pageURL url.URL, author string, title string, publishDate *time.Time,
 	isDraft bool, categories []string, tags []string, guid *rss.GUID, featuredImageID *string,
 	postFormat *string, customMetaData []wpparser.CustomMetaDatum, taxinomies []wpparser.TaxonomyInfo) (map[string]any, error) {
@@ -212,27 +239,13 @@ func getMetadata(provider ImageURLProvider, pageURL url.URL, author string, titl
 
 	for _, metadatum := range customMetaData {
 		if strings.HasPrefix(metadatum.Value, "a:") {
-			// Try to decode PHP serialized array
-			/* Ex:
-			a:2:{s:10:"taxonomies";s:32:"f166db6f0df2a3df4c2715a8bcc30eec";s:15:"postmeta_fields";s:32:"0edff5c6e53a54394f90f7b5a8fc1e76";}
-			*/
-			phpArray, err := gophp.Unserialize([]byte(metadatum.Value))
-			if err != nil {
-				log.Error().Err(err).Str("array", metadatum.Value).Msg("Failed to decode PHP serialized array")
-				metadata[metadatum.Key] = metadatum.Value
+			phpArray := unserialiazePHParray(metadatum.Value)
+			if phpArray != nil {
+				// Decoded array is a nested dictionnary
+				metadata[metadatum.Key] = phpArray
 			} else {
-				// Merge the PHP key: value "array" into Go dictionnary
-				// This should result in nested dict fields in the YAML header
-				if arr, ok := phpArray.(map[interface{}]interface{}); ok {
-					converted := make(map[string]interface{})
-					for k, v := range arr {
-						keyStr := fmt.Sprintf("%v", k)
-						converted[keyStr] = v
-					}
-					metadata[metadatum.Key] = converted
-				} else {
-					metadata[metadatum.Key] = phpArray
-				}
+				// Fallback to ugly serialized array
+				metadata[metadatum.Key] = metadatum.Value
 			}
 		} else {
 			// Simple string
