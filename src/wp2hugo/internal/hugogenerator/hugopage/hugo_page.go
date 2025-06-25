@@ -174,7 +174,7 @@ func getMarkdownLinks(regex *regexp.Regexp, markdown string) []string {
 	return links
 }
 
-func unserialiazePHParray(array string) map[string]interface{} {
+func unserialiazePHParray(array string) interface{} {
 	/* Ex:
 	a:2:{s:10:"taxonomies";s:32:"f166db6f0df2a3df4c2715a8bcc30eec";s:15:"postmeta_fields";s:32:"0edff5c6e53a54394f90f7b5a8fc1e76";}
 	*/
@@ -186,18 +186,7 @@ func unserialiazePHParray(array string) map[string]interface{} {
 			Msg("Failed to decode PHP serialized array")
 		return nil
 	} else {
-		// Merge the PHP key: value "array" into Go dictionnary
-		// This should result in nested dict fields in the YAML header
-		if arr, ok := phpArray.(map[interface{}]interface{}); ok {
-			converted := make(map[string]interface{})
-			for k, v := range arr {
-				keyStr := fmt.Sprintf("%v", k)
-				converted[keyStr] = v
-			}
-			return converted
-		} else {
-			return nil
-		}
+		return phpArray
 	}
 }
 
