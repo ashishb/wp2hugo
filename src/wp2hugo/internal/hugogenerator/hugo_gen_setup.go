@@ -281,7 +281,7 @@ func (g Generator) writeCustomPosts(outputDirPath string, info wpparser.WebsiteI
 		// ensure it is saved in the same directory and
 		// prepend the name of the parent in the filename
 		pagePath := ""
-		if page.PostParentID > 0	{
+		if page.PostParentID > 0 {
 			for _, parent := range info.CustomPosts() {
 				// If the custom post has a parent, we will add its .md file into
 				// the parent page branch bundle.

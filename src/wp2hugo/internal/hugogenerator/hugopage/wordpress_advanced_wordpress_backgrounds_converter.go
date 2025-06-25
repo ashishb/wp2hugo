@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"regexp"
-	"strings"
 	"strconv"
+	"strings"
 )
 
 type ImageURLProvider interface {
