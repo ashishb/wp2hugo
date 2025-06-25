@@ -410,8 +410,8 @@ func getCommonFields(item *rss.Item, taxonomies []TaxonomyInfo) (*CommonFields, 
 			postFormat = &tmp
 		} else {
 			taxo := isTaxonomy(category, taxonomies)
-			if (taxo != TaxonomyInfo{}) {
-				pageTaxonomies = append(pageTaxonomies, taxo)
+			if (taxo != nil) {
+				pageTaxonomies = append(pageTaxonomies, *taxo)
 			} else {
 				log.Warn().
 					Str("link", item.Link).
@@ -627,13 +627,13 @@ func isTag(tag *rss.Category) bool {
 	return tag.Domain == "post_tag" || tag.Domain == "portfolio_tags" || tag.Domain == "product_tag"
 }
 
-func isTaxonomy(taxonomy *rss.Category, taxonomies []TaxonomyInfo) TaxonomyInfo {
+func isTaxonomy(taxonomy *rss.Category, taxonomies []TaxonomyInfo) *TaxonomyInfo {
 	for _, tax := range taxonomies {
 		if tax.Taxonomy == taxonomy.Domain {
-			return tax
+			return &tax
 		}
 	}
-	return TaxonomyInfo{}
+	return nil
 }
 
 // NormalizeCategoryName removes space from the category name and converts it to lowercase
