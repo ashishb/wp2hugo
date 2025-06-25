@@ -241,6 +241,60 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 	return &siteDir, nil
 }
 
+func getPagePath(outputDirPath string, page wpparser.CommonFields, posts []wpparser.CommonFields) (error, string) {
+	pagePath := ""
+
+	if page.PostParentID > 0 {
+		for _, parent := range posts {
+			// If the custom post has a parent, we will add its .md file into
+			// the parent page branch bundle.
+			// Note that we don't care if the parent has the same type as the children,
+			// which is designed for WooCommerce : product variations are a different
+			// post type than their parent product. All in all, that seems generic enough.
+			if parent.PostID == page.PostParentID {
+				parent_file_name, _ := parent.Filename()
+				pagesDir := path.Join(outputDirPath, "content", *parent.PostType + "s", parent_file_name)
+				if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
+					return err, pagePath
+				}
+				file_name, lang := page.Filename()
+				if lang != "" {
+					file_name = fmt.Sprintf("%s.%s", file_name, lang)
+				}
+				pagePath = getFilePath(pagesDir, file_name)
+				break
+			}
+		}
+		if pagePath == "" {
+			log.Error().
+				Int("postID", page.PostID).
+				Int("postParentID", page.PostParentID).
+				Msg("Critical error: pagePath is undefined for custom post")
+		}
+	}
+
+	// Whether the post has no parent or we could not find it:
+	if pagePath == "" {
+		// Create a branch page bundle using using a dynamic posttype subfolder
+		file_name, lang := page.Filename()
+		pagesDir := path.Join(outputDirPath, "content", *page.PostType + "s", file_name)
+		if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
+			return err, pagePath
+		}
+
+		// If this page has no parent, it is the parent of the page bundle
+		// OR we didn't find its parent and then page bundle will now have more than one _index.md file...
+		// User will have to untangle that mess.
+		file_name = "_index"
+		if lang != "" {
+			file_name = fmt.Sprintf("%s.%s", file_name, lang)
+		}
+		pagePath = getFilePath(pagesDir, file_name)
+	}
+
+	return nil, pagePath
+}
+
 func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) error {
 	if len(info.Pages()) == 0 {
 		log.Info().Msg("No pages to write")
@@ -254,13 +308,21 @@ func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) e
 
 	// Write pages
 	for _, page := range info.Pages() {
-		file_name, lang := page.Filename()
-		if lang != "" {
-			file_name = fmt.Sprintf("%s.%s", file_name, lang)
+		// If the current element is a child of another custom post,
+		// ensure it is saved in the same directory and
+		// prepend the name of the parent in the filename
+
+		// Convert info.Pages() to a slice of wpparser.CommonFields
+		pages := make([]wpparser.CommonFields, len(info.Pages()))
+		for i, p := range info.Pages() {
+			pages[i] = p.CommonFields
 		}
-		pagePath := getFilePath(pagesDir, file_name)
-		if err := g.writePage(outputDirPath, pagePath, page.CommonFields); err != nil {
+		if err, pagePath := getPagePath(outputDirPath, page.CommonFields, pages); err != nil {
 			return err
+		} else {
+			if err := g.writePage(outputDirPath, pagePath, page.CommonFields); err != nil {
+				return err
+			}
 		}
 		// Redirect from old URL to new URL
 		g.maybeAddNginxRedirect(page.CommonFields)
@@ -280,57 +342,18 @@ func (g Generator) writeCustomPosts(outputDirPath string, info wpparser.WebsiteI
 		// If the current element is a child of another custom post,
 		// ensure it is saved in the same directory and
 		// prepend the name of the parent in the filename
-		pagePath := ""
-		if page.PostParentID > 0 {
-			for _, parent := range info.CustomPosts() {
-				// If the custom post has a parent, we will add its .md file into
-				// the parent page branch bundle.
-				// Note that we don't care if the parent has the same type as the children,
-				// which is designed for WooCommerce : product variations are a different
-				// post type than their parent product. All in all, that seems generic enough.
-				if parent.PostID == page.PostParentID {
-					parent_file_name, _ := parent.Filename()
-					pagesDir := path.Join(outputDirPath, "content", *parent.PostType, parent_file_name)
-					if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
-						return err
-					}
-					file_name, lang := page.Filename()
-					if lang != "" {
-						file_name = fmt.Sprintf("%s.%s", file_name, lang)
-					}
-					pagePath = getFilePath(pagesDir, file_name)
-					break
-				}
-			}
-			if pagePath == "" {
-				log.Error().
-					Int("postID", page.PostID).
-					Int("postParentID", page.PostParentID).
-					Msg("Critical error: pagePath is undefined for custom post")
-			}
-		}
 
-		// Whether the post has no parent or we could not find it:
-		if pagePath == "" {
-			// Create a branch page bundle using using a dynamic posttype subfolder
-			file_name, lang := page.Filename()
-			pagesDir := path.Join(outputDirPath, "content", *page.PostType, file_name)
-			if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
+		// Convert info.CustomPosts() to a slice of wpparser.CommonFields
+		customPosts := make([]wpparser.CommonFields, len(info.CustomPosts()))
+		for i, cp := range info.CustomPosts() {
+			customPosts[i] = cp.CommonFields
+		}
+		if err, pagePath := getPagePath(outputDirPath, page.CommonFields, customPosts); err != nil {
+			return err
+		} else {
+			if err := g.writePage(outputDirPath, pagePath, page.CommonFields); err != nil {
 				return err
 			}
-
-			// If this page has no parent, it is the parent of the page bundle
-			// OR we didn't find its parent and then page bundle will now have more than one _index.md file...
-			// User will have to untangle that mess.
-			file_name = "_index"
-			if lang != "" {
-				file_name = fmt.Sprintf("%s.%s", file_name, lang)
-			}
-			pagePath = getFilePath(pagesDir, file_name)
-		}
-
-		if err := g.writePage(outputDirPath, pagePath, page.CommonFields); err != nil {
-			return err
 		}
 		// Redirect from old URL to new URL
 		g.maybeAddNginxRedirect(page.CommonFields)
