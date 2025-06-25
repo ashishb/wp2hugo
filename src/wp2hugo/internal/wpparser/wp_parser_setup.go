@@ -410,7 +410,7 @@ func getCommonFields(item *rss.Item, taxonomies []TaxonomyInfo) (*CommonFields, 
 			postFormat = &tmp
 		} else {
 			taxo := isTaxonomy(category, taxonomies)
-			if (taxo != nil) {
+			if taxo != nil {
 				pageTaxonomies = append(pageTaxonomies, *taxo)
 			} else {
 				log.Warn().
@@ -758,7 +758,7 @@ func buildTaxonomy(term ext.Extension) TaxonomyInfo {
 			id = 0
 		}
 	}
- 	return TaxonomyInfo{
+	return TaxonomyInfo{
 		ID:       id,
 		Taxonomy: taxonomy,
 		Parent:   parent,
