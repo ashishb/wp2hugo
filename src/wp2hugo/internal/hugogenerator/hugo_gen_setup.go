@@ -323,7 +323,9 @@ func sanitizePageBundles(dirPath string) error {
 	for _, file := range files {
 		if file.IsDir() {
 			// Recurse into subdirectory
-			sanitizePageBundles(path.Join(dirPath, file.Name()))
+			if err:= sanitizePageBundles(path.Join(dirPath, file.Name())); err != nil {
+				return err
+			}
 		} else {
 			name := file.Name()
 			fmt.Println("Processing file:", name)
@@ -374,8 +376,7 @@ func sanitizePageBundles(dirPath string) error {
 }
 
 func sanitizePostType(outputDirPath string, postType string) error {
-	path := path.Join(outputDirPath, "content", postType)
-	return sanitizePageBundles(path)
+	return sanitizePageBundles(path.Join(outputDirPath, "content", postType))
 }
 
 func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) error {
