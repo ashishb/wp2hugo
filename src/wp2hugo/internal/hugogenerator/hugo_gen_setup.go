@@ -298,6 +298,85 @@ func getPagePath(outputDirPath string, page wpparser.CommonFields, posts []wppar
 	return pagePath, nil
 }
 
+func sanitizePageBundles(dirPath string) error {
+	// For pages and custom post types, at import we assume they are all hierarchical,
+	// meaning the parent page gets written into `/content/pages/parent-page/_index.md`
+	// and then the children go into `/content/pages/parent-page/child.md`.
+	// This defines a subtype of what Hugo calls a page bundle: a branch.
+	// See details : https://gohugo.io/content-management/page-bundles/
+	// WP2Hugo doesn't maintain an internal representation of the content tree,
+	// so we blindly write to subfolders, rigidly assuming branches.
+	// This fuction has to be called after the folders tree is populated on disk,
+	// and will convert branch bundles to leaf bundles (aka rename _index.md to index.md),
+	// for cases where the `/content/pages/parent-page/` subfolder contains only `_index.md`.
+	// Conversely, we also ensure that branch bundles don't use `index.md`, though there is no
+	// usecase for that yet.
+	files, err := os.ReadDir(dirPath)
+	if err != nil {
+		log.Error().Err(err).Str("dirPath", dirPath).Msg("error reading directory")
+		return err
+	}
+
+	fileCount := 0 // normal .md files only, aka not index.md/_index.md
+
+	// 1. Diagnostic loop
+	for _, file := range files {
+		if file.IsDir() {
+			// Recurse into subdirectory
+			sanitizePageBundles(path.Join(dirPath, file.Name()))
+		} else {
+			name := file.Name()
+			fmt.Println("Processing file:", name)
+			if !(strings.HasPrefix(name, "_index.") || strings.HasPrefix(name, "index.")) {
+				// Normal Markdown file
+				fileCount++
+			}
+		}
+	}
+
+	// 2. Renaming loop
+	for _, file := range files {
+		if !file.IsDir() {
+			name := file.Name()
+			if strings.HasPrefix(name, "_index.") && fileCount == 0 {
+				// _index.md defines a branch but we found no other leaf in the subfolder:
+				// convert to leaf (aka rename to index.md)
+				oldPath := path.Join(dirPath, name)
+				newName := strings.Replace(name, "_index.", "index.", 1)
+				newPath := path.Join(dirPath, newName)
+				if err := os.Rename(oldPath, newPath); err != nil {
+					log.Error().
+						Err(err).
+						Str("oldPath", oldPath).
+						Str("newPath", newPath).
+						Msg("error renaming _index.md to index.md")
+					return err
+				}
+			} else if strings.HasPrefix(name, "index.") && fileCount > 0 {
+				// index.md defines a leaf but we found other leaves in the subfolder:
+				// convert to branch (aka rename to _index.md)
+				oldPath := path.Join(dirPath, name)
+				newName := strings.Replace(name, "index.", "_index.", 1)
+				newPath := path.Join(dirPath, newName)
+				if err := os.Rename(oldPath, newPath); err != nil {
+					log.Error().
+						Err(err).
+						Str("oldPath", oldPath).
+						Str("newPath", newPath).
+						Msg("error renaming index.md to _index.md")
+					return err
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+func sanitizePostType(outputDirPath string, postType string) error {
+	return sanitizePageBundles(path.Join(outputDirPath, "content", postType))
+}
+
 func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) error {
 	if len(info.Pages()) == 0 {
 		log.Info().Msg("No pages to write")
@@ -331,6 +410,11 @@ func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) e
 		g.maybeAddNginxRedirect(page.CommonFields)
 	}
 
+	// Properly set page bundle type
+	if err := sanitizePostType(outputDirPath, "pages"); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -360,6 +444,20 @@ func (g Generator) writeCustomPosts(outputDirPath string, info wpparser.WebsiteI
 		}
 		// Redirect from old URL to new URL
 		g.maybeAddNginxRedirect(page.CommonFields)
+	}
+
+	// Properly set page bundle type
+	postTypes := []string{
+		"products",
+		"product_variations",
+		"avada_faqs",
+		"avada_portfolios",
+	}
+
+	for _, postType := range postTypes {
+		if err := sanitizePostType(outputDirPath, postType); err != nil {
+			return err
+		}
 	}
 
 	return nil
