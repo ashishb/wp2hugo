@@ -27,11 +27,11 @@ func waitOrStop(resp *http.Response) (int, bool) {
 	stop := false
 	switch resp.StatusCode {
 
-	case 200:
+	case http.StatusOK:
 		// Success
 		stop = true
 
-	case 429:
+	case http.StatusTooManyRequests:
 		// HTTP error 429 = too many requests,
 		// aka we are getting rate-thresholded.
 		// Some servers may tell us when we are allowed to retry:
@@ -44,7 +44,7 @@ func waitOrStop(resp *http.Response) (int, bool) {
 			timeout = 2
 		}
 
-	case 404:
+	case http.StatusNotFound:
 		// HTTP error 404 = not found
 		// Useless to retry downloading
 		stop = true
