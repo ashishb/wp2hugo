@@ -21,7 +21,7 @@ It handles several weird edge cases that I encountered while trying to migrate m
 While this primarily targets Hugo-based code generation, one can use it to convert WordPress blogs to Markdown-based files that can be used with other systems,
 for example, [Mkdocs](https://www.mkdocs.org/) or [Jekyll](https://jekyllrb.com/).
 
-### Following sites have migrated using `wp2hugo`
+## Following sites have migrated using `wp2hugo`
 
 1. [ashishb.net](https://ashishb.net/tech/wordpress-to-hugo/)
 1. [inliniac.net](https://inliniac.net/blog/posts/blog-moved-to-hugo/)
