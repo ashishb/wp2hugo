@@ -253,7 +253,7 @@ func getPagePath(outputDirPath string, page wpparser.CommonFields, posts []wppar
 			// post type than their parent product. All in all, that seems generic enough.
 			if parent.PostID == page.PostParentID {
 				parent_file_name, _ := parent.Filename()
-				pagesDir := path.Join(outputDirPath, "content", *parent.PostType + "s", parent_file_name)
+				pagesDir := path.Join(outputDirPath, "content", *parent.PostType+"s", parent_file_name)
 				if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
 					return err, pagePath
 				}
@@ -277,7 +277,7 @@ func getPagePath(outputDirPath string, page wpparser.CommonFields, posts []wppar
 	if pagePath == "" {
 		// Create a branch page bundle using using a dynamic posttype subfolder
 		file_name, lang := page.Filename()
-		pagesDir := path.Join(outputDirPath, "content", *page.PostType + "s", file_name)
+		pagesDir := path.Join(outputDirPath, "content", *page.PostType+"s", file_name)
 		if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
 			return err, pagePath
 		}
