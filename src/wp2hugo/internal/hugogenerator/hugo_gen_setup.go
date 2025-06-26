@@ -323,7 +323,7 @@ func sanitizePageBundles(dirPath string) error {
 	for _, file := range files {
 		if file.IsDir() {
 			// Recurse into subdirectory
-			if err:= sanitizePageBundles(path.Join(dirPath, file.Name())); err != nil {
+			if err := sanitizePageBundles(path.Join(dirPath, file.Name())); err != nil {
 				return err
 			}
 		} else {
