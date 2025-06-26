@@ -94,10 +94,13 @@ func (g Generator) Generate() error {
 	if err = updateConfig(*siteDir, info); err != nil {
 		return err
 	}
-	if err = g.writePages(*siteDir, info); err != nil {
+	// Non-hierarchical content:
+	if err = g.writePosts(*siteDir, info); err != nil {
 		return err
 	}
-	if err = g.writePosts(*siteDir, info); err != nil {
+
+	// Hierarchical content:
+	if err = g.writePages(*siteDir, info); err != nil {
 		return err
 	}
 	if err = g.writeCustomPosts(*siteDir, info); err != nil {
@@ -241,7 +244,7 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 	return &siteDir, nil
 }
 
-func getPagePath(outputDirPath string, page wpparser.CommonFields, posts []wpparser.CommonFields) (error, string) {
+func getPagePath(outputDirPath string, page wpparser.CommonFields, posts []wpparser.CommonFields) (string, error) {
 	pagePath := ""
 
 	if page.PostParentID > 0 {
@@ -255,7 +258,7 @@ func getPagePath(outputDirPath string, page wpparser.CommonFields, posts []wppar
 				parent_file_name, _ := parent.Filename()
 				pagesDir := path.Join(outputDirPath, "content", *parent.PostType+"s", parent_file_name)
 				if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
-					return err, pagePath
+					return pagePath, err
 				}
 				file_name, lang := page.Filename()
 				if lang != "" {
@@ -279,7 +282,7 @@ func getPagePath(outputDirPath string, page wpparser.CommonFields, posts []wppar
 		file_name, lang := page.Filename()
 		pagesDir := path.Join(outputDirPath, "content", *page.PostType+"s", file_name)
 		if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
-			return err, pagePath
+			return pagePath, err
 		}
 
 		// If this page has no parent, it is the parent of the page bundle
@@ -292,7 +295,7 @@ func getPagePath(outputDirPath string, page wpparser.CommonFields, posts []wppar
 		pagePath = getFilePath(pagesDir, file_name)
 	}
 
-	return nil, pagePath
+	return pagePath, nil
 }
 
 func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) error {
@@ -317,7 +320,7 @@ func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) e
 		for i, p := range info.Pages() {
 			pages[i] = p.CommonFields
 		}
-		if err, pagePath := getPagePath(outputDirPath, page.CommonFields, pages); err != nil {
+		if pagePath, err := getPagePath(outputDirPath, page.CommonFields, pages); err != nil {
 			return err
 		} else {
 			if err := g.writePage(outputDirPath, pagePath, page.CommonFields); err != nil {
@@ -348,7 +351,7 @@ func (g Generator) writeCustomPosts(outputDirPath string, info wpparser.WebsiteI
 		for i, cp := range info.CustomPosts() {
 			customPosts[i] = cp.CommonFields
 		}
-		if err, pagePath := getPagePath(outputDirPath, page.CommonFields, customPosts); err != nil {
+		if pagePath, err := getPagePath(outputDirPath, page.CommonFields, customPosts); err != nil {
 			return err
 		} else {
 			if err := g.writePage(outputDirPath, pagePath, page.CommonFields); err != nil {
