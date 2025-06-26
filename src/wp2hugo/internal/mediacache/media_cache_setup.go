@@ -80,7 +80,7 @@ func (m MediaCache) GetReader(url string) (io.Reader, error) {
 		Str("url", url).
 		Msg("media will be fetched")
 
-	var http_err error = fmt.Errorf("generic error")
+	var http_err error
 	var resp *http.Response = nil
 
 	retries := 0
