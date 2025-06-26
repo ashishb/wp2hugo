@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 	"unicode"
@@ -72,6 +73,8 @@ type CommonFields struct {
 
 	Categories      []string
 	Tags            []string
+	Taxonomies      []TaxonomyInfo
+	CustomMetaData  []CustomMetaDatum
 	Footnotes       []Footnote
 	FeaturedImageID *string // Optional WordPress attachment ID of the featured image
 
@@ -193,6 +196,11 @@ type Footnote struct {
 	Content string `json:"content"`
 }
 
+type CustomMetaDatum struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
 // Parse parses the XML data and returns the WebsiteInfo.
 // authors is a list of author names. If it is empty, all authors are considered.
 func (p *Parser) Parse(xmlData io.Reader, authors []string) (*WebsiteInfo, error) {
@@ -226,6 +234,7 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 
 	categories := getCategories(feed.Extensions["wp"]["category"])
 	tags := getTags(feed.Extensions["wp"]["tag"])
+	taxonomies := getTaxonomies(feed.Extensions["wp"]["term"])
 
 	attachments := make([]AttachmentInfo, 0)
 	pages := make([]PageInfo, 0)
@@ -237,7 +246,7 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 		wpPostType := item.Extensions["wp"]["post_type"][0].Value
 		switch wpPostType {
 		case "attachment":
-			if attachment, err := getAttachmentInfo(item); err != nil && !errors.Is(err, errTrashItem) {
+			if attachment, err := getAttachmentInfo(item, taxonomies); err != nil && !errors.Is(err, errTrashItem) {
 				return nil, err
 			} else if attachment != nil && hasValidAuthor(authors, attachment.CommonFields) {
 				attachments = append(attachments, *attachment)
@@ -247,7 +256,7 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 					Msg("processing attachment")
 			}
 		case "page":
-			if page, err := getPageInfo(item); err != nil && !errors.Is(err, errTrashItem) {
+			if page, err := getPageInfo(item, taxonomies); err != nil && !errors.Is(err, errTrashItem) {
 				return nil, err
 			} else if page != nil {
 				if page.Content == "" && hasValidAuthor(authors, page.CommonFields) {
@@ -262,7 +271,7 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 					Msg("processing page")
 			}
 		case "post":
-			if post, err := getPostInfo(item); err != nil && !errors.Is(err, errTrashItem) {
+			if post, err := getPostInfo(item, taxonomies); err != nil && !errors.Is(err, errTrashItem) {
 				return nil, err
 			} else if post != nil && hasValidAuthor(authors, post.CommonFields) {
 				if post.Content == "" {
@@ -282,7 +291,7 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 			// and having their own archives, aside from blog posts.
 			// They fall within what Hugo calls sections and page bundles.
 			// Problem is some themes use custom post types for really weird stuff (layouts, etc.)
-			if customPost, err := getCustomPostInfo(item); err != nil && !errors.Is(err, errTrashItem) {
+			if customPost, err := getCustomPostInfo(item, taxonomies); err != nil && !errors.Is(err, errTrashItem) {
 				return nil, err
 			} else if customPost != nil {
 				if customPost.Content == "" {
@@ -327,6 +336,7 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 
 		categories: categories,
 		tags:       tags,
+		taxonomies: taxonomies,
 
 		attachments:     attachments,
 		pages:           pages,
@@ -348,8 +358,8 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 	return &websiteInfo, nil
 }
 
-func getAttachmentInfo(item *rss.Item) (*AttachmentInfo, error) {
-	fields, err := getCommonFields(item)
+func getAttachmentInfo(item *rss.Item, taxonomies []TaxonomyInfo) (*AttachmentInfo, error) {
+	fields, err := getCommonFields(item, taxonomies)
 	if err != nil {
 		return nil, fmt.Errorf("error getting common fields: %w", err)
 	}
@@ -360,7 +370,7 @@ func getAttachmentInfo(item *rss.Item) (*AttachmentInfo, error) {
 	return &attachment, nil
 }
 
-func getCommonFields(item *rss.Item) (*CommonFields, error) {
+func getCommonFields(item *rss.Item, taxonomies []TaxonomyInfo) (*CommonFields, error) {
 	var lastModifiedDate *time.Time
 	values := item.Extensions["wp"]["post_modified_gmt"]
 	if len(values) > 0 {
@@ -387,6 +397,7 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 	}
 	pageCategories := make([]string, 0, len(item.Categories))
 	pageTags := make([]string, 0, len(item.Categories))
+	pageTaxonomies := make([]TaxonomyInfo, 0, len(item.Categories))
 	var postFormat *string
 
 	for _, category := range item.Categories {
@@ -398,12 +409,38 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 			tmp := NormalizeCategoryName(category.Value)
 			postFormat = &tmp
 		} else {
-			log.Warn().
-				Str("link", item.Link).
-				Any("categories", item.Categories).
-				Msgf("Unknown category: %s", category)
+			taxo := isTaxonomy(category, taxonomies)
+			if taxo != nil {
+				pageTaxonomies = append(pageTaxonomies, *taxo)
+			} else {
+				log.Warn().
+					Str("link", item.Link).
+					Any("categories", item.Categories).
+					Msgf("Unknown category: %s", category)
+			}
 		}
 	}
+
+	pageCustomMetaData := make([]CustomMetaDatum, 0, len(item.Extensions["wp"]["postmeta"]))
+	// Extract custom metadata from <wp:postmeta>
+	if len(item.Extensions["wp"]["postmeta"]) > 0 {
+		for _, meta := range item.Extensions["wp"]["postmeta"] {
+			var key, value string
+			if len(meta.Children["meta_key"]) > 0 {
+				key = meta.Children["meta_key"][0].Value
+			}
+			if len(meta.Children["meta_value"]) > 0 {
+				value = meta.Children["meta_value"][0].Value
+			}
+			if key != "" {
+				pageCustomMetaData = append(pageCustomMetaData, CustomMetaDatum{
+					Key:   key,
+					Value: value,
+				})
+			}
+		}
+	}
+
 	if len(item.Links) > 1 {
 		log.Warn().
 			Str("link", item.Link).
@@ -472,7 +509,9 @@ func getCommonFields(item *rss.Item) (*CommonFields, error) {
 		Description:     item.Description,
 		Content:         item.Content,
 		Categories:      pageCategories,
+		CustomMetaData:  pageCustomMetaData,
 		Tags:            pageTags,
+		Taxonomies:      pageTaxonomies,
 		Footnotes:       getFootnotes(item),
 		FeaturedImageID: getThumbnailID(item),
 
@@ -588,13 +627,22 @@ func isTag(tag *rss.Category) bool {
 	return tag.Domain == "post_tag" || tag.Domain == "portfolio_tags" || tag.Domain == "product_tag"
 }
 
+func isTaxonomy(taxonomy *rss.Category, taxonomies []TaxonomyInfo) *TaxonomyInfo {
+	for _, tax := range taxonomies {
+		if tax.Taxonomy == taxonomy.Domain {
+			return &tax
+		}
+	}
+	return nil
+}
+
 // NormalizeCategoryName removes space from the category name and converts it to lowercase
 func NormalizeCategoryName(name string) string {
 	return strings.ToLower(strings.ReplaceAll(name, " ", "-"))
 }
 
-func getPageInfo(item *rss.Item) (*PageInfo, error) {
-	fields, err := getCommonFields(item)
+func getPageInfo(item *rss.Item, taxonomies []TaxonomyInfo) (*PageInfo, error) {
+	fields, err := getCommonFields(item, taxonomies)
 	if err != nil {
 		return nil, fmt.Errorf("error getting common fields: %w", err)
 	}
@@ -606,12 +654,12 @@ func getPageInfo(item *rss.Item) (*PageInfo, error) {
 }
 
 // testing only
-func GetPostInfo(item *rss.Item) (*PostInfo, error) {
-	return getPostInfo(item)
+func GetPostInfo(item *rss.Item, taxonomies []TaxonomyInfo) (*PostInfo, error) {
+	return getPostInfo(item, taxonomies)
 }
 
-func getPostInfo(item *rss.Item) (*PostInfo, error) {
-	fields, err := getCommonFields(item)
+func getPostInfo(item *rss.Item, taxonomies []TaxonomyInfo) (*PostInfo, error) {
+	fields, err := getCommonFields(item, taxonomies)
 	if err != nil {
 		return nil, fmt.Errorf("error getting common fields: %w", err)
 	}
@@ -622,8 +670,8 @@ func getPostInfo(item *rss.Item) (*PostInfo, error) {
 	return &post, nil
 }
 
-func getCustomPostInfo(item *rss.Item) (*CustomPostInfo, error) {
-	fields, err := getCommonFields(item)
+func getCustomPostInfo(item *rss.Item, taxonomies []TaxonomyInfo) (*CustomPostInfo, error) {
+	fields, err := getCommonFields(item, taxonomies)
 	if err != nil {
 		return nil, fmt.Errorf("error getting common fields: %w", err)
 	}
@@ -681,6 +729,50 @@ func getTags(inputs []ext.Extension) []TagInfo {
 		categories = append(categories, tag)
 	}
 	return categories
+}
+
+func buildTaxonomy(term ext.Extension) TaxonomyInfo {
+	var id int
+	var taxonomy, slug, parent, name string
+
+	if len(term.Children["term_slug"]) > 0 {
+		slug = term.Children["term_slug"][0].Value
+	}
+	if len(term.Children["term_name"]) > 0 {
+		name = term.Children["term_name"][0].Value
+	}
+	if len(term.Children["term_parent"]) > 0 {
+		parent = term.Children["term_parent"][0].Value
+	}
+	if len(term.Children["term_taxonomy"]) > 0 {
+		taxonomy = term.Children["term_taxonomy"][0].Value
+	}
+	if len(term.Children["term_id"]) > 0 {
+		idStr := term.Children["term_id"][0].Value
+		var err error
+		id, err = strconv.Atoi(idStr)
+		if err != nil {
+			log.Warn().
+				Str("term_id", idStr).
+				Msg("Error converting term_id to int")
+			id = 0
+		}
+	}
+	return TaxonomyInfo{
+		ID:       id,
+		Taxonomy: taxonomy,
+		Parent:   parent,
+		Name:     name,
+		Slug:     slug,
+	}
+}
+
+func getTaxonomies(inputs []ext.Extension) []TaxonomyInfo {
+	taxonomies := make([]TaxonomyInfo, 0, len(inputs))
+	for _, term := range inputs {
+		taxonomies = append(taxonomies, buildTaxonomy(term))
+	}
+	return taxonomies
 }
 
 func getFootnotes(item *rss.Item) []Footnote {

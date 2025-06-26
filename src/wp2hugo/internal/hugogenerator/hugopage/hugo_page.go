@@ -16,6 +16,7 @@ import (
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
 	"github.com/go-enry/go-enry/v2"
+	"github.com/leeqvip/gophp"
 	"github.com/mmcdole/gofeed/rss"
 	"github.com/rs/zerolog/log"
 )
@@ -73,9 +74,10 @@ var _hugoParallaxBlurLinks = regexp.MustCompile(`{{< parallaxblur.*?src="([^\"]+
 func NewPage(provider ImageURLProvider, pageURL url.URL, author string, title string, publishDate *time.Time,
 	isDraft bool, categories []string, tags []string, attachments []wpparser.AttachmentInfo,
 	footnotes []wpparser.Footnote,
-	htmlContent string, guid *rss.GUID, featuredImageID *string, postFormat *string) (*Page, error) {
+	htmlContent string, guid *rss.GUID, featuredImageID *string, postFormat *string,
+	customMetaData []wpparser.CustomMetaDatum, taxinomies []wpparser.TaxonomyInfo) (*Page, error) {
 	metadata, err := getMetadata(provider, pageURL, author, title, publishDate, isDraft, categories, tags, guid,
-		featuredImageID, postFormat)
+		featuredImageID, postFormat, customMetaData, taxinomies)
 	if err != nil {
 		return nil, err
 	}
@@ -172,9 +174,26 @@ func getMarkdownLinks(regex *regexp.Regexp, markdown string) []string {
 	return links
 }
 
+func unserialiazePHParray(array string) interface{} {
+	/* Ex:
+	a:2:{s:10:"taxonomies";s:32:"f166db6f0df2a3df4c2715a8bcc30eec";s:15:"postmeta_fields";s:32:"0edff5c6e53a54394f90f7b5a8fc1e76";}
+	*/
+	phpArray, err := gophp.Unserialize([]byte(array))
+	if err != nil {
+		log.Error().
+			Err(err).
+			Str("array", array).
+			Msg("Failed to decode PHP serialized array")
+		return nil
+	} else {
+		return phpArray
+	}
+}
+
 func getMetadata(provider ImageURLProvider, pageURL url.URL, author string, title string, publishDate *time.Time,
 	isDraft bool, categories []string, tags []string, guid *rss.GUID, featuredImageID *string,
-	postFormat *string) (map[string]any, error) {
+	postFormat *string, customMetaData []wpparser.CustomMetaDatum, taxinomies []wpparser.TaxonomyInfo) (map[string]any, error) {
+
 	metadata := make(map[string]any)
 	metadata["url"] = pageURL.Path // Relative URL
 	metadata["author"] = author
@@ -193,9 +212,42 @@ func getMetadata(provider ImageURLProvider, pageURL url.URL, author string, titl
 		sort.Strings(tags)
 		metadata[TagName] = slices.Compact(tags)
 	}
+
+	for _, taxinomy := range taxinomies {
+		if existing, ok := metadata[taxinomy.Taxonomy]; ok {
+			switch v := existing.(type) {
+			case []string:
+				metadata[taxinomy.Taxonomy] = append(v, taxinomy.Name)
+			default:
+				metadata[taxinomy.Taxonomy] = []string{taxinomy.Name}
+			}
+		} else {
+			metadata[taxinomy.Taxonomy] = []string{taxinomy.Name}
+		}
+	}
+
+	for _, metadatum := range customMetaData {
+		if strings.HasPrefix(metadatum.Value, "a:") {
+			phpArray := unserialiazePHParray(metadatum.Value)
+			if phpArray != nil {
+				// Decoded array is a nested dictionnary
+				metadata[metadatum.Key] = phpArray
+			} else {
+				// Fallback to ugly serialized array
+				metadata[metadatum.Key] = metadatum.Value
+			}
+		} else {
+			// Simple string
+			metadata[metadatum.Key] = metadatum.Value
+		}
+		// Note: if any step of the PHP array reading/decoding failed,
+		// now we got the original serialized array
+	}
+
 	if guid != nil {
 		metadata["guid"] = guid.Value
 	}
+
 	if featuredImageID != nil {
 		if imageInfo, err := provider.GetImageInfo(*featuredImageID); err != nil {
 			log.Warn().

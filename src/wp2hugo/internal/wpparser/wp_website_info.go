@@ -23,6 +23,7 @@ type WebsiteInfo struct {
 	posts           []PostInfo
 	navigationLinks []NavigationLink
 	customPosts     []CustomPostInfo
+	taxonomies      []TaxonomyInfo
 
 	postIDToAttachmentCache map[string][]AttachmentInfo
 }
@@ -44,6 +45,14 @@ type TagInfo struct {
 	ID   string
 	Name string
 	Slug string
+}
+
+type TaxonomyInfo struct {
+	ID       int
+	Taxonomy string
+	Slug     string
+	Parent   string
+	Name     string
 }
 
 func (w *WebsiteInfo) Title() string {
