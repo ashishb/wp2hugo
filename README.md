@@ -181,9 +181,19 @@ Flags:
 1. [ashishb.net](https://ashishb.net/tech/wordpress-to-hugo/)
 1. [inliniac.net](https://inliniac.net/blog/posts/blog-moved-to-hugo/)
 1. [blog.polarweasel.org](https://blog.polarweasel.org/2025/01/09/bye-wordpress/)
-1. [open-bio.org](https://tzovar.as/migrating-from-wp/)
+1. [open-bio.org](https://www.open-bio.org/posts/2025-03-04-new-website/) - more details from [Bastian Greshake Tzovaras](https://tzovar.as/migrating-from-wp/)
 1. [Virtual Andy](https://dev.ahill.net/posts/moving-away-from-wpdotcom/)
 1. [bjørn:johansen](https://bjornjohansen.com/wp2hugo/)
+1. [xf.is](https://www.xf.is/2025/01/19/blog-update/)
+1. [retro.moe](https://retro.moe/2025/01/15/migrate_wordpress_to_hugo_in_github_pages/)
+1. [Marcelo Fernandez (in Spanish)](https://blog.marcelofernandez.info/posts/migracion-a-hugo/)
+1. [Mountain Water (Chinese Traditional)](https://mountainandwater.blog/2025/04/15/migration-from-wordpress-to-hugo/)
+1. [Hit To Key](https://hit-to-key.net/posts/2024-10-10-migration/)
+1. [Chuyển địa chỉ](https://tuanbui.net/2024/07/10/chuyen-dia-chi/)
+1. [cynarski.dev (Polish)](https://cynarski.dev/2024/12/22/migracja_na_hugo/)
+1. [It's a Binary World 2.0](https://www.ericsbinaryworld.com/posts/wordpress-to-hugo-migration-process/)
+1. [The Legal Beaver](https://legalbeaver.ca/2024/06/12/migration-to-hugo/)
+1. [Deuts Log](https://deuts.org/x/446-wp2hugo/)
 
 Feel free to send a Pull request if you migrated your website using `wp2hugo`
 
