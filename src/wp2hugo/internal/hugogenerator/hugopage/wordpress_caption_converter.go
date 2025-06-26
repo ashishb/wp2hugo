@@ -17,14 +17,14 @@ import (
 // the important fields to extract are "align", "width", "src", "alt"
 var _CaptionRegEx1 = regexp.MustCompile(`\[caption [^ ]* align="([^"]+)" width="([^"]+)"\]` +
 	`.*?` +
-	`<img class="[^"]*?" src="([^"]+)" alt="([^"]*?)" width="([^"]*?)" height="([^"]*?)" />` +
+	`<img.*?src="([^"]+)" alt="([^"]*?)" width="([^"]*?)" height="([^"]*?)" />` +
 	`.+?` +
 	`\[/caption\]`)
 
 // No alt
 var _CaptionRegEx2 = regexp.MustCompile(`\[caption [^ ]* align="([^"]+)" width="([^"]+)"\]` +
 	`.*?` +
-	`<img class="[^"]*?" src="([^"]+)" width="([^"]*?)" height="([^"]*?)" />` +
+	`<img.*?src="([^"]+)" width="([^"]*?)" height="([^"]*?)" />` +
 	`.+?` +
 	`\[/caption\]`)
 
@@ -36,6 +36,7 @@ func replaceCaptionWithFigure(htmlData string) string {
 
 	htmlData = replaceAllStringSubmatchFunc(_CaptionRegEx1, htmlData, captionReplacementFunction)
 	htmlData = replaceAllStringSubmatchFunc(_CaptionRegEx2, htmlData, captionReplacementFunction)
+	fmt.Println(htmlData)
 	return htmlData
 }
 
