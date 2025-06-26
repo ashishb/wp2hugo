@@ -176,6 +176,17 @@ Flags:
       --viper            use Viper for configuration (default true)
 ```
 
-Note:
+### Following sites have migrated using `wp2hugo`
+
+1. [ashishb.net](https://ashishb.net/tech/wordpress-to-hugo/)
+1. [inliniac.net](https://inliniac.net/blog/posts/blog-moved-to-hugo/)
+1. [blog.polarweasel.org](https://blog.polarweasel.org/2025/01/09/bye-wordpress/)
+1. [open-bio.org](https://tzovar.as/migrating-from-wp/)
+1. [Virtual Andy](https://dev.ahill.net/posts/moving-away-from-wpdotcom/)
+1. [bjørn:johansen](https://bjornjohansen.com/wp2hugo/)
+
+Feel free to send a Pull request if you migrated your website using `wp2hugo`
+
+### Note
 
 1. To migrate comments, use [Remark42](https://remark42.com/docs/backup/migration/)
