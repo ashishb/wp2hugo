@@ -260,7 +260,7 @@ func (g Generator) downloadAllMedia(outputDirPath string, info wpparser.WebsiteI
 	prefixes = append(prefixes, fmt.Sprintf("http://www.%s", hostname))
 
 	for _, attachment := range info.Attachments() {
-		if err, _ := downloadMedia(*attachment.GetAttachmentURL(), outputDirPath, prefixes, g, info.Link()); err != nil {
+		if _, err := downloadMedia(*attachment.GetAttachmentURL(), outputDirPath, prefixes, g, info.Link()); err != nil {
 			return err
 		}
 	}
@@ -447,7 +447,7 @@ func (g Generator) writePage(outputMediaDirPath string, pagePath string, page wp
 	}
 
 	if g.downloadMedia {
-		err, urlReplacements := g.downloadPageMedia(outputMediaDirPath, p, pageURL)
+		urlReplacements, err := g.downloadPageMedia(outputMediaDirPath, p, pageURL)
 		if err != nil {
 			return err
 		} else {
@@ -482,7 +482,7 @@ func (g Generator) newHugoPage(pageURL *url.URL, page wpparser.CommonFields) (*h
 		page.Footnotes, page.Content, page.GUID, page.FeaturedImageID, page.PostFormat)
 }
 
-func downloadMedia(link string, outputMediaDirPath string, prefixes []string, g Generator, pageURL *url.URL) (error, map[string]string) {
+func downloadMedia(link string, outputMediaDirPath string, prefixes []string, g Generator, pageURL *url.URL) (map[string]string, error) {
 
 	// Uniformize protocol-less links: add protocol
 	if strings.HasPrefix(link, "//") {
@@ -567,9 +567,9 @@ func downloadMedia(link string, outputMediaDirPath string, prefixes []string, g 
 				Str("pageLink", pageURL.String()).
 				Str("outputFilePath", outputFilePath).
 				Msg("error fetching media file")
-			return nil, urlReplacement
+			return urlReplacement, nil
 		} else {
-			return fmt.Errorf("error fetching media file %s: %s", link, err), nil
+			return nil, fmt.Errorf("error fetching media file %s: %s", link, err)
 		}
 	}
 
@@ -581,14 +581,14 @@ func downloadMedia(link string, outputMediaDirPath string, prefixes []string, g 
 				Str("pageLink", pageURL.String()).
 				Msg("error downloading media file")
 		} else {
-			return fmt.Errorf("error downloading media file: %s embedded in %s", err, pageURL.String()), nil
+			return nil, fmt.Errorf("error downloading media file: %s embedded in %s", err, pageURL.String())
 		}
 	}
 
-	return nil, urlReplacement
+	return urlReplacement, nil
 }
 
-func (g Generator) downloadPageMedia(outputMediaDirPath string, p *hugopage.Page, pageURL *url.URL) (error, map[string]string) {
+func (g Generator) downloadPageMedia(outputMediaDirPath string, p *hugopage.Page, pageURL *url.URL) (map[string]string, error) {
 	links := p.WPMediaLinks()
 	log.Debug().
 		Str("page", pageURL.String()).
@@ -610,13 +610,13 @@ func (g Generator) downloadPageMedia(outputMediaDirPath string, p *hugopage.Page
 	urlReplacements := make(map[string]string)
 
 	for _, link := range links {
-		if err, replacement := downloadMedia(link, outputMediaDirPath, prefixes, g, pageURL); err != nil {
-			return err, nil
+		if replacement, err := downloadMedia(link, outputMediaDirPath, prefixes, g, pageURL); err != nil {
+			return nil, err
 		} else {
 			for k, v := range replacement {
 				urlReplacements[k] = v
 			}
 		}
 	}
-	return nil, urlReplacements
+	return urlReplacements, nil
 }
