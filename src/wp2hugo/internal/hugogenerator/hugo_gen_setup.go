@@ -327,7 +327,7 @@ func sanitizePageBundles(dirPath string) error {
 		} else {
 			name := file.Name()
 			fmt.Println("Processing file:", name)
-			if !(strings.HasPrefix(name, "_index.") || strings.HasPrefix(name, "index.")) {
+			if !strings.HasPrefix(name, "_index.") && !strings.HasPrefix(name, "index.") {
 				// Normal Markdown file
 				fileCount++
 			}
@@ -374,7 +374,8 @@ func sanitizePageBundles(dirPath string) error {
 }
 
 func sanitizePostType(outputDirPath string, postType string) error {
-	return sanitizePageBundles(path.Join(outputDirPath, "content", postType))
+	path := path.Join(outputDirPath, "content", postType)
+	return sanitizePageBundles(path)
 }
 
 func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) error {
