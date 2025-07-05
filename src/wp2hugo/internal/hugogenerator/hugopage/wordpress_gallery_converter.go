@@ -40,7 +40,7 @@ var errGalleryWithNoIDs = errors.New("no image IDs found in gallery shortcode")
 // TODO: should we handle `order="ASC|DESC"` when `orderby="ID"` ?
 // Seems to me that people mostly order pictures in galleries arbitrarily.
 // Converts the WordPress's caption shortcode to Hugo shortcode "figure"
-func replaceGalleryWithFigure(provider ImageURLProvider, attachmentIDs []int, htmlData string) string {
+func replaceGalleryWithFigure(provider ImageURLProvider, attachmentIDs []string, htmlData string) string {
 	log.Debug().
 		Msg("Replacing gallery with figures")
 
@@ -56,9 +56,6 @@ func replaceGalleryWithFigure(provider ImageURLProvider, attachmentIDs []int, ht
 	return htmlData
 }
 
-<<<<<<< HEAD
-func galleryReplacementFunction(provider ImageURLProvider, attachmentIDs []string, galleryInfo string) (string, error) {
-=======
 func replaceGutembergGalleryWithFigure(htmlData string) string {
 	log.Debug().
 		Msg("Replacing Gutenberg gallery with figures")
@@ -152,8 +149,7 @@ func gutenbergGalleryReplacementFunction(groups []string) string {
 	return output.String()
 }
 
-func galleryReplacementFunction(provider ImageURLProvider, attachmentIDs []int, galleryInfo string) (string, error) {
->>>>>>> 4b4ebf7 (Support Gutenberg gallery blocks)
+func galleryReplacementFunction(provider ImageURLProvider, attachmentIDs []string, galleryInfo string) (string, error) {
 	var output strings.Builder
 
 	// Find columns layout
