@@ -18,8 +18,8 @@ WP2Hugo will detect and automatically convert the following shortcodes:
 | YouTube plain-text embed | `https://www.youtube.com/watch?v=gJ7AAJXHeeg` | `{{< youtube gJ7AAJXHeeg >}}` | Native WordPress[^1] |
 | YouTube iframe | `<iframe src="https://www.youtube.com/embed/gJ7AAJXHeeg width="640" height"480"></iframe>` | `{{< youtube gJ7AAJXHeeg >}}` | Native WordPress[^1] |
 | YouTube Gutenberg embed block | | `{{< youtube gJ7AAJXHeeg >}}` | Native WordPress[^1] |
-| Google Maps iframe | `<iframe src="https://www.google.com/maps/d/u/0/embed?mid=1lcjyzfxxXcdDP3XkrikfqIJryfFi4ZA" width="640" height="480"></iframe>` | `{{< googlemaps src="1lcjyzfxxXcdDP3XkrikfqIJryfFi4ZA" width=640 height=480 >}}` | Native HTML[^2]
-| [List category posts](https://fr.wordpress.org/plugins/list-category-posts/) | `[catlist name="foo" catlink="yes" numberpost="9"]` | `{{< catlist category="foo" catlink=true count=9 >}}` | Third-party plugin[^2]
+| Google Maps iframe | `<iframe src="https://www.google.com/maps/d/u/0/embed?mid=1lcjyzfxxXcdDP3XkrikfqIJryfFi4ZA" width="640" height="480"></iframe>` | `{{< googlemaps src="1lcjyzfxxXcdDP3XkrikfqIJryfFi4ZA" width=640 height=480 >}}` | Native HTML[^2] |
+| [List category posts](https://fr.wordpress.org/plugins/list-category-posts/) | `[catlist name="foo" catlink="yes" numberpost="9"]` | `{{< catlist category="foo" catlink=true count=9 >}}` | Third-party plugin[^2] |
 | [Advanced WordPress Backgrounds](https://wordpress.org/plugins/advanced-backgrounds/) | `[nk_awb awb_type="image" awb_image="4256"] ... [/nk_abw]` | `{{< parallaxblur src="%s" >}}... {{< /parallaxblar >}}` | Third-party plugin[^2] |
 
 [^1]: Native Hugo shortcode,
