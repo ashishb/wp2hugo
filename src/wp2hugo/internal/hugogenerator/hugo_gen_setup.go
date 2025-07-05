@@ -254,11 +254,7 @@ func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) e
 
 	// Write pages
 	for _, page := range info.Pages() {
-		file_name, lang := page.Filename()
-		if lang != "" {
-			file_name = fmt.Sprintf("%s.%s", file_name, lang)
-		}
-		pagePath := getFilePath(pagesDir, file_name)
+		pagePath := getFilePath(pagesDir, page.Filename().FileNameWithLanguage())
 		if err := g.writePage(outputDirPath, pagePath, page.CommonFields); err != nil {
 			return err
 		}
@@ -281,31 +277,28 @@ func (g Generator) writeCustomPosts(outputDirPath string, info wpparser.WebsiteI
 		// ensure it is saved in the same directory and
 		// prepend the name of the parent in the filename
 		pagePath := ""
-		if page.PostParentID > 0 {
+		if page.PostParentID != nil {
 			for _, parent := range info.CustomPosts() {
 				// If the custom post has a parent, we will add its .md file into
 				// the parent page branch bundle.
 				// Note that we don't care if the parent has the same type as the children,
 				// which is designed for WooCommerce : product variations are a different
 				// post type than their parent product. All in all, that seems generic enough.
-				if parent.PostID == page.PostParentID {
-					parent_file_name, _ := parent.Filename()
-					pagesDir := path.Join(outputDirPath, "content", *parent.PostType, parent_file_name)
+				if parent.PostID == *page.PostParentID {
+					parentFileName := parent.Filename().FileNameNoLanguage()
+					pagesDir := path.Join(outputDirPath, "content", *parent.PostType, parentFileName)
 					if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
 						return err
 					}
-					file_name, lang := page.Filename()
-					if lang != "" {
-						file_name = fmt.Sprintf("%s.%s", file_name, lang)
-					}
-					pagePath = getFilePath(pagesDir, file_name)
+
+					pagePath = getFilePath(pagesDir, page.Filename().FileNameWithLanguage())
 					break
 				}
 			}
 			if pagePath == "" {
 				log.Error().
-					Int("postID", page.PostID).
-					Int("postParentID", page.PostParentID).
+					Str("postID", page.PostID).
+					Any("postParentID", page.PostParentID).
 					Msg("Critical error: pagePath is undefined for custom post")
 			}
 		}
@@ -313,20 +306,20 @@ func (g Generator) writeCustomPosts(outputDirPath string, info wpparser.WebsiteI
 		// Whether the post has no parent or we could not find it:
 		if pagePath == "" {
 			// Create a branch page bundle using using a dynamic posttype subfolder
-			file_name, lang := page.Filename()
-			pagesDir := path.Join(outputDirPath, "content", *page.PostType, file_name)
+			pagesDir := path.Join(outputDirPath, "content", *page.PostType, page.Filename().FileNameNoLanguage())
 			if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
 				return err
 			}
 
+			lang := page.Filename().Language()
 			// If this page has no parent, it is the parent of the page bundle
 			// OR we didn't find its parent and then page bundle will now have more than one _index.md file...
 			// User will have to untangle that mess.
-			file_name = "_index"
-			if lang != "" {
-				file_name = fmt.Sprintf("%s.%s", file_name, lang)
+			fileName := "_index"
+			if lang != nil {
+				fileName = fmt.Sprintf("%s.%s", fileName, *lang)
 			}
-			pagePath = getFilePath(pagesDir, file_name)
+			pagePath = getFilePath(pagesDir, fileName)
 		}
 
 		if err := g.writePage(outputDirPath, pagePath, page.CommonFields); err != nil {
@@ -424,11 +417,7 @@ func (g Generator) writePosts(outputDirPath string, info wpparser.WebsiteInfo) e
 
 	// Write posts
 	for _, post := range info.Posts() {
-		file_name, lang := post.Filename()
-		if lang != "" {
-			file_name = fmt.Sprintf("%s.%s", file_name, lang)
-		}
-		postPath := getFilePath(postsDir, file_name)
+		postPath := getFilePath(postsDir, post.Filename().FileNameWithLanguage())
 		if err := g.writePage(outputDirPath, postPath, post.CommonFields); err != nil {
 			return err
 		}

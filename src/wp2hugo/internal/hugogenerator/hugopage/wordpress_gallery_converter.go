@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -18,8 +17,10 @@ import (
 // It is mostly "file" to handle, since "attachment_page" makes no sense for Hugo.
 var _GalleryRegEx = regexp.MustCompile(`\[gallery ([^\[\]]*)\]`)
 
-var _idRegEx = regexp.MustCompile(`ids="([^"]+)"`)
-var _colsRegEx = regexp.MustCompile(`columns="([^"]+)"`)
+var (
+	_idRegEx   = regexp.MustCompile(`ids="([^"]+)"`)
+	_colsRegEx = regexp.MustCompile(`columns="([^"]+)"`)
+)
 
 var errGalleryWithNoIDs = errors.New("no image IDs found in gallery shortcode")
 
@@ -28,7 +29,7 @@ var errGalleryWithNoIDs = errors.New("no image IDs found in gallery shortcode")
 
 // Converts the WordPress's caption shortcode to Hugo shortcode "figure"
 // https://adityatelange.github.io/hugo-PaperMod/posts/papermod/papermod-faq/#centering-image-in-markdown
-func replaceGalleryWithFigure(provider ImageURLProvider, attachmentIDs []int, htmlData string) string {
+func replaceGalleryWithFigure(provider ImageURLProvider, attachmentIDs []string, htmlData string) string {
 	log.Debug().
 		Msg("Replacing gallery with figures")
 
@@ -44,7 +45,7 @@ func replaceGalleryWithFigure(provider ImageURLProvider, attachmentIDs []int, ht
 	return htmlData
 }
 
-func galleryReplacementFunction(provider ImageURLProvider, attachmentIDs []int, galleryInfo string) (string, error) {
+func galleryReplacementFunction(provider ImageURLProvider, attachmentIDs []string, galleryInfo string) (string, error) {
 	var output strings.Builder
 
 	// Find columns layout
@@ -58,14 +59,10 @@ func galleryReplacementFunction(provider ImageURLProvider, attachmentIDs []int, 
 	ids := _idRegEx.FindStringSubmatch(galleryInfo)
 	if len(ids) == 0 {
 		if len(attachmentIDs) > 0 {
-			idsStr := make([]string, len(attachmentIDs))
-			for i, id := range attachmentIDs {
-				idsStr[i] = fmt.Sprintf("%d", id)
-			}
-			ids = []string{"", strings.Join(idsStr, ",")}
+			ids = []string{"", strings.Join(attachmentIDs, ",")}
 			log.Info().
 				Str("galleryInfo", galleryInfo).
-				Ints("attachmentIDs", attachmentIDs).
+				Strs("attachmentIDs", attachmentIDs).
 				Msg("No image IDs found in gallery shortcode, fallback to page attachments")
 		} else {
 			log.Warn().
@@ -86,14 +83,7 @@ func galleryReplacementFunction(provider ImageURLProvider, attachmentIDs []int, 
 
 	// For each image ID in WP gallery shortcode, get the URL
 	for _, s := range idsArray {
-		imgID, err := strconv.Atoi(strings.TrimSpace(s))
-		if err != nil {
-			log.Warn().
-				Err(err).
-				Str("imageID", s).
-				Msg("Invalid image ID in gallery")
-			continue
-		}
+		imgID := strings.TrimSpace(s)
 		tmp, err := provider.GetImageInfo(imgID)
 		if tmp != nil {
 			src := tmp.ImageURL
