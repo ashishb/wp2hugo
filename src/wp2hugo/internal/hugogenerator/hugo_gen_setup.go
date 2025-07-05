@@ -103,10 +103,13 @@ func (g Generator) Generate() error {
 		}
 	}
 
-	if err = g.writePages(*siteDir, info); err != nil {
+	// Non-hierarchical content:
+	if err = g.writePosts(*siteDir, info); err != nil {
 		return err
 	}
-	if err = g.writePosts(*siteDir, info); err != nil {
+
+	// Hierarchical content:
+	if err = g.writePages(*siteDir, info); err != nil {
 		return err
 	}
 	if err = g.writeCustomPosts(*siteDir, info); err != nil {
@@ -268,6 +271,141 @@ func (g Generator) downloadAllMedia(outputDirPath string, info wpparser.WebsiteI
 	return nil
 }
 
+func getPagePath(outputDirPath string, page wpparser.CommonFields, posts []wpparser.CommonFields) (string, error) {
+	pagePath := ""
+
+	if page.PostParentID > 0 {
+		for _, parent := range posts {
+			// If the custom post has a parent, we will add its .md file into
+			// the parent page branch bundle.
+			// Note that we don't care if the parent has the same type as the children,
+			// which is designed for WooCommerce : product variations are a different
+			// post type than their parent product. All in all, that seems generic enough.
+			if parent.PostID == page.PostParentID {
+				parent_file_name, _ := parent.Filename()
+				pagesDir := path.Join(outputDirPath, "content", *parent.PostType+"s", parent_file_name)
+				if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
+					return pagePath, err
+				}
+				file_name, lang := page.Filename()
+				if lang != "" {
+					file_name = fmt.Sprintf("%s.%s", file_name, lang)
+				}
+				pagePath = getFilePath(pagesDir, file_name)
+				break
+			}
+		}
+		if pagePath == "" {
+			log.Error().
+				Int("postID", page.PostID).
+				Int("postParentID", page.PostParentID).
+				Msg("Critical error: pagePath is undefined for custom post")
+		}
+	}
+
+	// Whether the post has no parent or we could not find it:
+	if pagePath == "" {
+		// Create a branch page bundle using using a dynamic posttype subfolder
+		file_name, lang := page.Filename()
+		pagesDir := path.Join(outputDirPath, "content", *page.PostType+"s", file_name)
+		if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
+			return pagePath, err
+		}
+
+		// If this page has no parent, it is the parent of the page bundle
+		// OR we didn't find its parent and then page bundle will now have more than one _index.md file...
+		// User will have to untangle that mess.
+		file_name = "_index"
+		if lang != "" {
+			file_name = fmt.Sprintf("%s.%s", file_name, lang)
+		}
+		pagePath = getFilePath(pagesDir, file_name)
+	}
+
+	return pagePath, nil
+}
+
+func sanitizePageBundles(dirPath string) error {
+	// For pages and custom post types, at import we assume they are all hierarchical,
+	// meaning the parent page gets written into `/content/pages/parent-page/_index.md`
+	// and then the children go into `/content/pages/parent-page/child.md`.
+	// This defines a subtype of what Hugo calls a page bundle: a branch.
+	// See details : https://gohugo.io/content-management/page-bundles/
+	// WP2Hugo doesn't maintain an internal representation of the content tree,
+	// so we blindly write to subfolders, rigidly assuming branches.
+	// This fuction has to be called after the folders tree is populated on disk,
+	// and will convert branch bundles to leaf bundles (aka rename _index.md to index.md),
+	// for cases where the `/content/pages/parent-page/` subfolder contains only `_index.md`.
+	// Conversely, we also ensure that branch bundles don't use `index.md`, though there is no
+	// usecase for that yet.
+	files, err := os.ReadDir(dirPath)
+	if err != nil {
+		log.Error().Err(err).Str("dirPath", dirPath).Msg("error reading directory")
+		return err
+	}
+
+	fileCount := 0 // normal .md files only, aka not index.md/_index.md
+
+	// 1. Diagnostic loop
+	for _, file := range files {
+		if file.IsDir() {
+			// Recurse into subdirectory
+			if err := sanitizePageBundles(path.Join(dirPath, file.Name())); err != nil {
+				return err
+			}
+		} else {
+			name := file.Name()
+			fmt.Println("Processing file:", name)
+			if !strings.HasPrefix(name, "_index.") && !strings.HasPrefix(name, "index.") {
+				// Normal Markdown file
+				fileCount++
+			}
+		}
+	}
+
+	// 2. Renaming loop
+	for _, file := range files {
+		if !file.IsDir() {
+			name := file.Name()
+			if strings.HasPrefix(name, "_index.") && fileCount == 0 {
+				// _index.md defines a branch but we found no other leaf in the subfolder:
+				// convert to leaf (aka rename to index.md)
+				oldPath := path.Join(dirPath, name)
+				newName := strings.Replace(name, "_index.", "index.", 1)
+				newPath := path.Join(dirPath, newName)
+				if err := os.Rename(oldPath, newPath); err != nil {
+					log.Error().
+						Err(err).
+						Str("oldPath", oldPath).
+						Str("newPath", newPath).
+						Msg("error renaming _index.md to index.md")
+					return err
+				}
+			} else if strings.HasPrefix(name, "index.") && fileCount > 0 {
+				// index.md defines a leaf but we found other leaves in the subfolder:
+				// convert to branch (aka rename to _index.md)
+				oldPath := path.Join(dirPath, name)
+				newName := strings.Replace(name, "index.", "_index.", 1)
+				newPath := path.Join(dirPath, newName)
+				if err := os.Rename(oldPath, newPath); err != nil {
+					log.Error().
+						Err(err).
+						Str("oldPath", oldPath).
+						Str("newPath", newPath).
+						Msg("error renaming index.md to _index.md")
+					return err
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+func sanitizePostType(outputDirPath string, postType string) error {
+	return sanitizePageBundles(path.Join(outputDirPath, "content", postType))
+}
+
 func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) error {
 	if len(info.Pages()) == 0 {
 		log.Info().Msg("No pages to write")
@@ -281,12 +419,29 @@ func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) e
 
 	// Write pages
 	for _, page := range info.Pages() {
-		pagePath := getFilePath(pagesDir, page.Filename())
-		if err := g.writePage(outputDirPath, pagePath, page.CommonFields); err != nil {
+		// If the current element is a child of another custom post,
+		// ensure it is saved in the same directory and
+		// prepend the name of the parent in the filename
+
+		// Convert info.Pages() to a slice of wpparser.CommonFields
+		pages := make([]wpparser.CommonFields, len(info.Pages()))
+		for i, p := range info.Pages() {
+			pages[i] = p.CommonFields
+		}
+		if pagePath, err := getPagePath(outputDirPath, page.CommonFields, pages); err != nil {
 			return err
+		} else {
+			if err := g.writePage(outputDirPath, pagePath, page.CommonFields); err != nil {
+				return err
+			}
 		}
 		// Redirect from old URL to new URL
 		g.maybeAddNginxRedirect(page.CommonFields)
+	}
+
+	// Properly set page bundle type
+	if err := sanitizePostType(outputDirPath, "pages"); err != nil {
+		return err
 	}
 
 	return nil
@@ -300,18 +455,38 @@ func (g Generator) writeCustomPosts(outputDirPath string, info wpparser.WebsiteI
 
 	// Write custom posts
 	for _, page := range info.CustomPosts() {
-		// Dynamically handle post type for target folder
-		pagesDir := path.Join(outputDirPath, "content", *page.PostType)
-		if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
-			return err
-		}
+		// If the current element is a child of another custom post,
+		// ensure it is saved in the same directory and
+		// prepend the name of the parent in the filename
 
-		pagePath := getFilePath(pagesDir, page.Filename())
-		if err := g.writePage(outputDirPath, pagePath, page.CommonFields); err != nil {
+		// Convert info.CustomPosts() to a slice of wpparser.CommonFields
+		customPosts := make([]wpparser.CommonFields, len(info.CustomPosts()))
+		for i, cp := range info.CustomPosts() {
+			customPosts[i] = cp.CommonFields
+		}
+		if pagePath, err := getPagePath(outputDirPath, page.CommonFields, customPosts); err != nil {
 			return err
+		} else {
+			if err := g.writePage(outputDirPath, pagePath, page.CommonFields); err != nil {
+				return err
+			}
 		}
 		// Redirect from old URL to new URL
 		g.maybeAddNginxRedirect(page.CommonFields)
+	}
+
+	// Properly set page bundle type
+	postTypes := []string{
+		"products",
+		"product_variations",
+		"avada_faqs",
+		"avada_portfolios",
+	}
+
+	for _, postType := range postTypes {
+		if err := sanitizePostType(outputDirPath, postType); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -374,7 +549,13 @@ func getFilePath(pagesDir string, baseFileName string) string {
 				Str("baseFileName", baseFileName).
 				Str("pagePath", pagePath).
 				Msg("File already exists, trying another filename")
-			pagePath = path.Join(pagesDir, fmt.Sprintf("%s-%d.md", baseFileName, i))
+
+			fileNameParts := strings.SplitN(baseFileName, ".", 2)
+			if len(fileNameParts) == 2 {
+				pagePath = path.Join(pagesDir, fmt.Sprintf("%s-%d.%s.md", fileNameParts[0], i, fileNameParts[1]))
+			} else {
+				pagePath = path.Join(pagesDir, fmt.Sprintf("%s-%d.md", baseFileName, i))
+			}
 			if !utils.FileExists(pagePath) {
 				break
 			}
@@ -396,7 +577,11 @@ func (g Generator) writePosts(outputDirPath string, info wpparser.WebsiteInfo) e
 
 	// Write posts
 	for _, post := range info.Posts() {
-		postPath := getFilePath(postsDir, post.Filename())
+		file_name, lang := post.Filename()
+		if lang != "" {
+			file_name = fmt.Sprintf("%s.%s", file_name, lang)
+		}
+		postPath := getFilePath(postsDir, file_name)
 		if err := g.writePage(outputDirPath, postPath, post.CommonFields); err != nil {
 			return err
 		}
@@ -479,7 +664,8 @@ func (g Generator) newHugoPage(pageURL *url.URL, page wpparser.CommonFields) (*h
 		*pageURL, page.Author, page.Title, page.PublishDate,
 		page.PublishStatus == wpparser.PublishStatusDraft || page.PublishStatus == wpparser.PublishStatusPending,
 		page.Categories, page.Tags, g.wpInfo.GetAttachmentsForPost(page.PostID),
-		page.Footnotes, page.Content, page.GUID, page.FeaturedImageID, page.PostFormat, page.CustomMetaData, page.Taxonomies)
+		page.Footnotes, page.Content, page.GUID, page.FeaturedImageID, page.PostFormat,
+		page.CustomMetaData, page.Taxonomies, page.PostID, page.PostParentID)
 }
 
 func downloadMedia(link string, outputMediaDirPath string, prefixes []string, g Generator, pageURL *url.URL) (map[string]string, error) {
