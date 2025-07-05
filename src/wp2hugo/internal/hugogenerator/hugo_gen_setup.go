@@ -274,14 +274,14 @@ func (g Generator) downloadAllMedia(outputDirPath string, info wpparser.WebsiteI
 func getPagePath(outputDirPath string, page wpparser.CommonFields, posts []wpparser.CommonFields) (string, error) {
 	pagePath := ""
 
-	if page.PostParentID > 0 {
+	if page.PostParentID != nil {
 		for _, parent := range posts {
 			// If the custom post has a parent, we will add its .md file into
 			// the parent page branch bundle.
 			// Note that we don't care if the parent has the same type as the children,
 			// which is designed for WooCommerce : product variations are a different
 			// post type than their parent product. All in all, that seems generic enough.
-			if parent.PostID == page.PostParentID {
+			if parent.PostID == *page.PostParentID {
 				parent_file_name, _ := parent.Filename()
 				pagesDir := path.Join(outputDirPath, "content", *parent.PostType+"s", parent_file_name)
 				if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
@@ -297,8 +297,8 @@ func getPagePath(outputDirPath string, page wpparser.CommonFields, posts []wppar
 		}
 		if pagePath == "" {
 			log.Error().
-				Int("postID", page.PostID).
-				Int("postParentID", page.PostParentID).
+				Str("postID", page.PostID).
+				Str("postParentID", *page.PostParentID).
 				Msg("Critical error: pagePath is undefined for custom post")
 		}
 	}

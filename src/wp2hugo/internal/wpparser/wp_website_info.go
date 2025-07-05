@@ -25,7 +25,7 @@ type WebsiteInfo struct {
 	customPosts     []CustomPostInfo
 	taxonomies      []TaxonomyInfo
 
-	postIDToAttachmentCache map[int][]AttachmentInfo
+	postIDToAttachmentCache map[string][]AttachmentInfo
 }
 
 type NavigationLink struct {
@@ -75,7 +75,7 @@ func (w *WebsiteInfo) NavigationLinks() []NavigationLink {
 	return w.navigationLinks
 }
 
-func (w *WebsiteInfo) GetAttachmentsForPost(postID int) []AttachmentInfo {
+func (w *WebsiteInfo) GetAttachmentsForPost(postID string) []AttachmentInfo {
 	return w.postIDToAttachmentCache[postID]
 }
 
@@ -91,13 +91,13 @@ func (w *WebsiteInfo) CustomPosts() []CustomPostInfo {
 	return w.customPosts
 }
 
-func getPostIDToAttachmentsMap(attachments []AttachmentInfo) map[int][]AttachmentInfo {
-	result := make(map[int][]AttachmentInfo)
+func getPostIDToAttachmentsMap(attachments []AttachmentInfo) map[string][]AttachmentInfo {
+	result := make(map[string][]AttachmentInfo)
 	for _, attachment := range attachments {
-		if attachment.PostParentID == 0 {
+		if attachment.PostParentID == nil {
 			continue
 		}
-		parentID := attachment.PostParentID
+		parentID := *attachment.PostParentID
 		if result[parentID] == nil {
 			result[parentID] = make([]AttachmentInfo, 0, 1)
 		}
