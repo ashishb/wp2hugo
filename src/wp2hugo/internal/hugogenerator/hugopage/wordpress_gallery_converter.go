@@ -3,9 +3,10 @@ package hugopage
 import (
 	"errors"
 	"fmt"
-	"golang.org/x/net/html"
 	"regexp"
 	"strings"
+
+	"golang.org/x/net/html"
 
 	"github.com/rs/zerolog/log"
 )
@@ -75,8 +76,12 @@ func findInnerFigures(node *html.Node, results *[]*html.Node) {
 
 func renderNode(n *html.Node) string {
 	var b strings.Builder
-	html.Render(&b, n)
-	return b.String()
+	if err := html.Render(&b, n); err != nil {
+		log.Warn().Err(err).Msg("Failed to render HTML node")
+		return ""
+	} else {
+		return b.String()
+	}
 }
 
 func replaceGalleryFigure(htmlData string) string {
