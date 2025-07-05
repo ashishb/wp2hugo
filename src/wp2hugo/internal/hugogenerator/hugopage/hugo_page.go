@@ -329,6 +329,7 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 	converter := getMarkdownConverter()
 	htmlContent = improvePreTagsWithCode(htmlContent)
 	htmlContent = replaceCaptionWithFigure(htmlContent)
+	htmlContent = replaceImageBlockWithFigure(htmlContent)
 	htmlContent = replaceAudioShortCode(htmlContent)
 	htmlContent = replaceGalleryWithFigure(provider, attachmentIDs, htmlContent)
 	htmlContent = replaceAWBWithParallaxBlur(provider, htmlContent)

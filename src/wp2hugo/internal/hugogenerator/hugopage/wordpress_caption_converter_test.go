@@ -22,6 +22,12 @@ const example4 = `
 [caption id="" align="aligncenter" width="2048"]<a href="https://photo.aurelienpierre.com/wp-content/uploads/sites/3/2014/06/20140513_0036-Place-Jacques-Cartier-v2-web.jpg"><img src="https://photo.aurelienpierre.com/wp-content/uploads/sites/3/2014/06/20140513_0036-Place-Jacques-Cartier-v2-web.jpg" alt="Place Jacques Cartier v2" width="2048" height="1161" /></a> Retouche manuelle[/caption]
 <p>`
 
+const example5 = `
+<!-- wp:image {"align":"center","id":3875,"sizeSlug":"large","className":"is-style-default"} -->
+<div class="wp-block-image is-style-default"><figure class="aligncenter size-large"><img src="https://photo.aurelienpierre.com/wp-content/uploads/sites/3/2016/03/Shooting-Minh-Ly-0155-_DSC0155-Minh-Ly-WEB-1100x1100.jpg" alt="" class="wp-image-3875"/><figcaption>Minh-Ly</figcaption></figure></div>
+<!-- /wp:image -->
+`
+
 func TestRegExMatches(t *testing.T) {
 	assert.True(t, _CaptionRegEx1.MatchString(example1), "RegEx should match")
 	assert.True(t, _CaptionRegEx1.MatchString(example2), "RegEx should match")
@@ -30,9 +36,17 @@ func TestRegExMatches(t *testing.T) {
 	assert.False(t, _CaptionRegEx1.MatchString(example3), "RegEx should match")
 
 	assert.True(t, _CaptionRegEx2.MatchString(example3), "RegEx should match")
+
+	assert.True(t, _FigureRegexCaption.MatchString(example5), "Regex should match")
+	assert.False(t, _FigureRegexNoCaption.MatchString(example5), "Regex should match")
 }
 
 func TestCaption4Replace(t *testing.T) {
-	expected := "\n</p>\n{{< figure align=aligncenter width=2048 src=\"https://photo.aurelienpierre.com/wp-content/uploads/sites/3/2014/06/20140513%5F0036-Place-Jacques-Cartier-v2-web.jpg\" alt=\"\" >}}\n<p>"
+	expected := "\n</p>\n{{< figure align=\"aligncenter\" width=2048 src=\"https://photo.aurelienpierre.com/wp-content/uploads/sites/3/2014/06/20140513%5F0036-Place-Jacques-Cartier-v2-web.jpg\" alt=\"Place Jacques Cartier v2\" caption=\"Place Jacques Cartier v2\" >}}\n<p>"
 	assert.Equal(t, expected, replaceCaptionWithFigure(example4))
+}
+
+func TestFigure5Replace(t *testing.T) {
+	expected := "\n{{< figure src=\"https://photo.aurelienpierre.com/wp-content/uploads/sites/3/2016/03/Shooting-Minh-Ly-0155-%5FDSC0155-Minh-Ly-WEB-1100x1100.jpg\" alt=\"\" caption=\"Minh-Ly\" >}}\n"
+	assert.Equal(t, expected, replaceImageBlockWithFigure(example5))
 }
