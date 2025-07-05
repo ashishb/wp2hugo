@@ -331,6 +331,7 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 	htmlContent = replaceCaptionWithFigure(htmlContent)
 	htmlContent = replaceImageBlockWithFigure(htmlContent)
 	htmlContent = replaceAudioShortCode(htmlContent)
+	htmlContent = replaceGutembergGalleryWithFigure(htmlContent)
 	htmlContent = replaceGalleryWithFigure(provider, attachmentIDs, htmlContent)
 	htmlContent = replaceAWBWithParallaxBlur(provider, htmlContent)
 	htmlContent = strings.Replace(htmlContent, _WordPressMoreTag, _customMoreTag, 1)

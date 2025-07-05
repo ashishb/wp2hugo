@@ -97,6 +97,9 @@ func imageBlockReplacementFunction(groups []string) string {
 	}
 	if len(groups) > 3 {
 		caption = groups[3]
+		if alt == "" {
+			alt = caption
+		}
 	} else {
 		caption = alt
 	}
