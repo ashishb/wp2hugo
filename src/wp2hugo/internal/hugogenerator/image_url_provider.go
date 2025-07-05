@@ -30,8 +30,10 @@ func (w WordPressImageURLProvider) GetImageInfo(imageID string) (*hugopage.Image
 			}
 		}
 	}
-	log.Error().Str("imageID", imageID).Msg("Image URL not found")
-	return nil, fmt.Errorf("image URL not found for imageID: %s", imageID)
+	log.Error().
+		Str("imageID", imageID).
+		Msg("Image URL not found")
+	return nil, fmt.Errorf("image URL not found for imageID: %d", imageID)
 }
 
 func newImageURLProvider(info wpparser.WebsiteInfo) WordPressImageURLProvider {

@@ -63,7 +63,7 @@ type CommonFields struct {
 	PostFormat       *string
 	PostType         *string // Custom post types, typically FAQ, portfolio, etc.
 
-	// 1. Only attachments seem to have this
+	// 1. Attachments and hierachical pages have this
 	// 2. "0" seems to be reserved for no parent, we replace that with nil
 	PostParentID *string // ID of the parent post, if any
 
@@ -138,7 +138,7 @@ func findSlugAndParams(parts []string) (string, string) {
 	return file, params
 }
 
-func (i CommonFields) Filename() string {
+func (i CommonFields) Filename() (string, string) {
 	// Split canonical link path on /
 	parts := strings.Split(strings.TrimRight(i.Link, "/"), "/")
 	file, params := findSlugAndParams(parts)
@@ -164,11 +164,12 @@ func (i CommonFields) Filename() string {
 	// Append language suffix if found in link
 	langRegex := regexp.MustCompile(`(?:\?|&)lang=([^&$]+)`)
 	langMatch := langRegex.FindStringSubmatch(params)
+	lang := ""
 	if len(langMatch) > 1 {
-		file = fmt.Sprintf("%s.%s", file, langMatch[1])
+		lang = langMatch[1]
 	}
 
-	return file
+	return file, lang
 }
 
 func (i CommonFields) GetAttachmentURL() *string {
@@ -285,7 +286,7 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 					Msg("processing Post")
 				posts = append(posts, *post)
 			}
-		case "avada_portfolio", "avada_faq":
+		case "avada_portfolio", "avada_faq", "product", "product_variation":
 			// TODO: let user pass custom post types from CLI arguments ?
 			// Most custom post types are more or less regular posts handled with special templates
 			// and having their own archives, aside from blog posts.

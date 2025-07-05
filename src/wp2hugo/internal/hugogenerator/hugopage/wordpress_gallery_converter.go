@@ -57,7 +57,11 @@ func galleryReplacementFunction(provider ImageURLProvider, attachmentIDs []strin
 	ids := _idRegEx.FindStringSubmatch(galleryInfo)
 	if len(ids) == 0 {
 		if len(attachmentIDs) > 0 {
-			ids = []string{"", strings.Join(attachmentIDs, ",")}
+			idsStr := make([]string, len(attachmentIDs))
+			for i, id := range attachmentIDs {
+				idsStr[i] = fmt.Sprintf("%d", id)
+			}
+			ids = []string{"", strings.Join(idsStr, ",")}
 			log.Info().
 				Str("galleryInfo", galleryInfo).
 				Strs("attachmentIDs", attachmentIDs).
@@ -81,7 +85,8 @@ func galleryReplacementFunction(provider ImageURLProvider, attachmentIDs []strin
 
 	// For each image ID in WP gallery shortcode, get the URL
 	for _, s := range idsArray {
-		tmp, err := provider.GetImageInfo(s)
+		imgID := strings.TrimSpace(s)
+		tmp, err := provider.GetImageInfo(imgID)
 		if tmp != nil {
 			src := tmp.ImageURL
 			// These characters create problems in Hugo's markdown
