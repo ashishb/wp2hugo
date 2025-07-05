@@ -11,16 +11,16 @@ type WordPressImageURLProvider struct {
 	info wpparser.WebsiteInfo
 }
 
-func (w WordPressImageURLProvider) GetImageInfo(imageID int) (*hugopage.ImageInfo, error) {
+func (w WordPressImageURLProvider) GetImageInfo(imageID string) (*hugopage.ImageInfo, error) {
 	log.Debug().
-		Int("imageID", imageID).
+		Str("imageID", imageID).
 		Msg("GetImageURL")
 	for _, attachment := range w.info.Attachments() {
 		if attachment.PostID == imageID {
 			attachmentURL := attachment.GetAttachmentURL()
 			if attachmentURL != nil {
 				log.Info().
-					Int("imageID", imageID).
+					Str("imageID", imageID).
 					Str("Link", *attachmentURL).
 					Msg("Image URL found")
 				return &hugopage.ImageInfo{
@@ -30,8 +30,8 @@ func (w WordPressImageURLProvider) GetImageInfo(imageID int) (*hugopage.ImageInf
 			}
 		}
 	}
-	log.Error().Int("imageID", imageID).Msg("Image URL not found")
-	return nil, fmt.Errorf("image URL not found for imageID: %d", imageID)
+	log.Error().Str("imageID", imageID).Msg("Image URL not found")
+	return nil, fmt.Errorf("image URL not found for imageID: %s", imageID)
 }
 
 func newImageURLProvider(info wpparser.WebsiteInfo) WordPressImageURLProvider {

@@ -281,14 +281,14 @@ func (g Generator) writeCustomPosts(outputDirPath string, info wpparser.WebsiteI
 		// ensure it is saved in the same directory and
 		// prepend the name of the parent in the filename
 		pagePath := ""
-		if page.PostParentID > 0 {
+		if page.PostParentID != nil {
 			for _, parent := range info.CustomPosts() {
 				// If the custom post has a parent, we will add its .md file into
 				// the parent page branch bundle.
 				// Note that we don't care if the parent has the same type as the children,
 				// which is designed for WooCommerce : product variations are a different
 				// post type than their parent product. All in all, that seems generic enough.
-				if parent.PostID == page.PostParentID {
+				if parent.PostID == *page.PostParentID {
 					parent_file_name, _ := parent.Filename()
 					pagesDir := path.Join(outputDirPath, "content", *parent.PostType, parent_file_name)
 					if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
@@ -304,8 +304,8 @@ func (g Generator) writeCustomPosts(outputDirPath string, info wpparser.WebsiteI
 			}
 			if pagePath == "" {
 				log.Error().
-					Int("postID", page.PostID).
-					Int("postParentID", page.PostParentID).
+					Str("postID", page.PostID).
+					Str("postParentID", *page.PostParentID).
 					Msg("Critical error: pagePath is undefined for custom post")
 			}
 		}
