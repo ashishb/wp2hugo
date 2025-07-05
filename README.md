@@ -18,7 +18,27 @@
 This is the best migrator for migrating WordPress export to Hugo.
 It handles several weird edge cases that I encountered while trying to migrate my [personal website](https://v1.ashishb.net) to [Hugo-based site](https://v2.ashishb.net/).
 
-While this primarily targets Hugo-based code generation, one can use it to convert WordPress blogs to Markdown-based files that can be used with other systems for example Mkdocs or Jekyll.
+While this primarily targets Hugo-based code generation, one can use it to convert WordPress blogs to Markdown-based files that can be used with other systems,
+for example, [Mkdocs](https://www.mkdocs.org/) or [Jekyll](https://jekyllrb.com/).
+
+## Following sites have migrated using `wp2hugo`
+
+1. [ashishb.net](https://ashishb.net/tech/wordpress-to-hugo/)
+1. [inliniac.net](https://inliniac.net/blog/posts/blog-moved-to-hugo/)
+1. [blog.polarweasel.org](https://blog.polarweasel.org/2025/01/09/bye-wordpress/)
+1. [open-bio.org](https://www.open-bio.org/posts/2025-03-04-new-website/) - more details from [Bastian Greshake Tzovaras](https://tzovar.as/migrating-from-wp/)
+1. [Virtual Andy](https://dev.ahill.net/posts/moving-away-from-wpdotcom/)
+1. [bjørn:johansen](https://bjornjohansen.com/wp2hugo/)
+1. [xf.is](https://www.xf.is/2025/01/19/blog-update/)
+1. [retro.moe](https://retro.moe/2025/01/15/migrate_wordpress_to_hugo_in_github_pages/)
+1. [Marcelo Fernandez (in Spanish)](https://blog.marcelofernandez.info/posts/migracion-a-hugo/)
+1. [Mountain Water (Chinese Traditional)](https://mountainandwater.blog/2025/04/15/migration-from-wordpress-to-hugo/)
+1. [Hit To Key](https://hit-to-key.net/posts/2024-10-10-migration/)
+1. [Chuyển địa chỉ](https://tuanbui.net/2024/07/10/chuyen-dia-chi/)
+1. [Cynarski.dev (Polish)](https://cynarski.dev/2024/12/22/migracja_na_hugo/)
+1. [It's a Binary World 2.0](https://www.ericsbinaryworld.com/posts/wordpress-to-hugo-migration-process/)
+1. [The Legal Beaver](https://legalbeaver.ca/2024/06/12/migration-to-hugo/)
+1. [Deuts Log](https://deuts.org/x/446-wp2hugo/)
 
 ## Commercial usage
 
@@ -72,7 +92,7 @@ $ make build_prod
 
 ## Goals of `wp2hugo`
 
-### Migrate post types, taxonomies and their archive pages
+### Migrate post types, taxonomies, and their archive pages
 
 1. [x] Migrate posts
 1. [x] Migrate pages
@@ -81,11 +101,11 @@ $ make build_prod
 1. [x] Migrate [Avada](https://themeforest.net/item/avada-responsive-multipurpose-theme/2833226) custom post types (FAQ, Portfolios)
 1. [x] Set the WordPress homepage correctly
 1. [x] Create WordPress author page
-1. [x] Migrate [WPML](https://wpml.org/) translated posts, pages and custom post types that use the [URL parameter scheme](https://wpml.org/documentation/getting-started-guide/language-setup/language-url-options/#language-name-added-as-a-parameter) (switch the WPML language URL option prior to exporting your blog content to XML).
+1. [x] Migrate [WPML](https://wpml.org/) translated posts, pages, and custom post types that use the [URL parameter scheme](https://wpml.org/documentation/getting-started-guide/language-setup/language-url-options/#language-name-added-as-a-parameter) (switch the WPML language URL option prior to exporting your blog content to XML).
 
 ### Migrate permalinks
 
-1. [x] Migrate all the URLs including media URLs correctly
+1. [x] Migrate all the URLs, including media URL,s correctly
 1. [x] Generate Nginx config containing GUID -> relative URL mapping
 1. [x] Migrate the RSS feed with existing UUIDs, so that entries appear the same - this is important for anyone with a significant feed following, see more details of a [failed migration](https://theorangeone.net/posts/rss-guids/)
 1. [x] Map WordPress's RSS `feed.xml` to Hugo's RSS `feed.xml`
@@ -139,9 +159,9 @@ They rarely migrate the metadata like GUID, YouTube embeds, Google Map embeds, a
 
 ## Hugo Manager
 
-This repository contains an experimental tool `hugomanager`.
-I use this tool for the automatic generation of URLs from title as well as for knowing which blog posts are still
-marked draft or which ones are scheduled to be published soon.
+This repository contains an experimental tool, `hugomanager`.
+I use this tool for the automatic generation of URLs from the title as well as for knowing which blog posts are still
+marked as drafts or which ones are scheduled to be published soon.
 
 You can build that via
 
@@ -176,6 +196,8 @@ Flags:
       --viper            use Viper for configuration (default true)
 ```
 
-Note:
+Feel free to send a Pull request if you migrated your website using `wp2hugo`
+
+### Note
 
 1. To migrate comments, use [Remark42](https://remark42.com/docs/backup/migration/)

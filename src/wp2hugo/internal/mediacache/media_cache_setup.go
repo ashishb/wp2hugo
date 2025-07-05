@@ -3,13 +3,15 @@ package mediacache
 import (
 	"crypto/sha256"
 	"fmt"
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
-	"github.com/rs/zerolog/log"
 	"io"
 	"net/http"
 	"os"
 	"path"
 	"strings"
+	"time"
+
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
+	"github.com/rs/zerolog/log"
 )
 
 type MediaCache struct {
@@ -18,6 +20,40 @@ type MediaCache struct {
 
 func New(cacheDirPath string) MediaCache {
 	return MediaCache{cacheDirPath: cacheDirPath}
+}
+
+func waitOrStop(resp *http.Response) (int, bool) {
+	timeout := 1
+	stop := false
+	switch resp.StatusCode {
+
+	case http.StatusOK:
+		// Success
+		stop = true
+
+	case http.StatusTooManyRequests:
+		// HTTP error 429 = too many requests,
+		// aka we are getting rate-thresholded.
+		// Some servers may tell us when we are allowed to retry:
+		retryAfter := resp.Header.Get("Retry-After")
+		if retryAfter != "" {
+			if seconds, err := time.ParseDuration(retryAfter + "s"); err == nil {
+				timeout = int(seconds.Seconds())
+			}
+		} else {
+			timeout = 2
+		}
+
+	case http.StatusNotFound:
+		// HTTP error 404 = not found
+		// Useless to retry downloading
+		stop = true
+
+	default:
+
+	}
+
+	return timeout, stop
 }
 
 func (m MediaCache) GetReader(url string) (io.Reader, error) {
@@ -43,9 +79,25 @@ func (m MediaCache) GetReader(url string) (io.Reader, error) {
 	log.Info().
 		Str("url", url).
 		Msg("media will be fetched")
-	resp, err := http.Get(url)
-	if err != nil {
-		return nil, fmt.Errorf("error fetching media %s: %s", url, err)
+
+	var http_err error
+	var resp *http.Response = nil
+
+	retries := 0
+	timeout := 1
+	stop := false
+	for retries < 5 && !stop {
+		// Send at most 1 request per second
+		// to avoid hammering servers and getting thresholded
+		time.Sleep(time.Duration(timeout) * time.Second)
+		resp, http_err = http.Get(url)
+		timeout, stop = waitOrStop(resp)
+		retries++
+		timeout *= retries
+	}
+
+	if http_err != nil {
+		return nil, fmt.Errorf("error fetching media %s: %s", url, http_err)
 	}
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("error fetching media %s: %s", url, resp.Status)

@@ -101,6 +101,12 @@ func (page *Page) Markdown() string {
 	return page.markdown
 }
 
+func (page *Page) Replace(replacementMap map[string]string) {
+	for old, new := range replacementMap {
+		page.markdown = strings.ReplaceAll(page.markdown, old, new)
+	}
+}
+
 func (page Page) Write(w io.Writer) error {
 	if err := page.writeMetadata(w); err != nil {
 		return err
