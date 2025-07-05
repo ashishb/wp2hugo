@@ -194,7 +194,7 @@ func unserialiazePHParray(array string) interface{} {
 func getMetadata(provider ImageURLProvider, pageURL url.URL, author string, title string, publishDate *time.Time,
 	isDraft bool, categories []string, tags []string, guid *rss.GUID, featuredImageID *string,
 	postFormat *string, customMetaData []wpparser.CustomMetaDatum, taxinomies []wpparser.TaxonomyInfo,
-	postID string, parentPostID *string ) (map[string]any, error) {
+	postID string, parentPostID *string) (map[string]any, error) {
 
 	metadata := make(map[string]any)
 	metadata["url"] = pageURL.Path // Relative URL
