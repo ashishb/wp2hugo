@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"regexp"
-	"strconv"
 	"strings"
 )
 
 type ImageURLProvider interface {
 	// E.g. converts "4256" to "https://ashishb.net/wp-content/uploads/2018/12/bora_bora_5_resized.jpg"
-	GetImageInfo(imageID int) (*ImageInfo, error)
+	GetImageInfo(imageID string) (*ImageInfo, error)
 }
 
 type ImageInfo struct {
@@ -35,20 +34,12 @@ func replaceAWBWithParallaxBlur(provider ImageURLProvider, htmlData string) stri
 }
 
 func awbReplacementFunction(provider ImageURLProvider, groups []string) string {
-	srcImageIDStr := groups[1]
-	srcImageID, err := strconv.Atoi(srcImageIDStr)
-	if err != nil {
-		log.Fatal().
-			Err(err).
-			Str("imageID", srcImageIDStr).
-			Msg("Invalid image ID")
-		return ""
-	}
+	srcImageID := groups[1]
 	tmp, err := provider.GetImageInfo(srcImageID)
 	if tmp == nil {
 		log.Fatal().
 			Err(err).
-			Int("imageID", srcImageID).
+			Str("imageID", srcImageID).
 			Msg("Image URL not found")
 		return ""
 	}
