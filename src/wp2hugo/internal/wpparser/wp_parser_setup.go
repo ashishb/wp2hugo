@@ -138,7 +138,7 @@ func findSlugAndParams(parts []string) (string, string) {
 	return file, params
 }
 
-func (i CommonFields) Filename() string {
+func (i CommonFields) Filename() (string, string) {
 	// Split canonical link path on /
 	parts := strings.Split(strings.TrimRight(i.Link, "/"), "/")
 	file, params := findSlugAndParams(parts)
@@ -164,11 +164,12 @@ func (i CommonFields) Filename() string {
 	// Append language suffix if found in link
 	langRegex := regexp.MustCompile(`(?:\?|&)lang=([^&$]+)`)
 	langMatch := langRegex.FindStringSubmatch(params)
+	lang := ""
 	if len(langMatch) > 1 {
-		file = fmt.Sprintf("%s.%s", file, langMatch[1])
+		lang = langMatch[1]
 	}
 
-	return file
+	return file, lang
 }
 
 func (i CommonFields) GetAttachmentURL() *string {
@@ -480,6 +481,8 @@ func getCommonFields(item *rss.Item, taxonomies []TaxonomyInfo) (*CommonFields, 
 	var postType *string
 	if len(item.Extensions["wp"]["post_type"]) > 0 {
 		postType = &item.Extensions["wp"]["post_type"][0].Value
+	} else {
+		postType = nil
 	}
 
 	var postParent *string
@@ -490,6 +493,8 @@ func getCommonFields(item *rss.Item, taxonomies []TaxonomyInfo) (*CommonFields, 
 			Str("post_parent", tmp).
 			Msg("Item has a parent")
 		postParent = &tmp
+	} else {
+		postParent = nil
 	}
 
 	return &CommonFields{

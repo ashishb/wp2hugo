@@ -75,9 +75,10 @@ func NewPage(provider ImageURLProvider, pageURL url.URL, author string, title st
 	isDraft bool, categories []string, tags []string, attachments []wpparser.AttachmentInfo,
 	footnotes []wpparser.Footnote,
 	htmlContent string, guid *rss.GUID, featuredImageID *string, postFormat *string,
-	customMetaData []wpparser.CustomMetaDatum, taxinomies []wpparser.TaxonomyInfo) (*Page, error) {
+	customMetaData []wpparser.CustomMetaDatum, taxinomies []wpparser.TaxonomyInfo,
+	postID string, parentPostID *string) (*Page, error) {
 	metadata, err := getMetadata(provider, pageURL, author, title, publishDate, isDraft, categories, tags, guid,
-		featuredImageID, postFormat, customMetaData, taxinomies)
+		featuredImageID, postFormat, customMetaData, taxinomies, postID, parentPostID)
 	if err != nil {
 		return nil, err
 	}
@@ -198,12 +199,15 @@ func unserialiazePHParray(array string) interface{} {
 
 func getMetadata(provider ImageURLProvider, pageURL url.URL, author string, title string, publishDate *time.Time,
 	isDraft bool, categories []string, tags []string, guid *rss.GUID, featuredImageID *string,
-	postFormat *string, customMetaData []wpparser.CustomMetaDatum, taxinomies []wpparser.TaxonomyInfo) (map[string]any, error) {
+	postFormat *string, customMetaData []wpparser.CustomMetaDatum, taxinomies []wpparser.TaxonomyInfo,
+	postID string, parentPostID *string) (map[string]any, error) {
 
 	metadata := make(map[string]any)
 	metadata["url"] = pageURL.Path // Relative URL
 	metadata["author"] = author
 	metadata["title"] = title
+	metadata["post_id"] = postID
+	metadata["parent_post_id"] = parentPostID
 	if publishDate != nil {
 		metadata["date"] = publishDate.Format(_hugoDateFormat)
 	}
