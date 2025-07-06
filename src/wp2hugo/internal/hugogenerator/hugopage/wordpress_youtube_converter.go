@@ -10,7 +10,7 @@ import (
 // Example: Plain-text Youtube URLs on their own line in post content are turned by WP into embeds
 // The YouTube Lyte plug-in additionally uses "httpa://" for audio and "httpv://" for video embeds:
 // https://wordpress.com/plugins/wp-youtube-lyte
-var _YoutubeRegEx = regexp.MustCompile(`(?m)(^|\s)(?:\[embed\])?http[sav]?://(?:m\.|www\.)?(?:youtu\.be|youtube\.com)/(?:watch|w)\?v=([^&\s\[\]]+)(?:\[\/embed\])?`)
+var _YoutubeRegEx = regexp.MustCompile(`(?m)(^|\s)http[sav]?://(?:m\.|www\.)?(?:youtu\.be|youtube\.com)/(?:watch|w)\?v=([^&\s]+)`)
 
 // Gutenberg Youtube embed into figure:
 // <!-- wp:embed {"url":"https://www.youtube.com/watch?v=7l6FjphZXsk","type":"video","providerNameSlug":"youtube","responsive":true,"align":"full","className":"wp-embed-aspect-16-9 wp-has-aspect-ratio"} -->
@@ -19,6 +19,7 @@ var _YoutubeRegEx = regexp.MustCompile(`(?m)(^|\s)(?:\[embed\])?http[sav]?://(?:
 // </div></figure>
 // <!-- /wp:embed -->
 var _YoutubeGutenbergRegEx = regexp.MustCompile(`(?ms)(^|\s)<!-- wp:embed {"url":"[^"]+v=([^"]+)".*?<!-- /wp:embed -->`)
+var _YoutubeEmbedRegEx = regexp.MustCompile(`(?m)(^|\s)(?:[embed])http[sav]?://(?:m\.|www\.)?(?:youtu\.be|youtube\.com)/(?:watch|w)\?v=([^&\s]+)(?:[/embed])`)
 
 func replacePlaintextYoutubeURL(htmlData string) string {
 	log.Debug().
@@ -26,6 +27,7 @@ func replacePlaintextYoutubeURL(htmlData string) string {
 
 	htmlData = replaceAllStringSubmatchFunc(_YoutubeGutenbergRegEx, htmlData, YoutubeReplacementFunction)
 	htmlData = replaceAllStringSubmatchFunc(_YoutubeRegEx, htmlData, YoutubeReplacementFunction)
+	htmlData = replaceAllStringSubmatchFunc(_YoutubeEmbedRegEx, htmlData, YoutubeReplacementFunction)
 	return htmlData
 }
 
