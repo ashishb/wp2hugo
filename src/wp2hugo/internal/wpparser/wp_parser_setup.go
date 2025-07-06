@@ -15,6 +15,7 @@ import (
 	ext "github.com/mmcdole/gofeed/extensions"
 	"github.com/mmcdole/gofeed/rss"
 	"github.com/rs/zerolog/log"
+	"github.com/samber/lo"
 	"golang.org/x/text/runes"
 	"golang.org/x/text/transform"
 	"golang.org/x/text/unicode/norm"
@@ -137,7 +138,28 @@ func findSlugAndParams(parts []string) (string, string) {
 	return file, params
 }
 
-func (i CommonFields) Filename() (string, string) {
+type FileInfo struct {
+	filename string
+	language *string
+}
+
+func (f FileInfo) FileNameWithLanguage() string {
+	if f.language == nil {
+		return f.filename
+	}
+
+	return fmt.Sprintf("%s.%s", f.filename, *f.language)
+}
+
+func (f FileInfo) FileNameNoLanguage() string {
+	return f.filename
+}
+
+func (f FileInfo) Language() *string {
+	return f.language
+}
+
+func (i CommonFields) GetFileInfo() FileInfo {
 	// Split canonical link path on /
 	parts := strings.Split(strings.TrimRight(i.Link, "/"), "/")
 	file, params := findSlugAndParams(parts)
@@ -163,12 +185,15 @@ func (i CommonFields) Filename() (string, string) {
 	// Append language suffix if found in link
 	langRegex := regexp.MustCompile(`(?:\?|&)lang=([^&$]+)`)
 	langMatch := langRegex.FindStringSubmatch(params)
-	lang := ""
+	var lang *string
 	if len(langMatch) > 1 {
-		lang = langMatch[1]
+		lang = lo.ToPtr(langMatch[1])
 	}
 
-	return file, lang
+	return FileInfo{
+		filename: file,
+		language: lang,
+	}
 }
 
 func (i CommonFields) GetAttachmentURL() *string {
