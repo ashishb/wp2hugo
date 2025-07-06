@@ -72,7 +72,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: Install zizmor
-        run: cargo install zizmor
+        run: cargo install --locked zizmor
 
       - name: Run zizmor on GitHub Actions
         run: zizmor --config .github/zizmor_config.yaml .github/workflows/*
