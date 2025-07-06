@@ -5,6 +5,11 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"os"
+	"path"
+	"regexp"
+	"strings"
+
 	"github.com/adrg/frontmatter"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/frontmatterhelper"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/llmhelper"
@@ -12,10 +17,6 @@ import (
 	"github.com/openai/openai-go"
 	"github.com/rs/zerolog/log"
 	"github.com/samber/lo"
-	"os"
-	"path"
-	"regexp"
-	"strings"
 )
 
 const _imageAltSystemPrompt = `
@@ -25,9 +26,11 @@ avoiding quotation marks. Do not start with "The image.`
 
 // Parse "{{< figure align=aligncenter width=768 src="Cedar_trail_waterfall-768x1024.jpg" alt="" >}}"
 // and extract "src" and "alt" attributes using regular expressions
-var _figureShortCodeRegEx = regexp.MustCompile(`{{<\s*?figure.*?>\s*?}}`)
-var _figureShortCodeSrcRegEx = regexp.MustCompile(`src=['"](.*?)['"]`)
-var _figureShortCodeAltRegEx = regexp.MustCompile(`alt=['"](.*?)['"]`)
+var (
+	_figureShortCodeRegEx    = regexp.MustCompile(`{{<\s*?figure.*?>\s*?}}`)
+	_figureShortCodeSrcRegEx = regexp.MustCompile(`src=['"](.*?)['"]`)
+	_figureShortCodeAltRegEx = regexp.MustCompile(`alt=['"](.*?)['"]`)
+)
 
 type Result struct {
 	numImageWithAlt    int

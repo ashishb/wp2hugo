@@ -1,18 +1,20 @@
 package urlsuggest
 
 import (
+	"errors"
 	"fmt"
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/frontmatterhelper"
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
-	"github.com/rs/zerolog/log"
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/frontmatterhelper"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
+	"github.com/rs/zerolog/log"
 )
 
 func ProcessFile(path string, updateInline bool) (*string, error) {
 	if !strings.HasSuffix(path, ".md") {
-		return nil, fmt.Errorf("file is not a markdown file")
+		return nil, errors.New("file is not a markdown file")
 	}
 
 	if !utils.FileExists(path) {
@@ -80,10 +82,10 @@ func suggestURL(matter frontmatterhelper.FrontMatter, path string) (*string, err
 	prefix := getPrefix(matter)
 	suffix := getSuffix(matter, path)
 	if prefix == "" {
-		return nil, fmt.Errorf("no prefix found")
+		return nil, errors.New("no prefix found")
 	}
 	if suffix == "" {
-		return nil, fmt.Errorf("no suffix found")
+		return nil, errors.New("no suffix found")
 	}
 	prefix = normalize(prefix)
 	suffix = normalize(suffix)

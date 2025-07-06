@@ -8,18 +8,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	siteSummaryCmd = &cobra.Command{
-		Use:   "sitesummary",
-		Short: "Print site stats (e.g. number of posts, number of drafts etc.)",
-		Long:  "Print site stats (e.g. number of posts, number of drafts etc.)",
-		Run: func(cmd *cobra.Command, args []string) {
-			log.Info().Msg("Site Summary command called")
-			logger.ConfigureLogging(_colorLogOutput)
-			generateDirSummary(_hugoDir)
-		},
-	}
-)
+var siteSummaryCmd = &cobra.Command{
+	Use:   "sitesummary",
+	Short: "Print site stats (e.g. number of posts, number of drafts etc.)",
+	Long:  "Print site stats (e.g. number of posts, number of drafts etc.)",
+	Run: func(cmd *cobra.Command, args []string) {
+		log.Info().Msg("Site Summary command called")
+		logger.ConfigureLogging(_colorLogOutput)
+		generateDirSummary(_hugoDir)
+	},
+}
 
 func init() {
 	siteSummaryCmd.Flags().StringVarP(&_hugoDir, "hugo-dir", "", "", "Hugo base directory or any directory containing Hugo markdown files")

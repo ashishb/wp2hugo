@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"errors"
+
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/descriptionsuggest"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/logger"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
-
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/logger"
 )
 
 var _limit int
@@ -18,7 +18,6 @@ func init() {
 		"enable colored log output, set false to structured JSON log")
 	_suggestDescriptionCmd.Flags().IntVarP(&_limit, "limit", "n", 10, "Limit the number of files to update")
 	rootCmd.AddCommand(_suggestDescriptionCmd)
-
 }
 
 var _suggestDescriptionCmd = &cobra.Command{

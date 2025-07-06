@@ -3,7 +3,7 @@ package hugopage
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const _textWithIframe = `
@@ -31,27 +31,27 @@ some more text
 func TestIframe(t *testing.T) {
 	converter := getMarkdownConverter()
 	result, err := converter.ConvertString(_textWithIframe)
-	assert.NoError(t, err)
-	assert.Contains(t, result, `{{< googlemaps src="1lcjyzfxxXcdDP3XkrikfqIJryfFi4ZA" width=640 height=480 >}}`)
+	require.NoError(t, err)
+	require.Contains(t, result, `{{< googlemaps src="1lcjyzfxxXcdDP3XkrikfqIJryfFi4ZA" width=640 height=480 >}}`)
 }
 
 func TestBlockGist(t *testing.T) {
 	converter := getMarkdownConverter()
 	result, err := converter.ConvertString(_textWithBlockGist)
-	assert.NoError(t, err)
-	assert.Contains(t, result, `{{< gist lawrencegripper 8e701b0d201e65af0f8bc9b8b0b14207 >}}`)
+	require.NoError(t, err)
+	require.Contains(t, result, `{{< gist lawrencegripper 8e701b0d201e65af0f8bc9b8b0b14207 >}}`)
 }
 
 func TestBlockGistDoesNotBreakImgParsing(t *testing.T) {
 	converter := getMarkdownConverter()
 	result, err := converter.ConvertString(_textWithImgFigureBlock)
-	assert.NoError(t, err)
-	assert.Equal(t, `[![](https://blog.gripdev.xyz/wp-content/uploads/2024/03/image.png?w=1024)](https://blog.gripdev.xyz/wp-content/uploads/2024/03/image.png)`, result)
+	require.NoError(t, err)
+	require.Equal(t, `[![](https://blog.gripdev.xyz/wp-content/uploads/2024/03/image.png?w=1024)](https://blog.gripdev.xyz/wp-content/uploads/2024/03/image.png)`, result)
 }
 
 func TestMarkdownGist(t *testing.T) {
 	converter := getMarkdownConverter()
 	result, err := converter.ConvertString(_textMarkdownGist)
-	assert.NoError(t, err)
-	assert.Contains(t, result, `{{< gist lawrencegripper 6bee7de123bea1936359 >}}`)
+	require.NoError(t, err)
+	require.Contains(t, result, `{{< gist lawrencegripper 6bee7de123bea1936359 >}}`)
 }

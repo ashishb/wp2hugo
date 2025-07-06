@@ -2,9 +2,10 @@ package hugopage
 
 import (
 	"fmt"
+	"regexp"
+
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
 	"github.com/rs/zerolog/log"
-	"regexp"
 )
 
 // Example: "[catlist name="programming" catlink=yes date=yes date\_tag=p excerpt=no numberposts=5 date=no thumbnail=no]"
@@ -30,7 +31,7 @@ func replaceAllStringSubmatchFunc(re *regexp.Regexp, str string, repl func([]str
 	result := ""
 	lastIndex := 0
 
-	for _, v := range re.FindAllSubmatchIndex([]byte(str), -1) {
+	for _, v := range re.FindAllStringSubmatchIndex(str, -1) {
 		var groups []string
 		for i := 0; i < len(v); i += 2 {
 			groups = append(groups, str[v[i]:v[i+1]])

@@ -2,6 +2,7 @@ package nginxgenerator
 
 import (
 	_ "embed"
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -12,8 +13,10 @@ var _baseTemplate string
 const _redirectHomepageQueryStringTemplate = `
             if ($query_string = "%s") { return 302 %s; }`
 
-type _SourceQueryString string
-type _DestinationPath string
+type (
+	_SourceQueryString string
+	_DestinationPath   string
+)
 
 type Config struct {
 	redirects map[_SourceQueryString]_DestinationPath
@@ -28,11 +31,11 @@ func NewConfig() *Config {
 func (c *Config) AddRedirect(source string, destination string) error {
 	if !strings.HasPrefix(source, "/?") {
 		// No strong reason, just that this suffices for most of the use cases
-		return fmt.Errorf("only source path starting with /? are supported for now")
+		return errors.New("only source path starting with /? are supported for now")
 	}
 	// Sanity check to ensure that we are redirecting to a relative path
 	if !strings.HasPrefix(destination, "/") {
-		return fmt.Errorf("destination path must start with /")
+		return errors.New("destination path must start with /")
 	}
 	source = strings.TrimPrefix(source, "/?")
 	c.redirects[_SourceQueryString(source)] = _DestinationPath(destination)

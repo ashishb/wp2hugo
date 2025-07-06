@@ -74,7 +74,7 @@ func appendFile(outputFilePath string, data string) error {
 	log.Info().
 		Str("location", outputFilePath).
 		Msgf("Writing custom font to %s", outputFilePath)
-	f, err := os.OpenFile(outputFilePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	f, err := os.OpenFile(outputFilePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0o644)
 	if err != nil {
 		return err
 	}

@@ -10,10 +10,12 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var youtubeID = regexp.MustCompile(`youtube\.com/embed/([^\&\?\/]+)`)
-var googleMapsID = regexp.MustCompile(`google\.com/maps/d/.*embed\?mid=([0-9A-Za-z-_]+)`)
-var gistUrl = regexp.MustCompile(`gist\.github\.com/([^/]+)/([0-9a-f]+)`)
-var gistMarkdown = regexp.MustCompile(`\\\[gist .*\]`)
+var (
+	youtubeID    = regexp.MustCompile(`youtube\.com/embed/([^\&\?\/]+)`)
+	googleMapsID = regexp.MustCompile(`google\.com/maps/d/.*embed\?mid=([0-9A-Za-z-_]+)`)
+	gistUrl      = regexp.MustCompile(`gist\.github\.com/([^/]+)/([0-9a-f]+)`)
+	gistMarkdown = regexp.MustCompile(`\\\[gist .*\]`)
+)
 
 func getMarkdownConverter() *md.Converter {
 	converter := md.NewConverter("", true, nil)

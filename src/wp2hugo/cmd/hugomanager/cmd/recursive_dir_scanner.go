@@ -1,11 +1,12 @@
 package cmd
 
 import (
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
-	"github.com/rs/zerolog/log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
+	"github.com/rs/zerolog/log"
 )
 
 func scanDir(dir string, updateInline bool, action func(string, bool) error) {

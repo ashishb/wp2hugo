@@ -3,9 +3,10 @@ package hugogenerator
 import (
 	"bytes"
 	"fmt"
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
 	"os"
 	"path"
+
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
 )
 
 // setupRssFeedFormat sets up custom guid for RSS feed that is being migrated from WordPress
@@ -18,7 +19,7 @@ func setupRssFeedFormat(siteDir string) error {
 	// take precendece over the theme's rss.xml
 	data, err := os.ReadFile(path.Join(siteDir, "themes", "PaperMod", "layouts", "_default", "rss.xml"))
 	if err != nil {
-		return fmt.Errorf("error reading rss.xml from PaperMod theme: %s", err)
+		return fmt.Errorf("error reading rss.xml from PaperMod theme: %w", err)
 	}
 	rssFile := path.Join(siteDir, "layouts", "rss.xml")
 	return writeFile(rssFile, getModifiedRSSXML(data))

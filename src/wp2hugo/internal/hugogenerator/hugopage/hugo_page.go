@@ -2,9 +2,6 @@ package hugopage
 
 import (
 	"fmt"
-	"github.com/gomarkdown/markdown"
-	"github.com/gomarkdown/markdown/ast"
-	"github.com/gomarkdown/markdown/parser"
 	"io"
 	"net/url"
 	"regexp"
@@ -16,6 +13,9 @@ import (
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
 	"github.com/go-enry/go-enry/v2"
+	"github.com/gomarkdown/markdown"
+	"github.com/gomarkdown/markdown/ast"
+	"github.com/gomarkdown/markdown/parser"
 	"github.com/leeqvip/gophp"
 	"github.com/mmcdole/gofeed/rss"
 	"github.com/rs/zerolog/log"
@@ -41,8 +41,10 @@ type Page struct {
 const _WordPressMoreTag = "<!--more-->"
 
 // In the next step, we will replace this as well
-const _customMoreTag = "{{< more >}}"
-const _wordPressTocTag = "[toc]"
+const (
+	_customMoreTag   = "{{< more >}}"
+	_wordPressTocTag = "[toc]"
+)
 
 var (
 	// E.g. <pre class="EnlighterJSRAW" data-enlighter-language="golang">
@@ -76,7 +78,8 @@ func NewPage(provider ImageURLProvider, pageURL url.URL, author string, title st
 	footnotes []wpparser.Footnote,
 	htmlContent string, guid *rss.GUID, featuredImageID *string, postFormat *string,
 	customMetaData []wpparser.CustomMetaDatum, taxinomies []wpparser.TaxonomyInfo,
-	postID string, parentPostID *string) (*Page, error) {
+	postID string, parentPostID *string,
+) (*Page, error) {
 	metadata, err := getMetadata(provider, pageURL, author, title, publishDate, isDraft, categories, tags, guid,
 		featuredImageID, postFormat, customMetaData, taxinomies, postID, parentPostID)
 	if err != nil {
@@ -181,7 +184,7 @@ func getMarkdownLinks(regex *regexp.Regexp, markdown string) []string {
 	return links
 }
 
-func unserialiazePHParray(array string) interface{} {
+func unserialiazePHParray(array string) any {
 	/* Ex:
 	a:2:{s:10:"taxonomies";s:32:"f166db6f0df2a3df4c2715a8bcc30eec";s:15:"postmeta_fields";s:32:"0edff5c6e53a54394f90f7b5a8fc1e76";}
 	*/
@@ -200,8 +203,8 @@ func unserialiazePHParray(array string) interface{} {
 func getMetadata(provider ImageURLProvider, pageURL url.URL, author string, title string, publishDate *time.Time,
 	isDraft bool, categories []string, tags []string, guid *rss.GUID, featuredImageID *string,
 	postFormat *string, customMetaData []wpparser.CustomMetaDatum, taxinomies []wpparser.TaxonomyInfo,
-	postID string, parentPostID *string) (map[string]any, error) {
-
+	postID string, parentPostID *string,
+) (map[string]any, error) {
 	metadata := make(map[string]any)
 	metadata["url"] = pageURL.Path // Relative URL
 	metadata["author"] = author
@@ -268,7 +271,7 @@ func getMetadata(provider ImageURLProvider, pageURL url.URL, author string, titl
 			coverInfo := make(map[string]string)
 			imageURL, err := url.Parse(imageInfo.ImageURL)
 			if err != nil {
-				return nil, fmt.Errorf("error parsing image URL '%s': %s", imageInfo.ImageURL, err)
+				return nil, fmt.Errorf("error parsing image URL '%s': %w", imageInfo.ImageURL, err)
 			}
 			if imageURL.Host == pageURL.Host {
 				// If the image URL is on the same host as the page, we can use a relative URL
@@ -308,11 +311,11 @@ func (page *Page) getCoverImageURL() *string {
 func (page *Page) writeMetadata(w io.Writer) error {
 	combinedMetadata, err := utils.GetYAML(page.metadata)
 	if err != nil {
-		return fmt.Errorf("error marshalling metadata: %s", err)
+		return fmt.Errorf("error marshalling metadata: %w", err)
 	}
 	combinedMetadataStr := fmt.Sprintf("---\n%s\n---\n", string(combinedMetadata))
 	if _, err := w.Write([]byte(combinedMetadataStr)); err != nil {
-		return fmt.Errorf("error writing to page file: %s", err)
+		return fmt.Errorf("error writing to page file: %w", err)
 	}
 	return nil
 }
@@ -359,7 +362,7 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 		Msg("Markdown conversion")
 
 	if err != nil {
-		return nil, fmt.Errorf("error converting HTML to Markdown: %s", err)
+		return nil, fmt.Errorf("error converting HTML to Markdown: %w", err)
 	}
 	if len(strings.TrimSpace(markdown)) == 0 {
 		// The page contains no markdown. Warn the user, but keep going.
@@ -439,7 +442,7 @@ func improvePreTagsWithCode(htmlContent string) string {
 // Mark code blocks with auto-detected language
 // Note: https://github.com/alecthomas/chroma is fairly inaccurate in detecting languages
 func highlightCode(markdown string) string {
-	var _codeBlocExtractor = regexp.MustCompile("\\`\\`\\`(.*)?\\n([.\\s\\S]*)?\\`\\`\\`")
+	_codeBlocExtractor := regexp.MustCompile("\\`\\`\\`(.*)?\\n([.\\s\\S]*)?\\`\\`\\`")
 	matches := _codeBlocExtractor.FindAllStringSubmatch(markdown, -1)
 	if len(matches) == 0 {
 		log.Debug().
@@ -513,13 +516,13 @@ func removeTrailingSpaces(markdown string) string {
 
 func (page Page) writeContent(w io.Writer) error {
 	if _, err := w.Write([]byte(page.markdown)); err != nil {
-		return fmt.Errorf("error writing to page file: %s", err)
+		return fmt.Errorf("error writing to page file: %w", err)
 	}
 
 	if !strings.HasSuffix(page.markdown, "\n") {
 		// Add a newline at the end of the file
 		if _, err := w.Write([]byte("\n")); err != nil {
-			return fmt.Errorf("error writing newline to page file: %s", err)
+			return fmt.Errorf("error writing newline to page file: %w", err)
 		}
 	}
 	return nil

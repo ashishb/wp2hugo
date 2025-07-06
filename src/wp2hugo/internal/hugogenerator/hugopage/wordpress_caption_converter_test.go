@@ -3,7 +3,7 @@ package hugopage
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const example1 = `
@@ -29,24 +29,24 @@ const example5 = `
 `
 
 func TestRegExMatches(t *testing.T) {
-	assert.True(t, _CaptionRegEx1.MatchString(example1), "RegEx should match")
-	assert.True(t, _CaptionRegEx1.MatchString(example2), "RegEx should match")
-	assert.True(t, _CaptionRegEx1.MatchString(example4), "RegEx should match")
+	require.True(t, _CaptionRegEx1.MatchString(example1), "RegEx should match")
+	require.True(t, _CaptionRegEx1.MatchString(example2), "RegEx should match")
+	require.True(t, _CaptionRegEx1.MatchString(example4), "RegEx should match")
 
-	assert.False(t, _CaptionRegEx1.MatchString(example3), "RegEx should match")
+	require.False(t, _CaptionRegEx1.MatchString(example3), "RegEx should match")
 
-	assert.True(t, _CaptionRegEx2.MatchString(example3), "RegEx should match")
+	require.True(t, _CaptionRegEx2.MatchString(example3), "RegEx should match")
 
-	assert.True(t, _FigureRegexCaption.MatchString(example5), "Regex should match")
-	assert.False(t, _FigureRegexNoCaption.MatchString(example5), "Regex should match")
+	require.True(t, _FigureRegexCaption.MatchString(example5), "Regex should match")
+	require.False(t, _FigureRegexNoCaption.MatchString(example5), "Regex should match")
 }
 
 func TestCaption4Replace(t *testing.T) {
 	expected := "\n</p>\n{{< figure align=\"aligncenter\" width=2048 src=\"https://photo.aurelienpierre.com/wp-content/uploads/sites/3/2014/06/20140513%5F0036-Place-Jacques-Cartier-v2-web.jpg\" alt=\"Place Jacques Cartier v2\" caption=\"Place Jacques Cartier v2\" >}}\n<p>"
-	assert.Equal(t, expected, replaceCaptionWithFigure(example4))
+	require.Equal(t, expected, replaceCaptionWithFigure(example4))
 }
 
 func TestFigure5Replace(t *testing.T) {
 	expected := "\n{{< figure src=\"https://photo.aurelienpierre.com/wp-content/uploads/sites/3/2016/03/Shooting-Minh-Ly-0155-%5FDSC0155-Minh-Ly-WEB-1100x1100.jpg\" alt=\"\" caption=\"Minh-Ly\" >}}\n"
-	assert.Equal(t, expected, replaceImageBlockWithFigure(example5))
+	require.Equal(t, expected, replaceImageBlockWithFigure(example5))
 }

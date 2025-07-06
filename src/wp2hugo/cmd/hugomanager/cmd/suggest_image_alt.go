@@ -2,12 +2,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/imagealtsuggest"
-	"github.com/rs/zerolog/log"
-	"github.com/spf13/cobra"
 	"strings"
 
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/imagealtsuggest"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/logger"
+	"github.com/rs/zerolog/log"
+	"github.com/spf13/cobra"
 )
 
 func init() {

@@ -2,6 +2,7 @@ package mediacache
 
 import (
 	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"net/http"
@@ -26,7 +27,6 @@ func waitOrStop(resp *http.Response) (int, bool) {
 	timeout := 1
 	stop := false
 	switch resp.StatusCode {
-
 	case http.StatusOK:
 		// Success
 		stop = true
@@ -50,7 +50,6 @@ func waitOrStop(resp *http.Response) (int, bool) {
 		stop = true
 
 	default:
-
 	}
 
 	return timeout, stop
@@ -64,11 +63,11 @@ func (m MediaCache) GetReader(url string) (io.Reader, error) {
 	}
 
 	if err := utils.CreateDirIfNotExist(m.cacheDirPath); err != nil {
-		return nil, fmt.Errorf("error creating cache directory: %s", err)
+		return nil, fmt.Errorf("error creating cache directory: %w", err)
 	}
 
 	key := getSHA256(url)
-	file, err := os.OpenFile(path.Join(m.cacheDirPath, key), os.O_RDONLY, 0644)
+	file, err := os.OpenFile(path.Join(m.cacheDirPath, key), os.O_RDONLY, 0o644)
 	if err == nil {
 		log.Info().
 			Str("url", url).
@@ -97,7 +96,7 @@ func (m MediaCache) GetReader(url string) (io.Reader, error) {
 	}
 
 	if http_err != nil {
-		return nil, fmt.Errorf("error fetching media %s: %s", url, http_err)
+		return nil, fmt.Errorf("error fetching media %s: %w", url, http_err)
 	}
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("error fetching media %s: %s", url, resp.Status)
@@ -106,22 +105,22 @@ func (m MediaCache) GetReader(url string) (io.Reader, error) {
 	defer func() {
 		_ = resp.Body.Close()
 	}()
-	file, err = os.OpenFile(path.Join(m.cacheDirPath, key), os.O_CREATE|os.O_WRONLY, 0644)
+	file, err = os.OpenFile(path.Join(m.cacheDirPath, key), os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
-		return nil, fmt.Errorf("error creating cache file for media %s: %s", url, err)
+		return nil, fmt.Errorf("error creating cache file for media %s: %w", url, err)
 	}
 	_, err = io.Copy(file, resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("error writing media to cache %s: %s", url, err)
+		return nil, fmt.Errorf("error writing media to cache %s: %w", url, err)
 	}
 
 	if err := file.Close(); err != nil {
-		return nil, fmt.Errorf("error closing cache file for media %s: %s", url, err)
+		return nil, fmt.Errorf("error closing cache file for media %s: %w", url, err)
 	}
 
-	file, err = os.OpenFile(path.Join(m.cacheDirPath, key), os.O_RDONLY, 0644)
+	file, err = os.OpenFile(path.Join(m.cacheDirPath, key), os.O_RDONLY, 0o644)
 	if err != nil {
-		return nil, fmt.Errorf("error opening cache file for media %s: %s", url, err)
+		return nil, fmt.Errorf("error opening cache file for media %s: %w", url, err)
 	}
 	return file, nil
 }
@@ -129,5 +128,5 @@ func (m MediaCache) GetReader(url string) (io.Reader, error) {
 func getSHA256(url string) string {
 	hasher := sha256.New()
 	hasher.Write([]byte(url))
-	return fmt.Sprintf("%x", hasher.Sum(nil))
+	return hex.EncodeToString(hasher.Sum(nil))
 }

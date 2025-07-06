@@ -1,17 +1,15 @@
 package hugopage
 
 import (
-	"fmt"
+	"regexp"
+
 	md "github.com/JohannesKaufmann/html-to-markdown"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/rs/zerolog/log"
-	"regexp"
 )
 
-var (
-	// Match consecutive <br>
-	_consecutiveBRRegex = regexp.MustCompile(`(?mi)(<br\s*/?>\s*){2,}`)
-)
+// Match consecutive <br>
+var _consecutiveBRRegex = regexp.MustCompile(`(?mi)(<br\s*/?>\s*){2,}`)
 
 const (
 	_consecutiveBrCustomTag = "consecutive-br"
@@ -40,7 +38,7 @@ func convertCustomBRToNewline() md.Plugin {
 						Str("content", content).
 						Str("text", selec.Text()).
 						Msg("Converting custom BR to newline")
-					text := fmt.Sprintf("\n\n%s", content)
+					text := "\n\n" + content
 					return &text
 				},
 			},
