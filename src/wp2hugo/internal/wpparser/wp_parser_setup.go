@@ -286,7 +286,7 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 					Msg("processing Post")
 				posts = append(posts, *post)
 			}
-		case "avada_portfolio", "avada_faq":
+		case "avada_portfolio", "avada_faq", "product", "product_variation":
 			// TODO: let user pass custom post types from CLI arguments ?
 			// Most custom post types are more or less regular posts handled with special templates
 			// and having their own archives, aside from blog posts.

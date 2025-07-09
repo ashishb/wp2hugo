@@ -440,9 +440,7 @@ func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) e
 	}
 
 	// Properly set page bundle type
-	if err := sanitizePostType(outputDirPath, "pages"); err != nil {
-		return err
-	}
+	sanitizePostType(outputDirPath, "pages")
 
 	return nil
 }
@@ -484,9 +482,7 @@ func (g Generator) writeCustomPosts(outputDirPath string, info wpparser.WebsiteI
 	}
 
 	for _, postType := range postTypes {
-		if err := sanitizePostType(outputDirPath, postType); err != nil {
-			return err
-		}
+		sanitizePostType(outputDirPath, postType)
 	}
 
 	return nil
