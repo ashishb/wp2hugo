@@ -402,8 +402,10 @@ func sanitizePageBundles(dirPath string) error {
 	return nil
 }
 
-func sanitizePostType(outputDirPath string, postType string) error {
-	return sanitizePageBundles(path.Join(outputDirPath, "content", postType))
+func sanitizePostType(outputDirPath string, postType string) {
+	if err := sanitizePageBundles(path.Join(outputDirPath, "content", postType)); err != nil {
+		// Intentionally ignore the error
+	}
 }
 
 func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) error {
