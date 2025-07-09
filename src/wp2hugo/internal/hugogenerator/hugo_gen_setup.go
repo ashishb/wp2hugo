@@ -405,6 +405,7 @@ func sanitizePageBundles(dirPath string) error {
 func sanitizePostType(outputDirPath string, postType string) {
 	if err := sanitizePageBundles(path.Join(outputDirPath, "content", postType)); err != nil {
 		// Intentionally ignore the error
+		fmt.Println("Error sanitizing page bundles:", err)
 	}
 }
 
