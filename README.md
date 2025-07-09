@@ -90,6 +90,10 @@ $ make build_prod
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/wp2hugo.svg)](https://repology.org/project/wp2hugo/versions)
 
+## Documentation
+
+More details on [the documentation](https://github.com/ashishb/wp2hugo/tree/main/doc).
+
 ## Goals of `wp2hugo`
 
 ### Migrate post types, taxonomies, and their archive pages
@@ -129,7 +133,7 @@ $ make build_prod
     1. [x] Migrate [WordPress [audio] shortcode](https://wordpress.org/documentation/article/audio-shortcode/))
 1. Migrate Gutenberg blocks and features:
     1. [x] Migrate WordPress [footnotes](https://github.com/ashishb/wp2hugo/issues/24)
-    1. [x] Migrate WordPress [gallery](https://wordpress.com/support/wordpress-editor/blocks/gallery-block/) including [empty Gallery](https://github.com/ashishb/wp2hugo/issues/68)
+    1. [x] Migrate WordPress [gallery shortcode](https://codex.wordpress.org/Gallery_Shortcode) including [empty Gallery](https://github.com/ashishb/wp2hugo/issues/68)
 
 ### Migrate post metadata and attributes
 
