@@ -23,13 +23,12 @@ import (
 const _filenameSizeLimit = 200
 
 var (
-	errTrashItem = fmt.Errorf("item is in trash")
+	errTrashItem = errors.New("item is in trash")
 	// \p{L} matches any letter from any language while \w matches only ASCII letters
 	nonAlphanumericRegex = regexp.MustCompile(`[^\p{L}]+`)
 )
 
-type Parser struct {
-}
+type Parser struct{}
 
 func NewParser() *Parser {
 	return &Parser{}
@@ -211,7 +210,7 @@ func (p *Parser) Parse(xmlData io.Reader, authors []string) (*WebsiteInfo, error
 		log.Warn().
 			Err(err).
 			Msgf("error parsing XML")
-		return nil, fmt.Errorf("error parsing XML: %s", err)
+		return nil, fmt.Errorf("error parsing XML: %w", err)
 	}
 	nonEmptyAuthors := make([]string, 0, len(authors))
 	for _, a := range authors {
@@ -555,7 +554,7 @@ func getAuthor(item *rss.Item) string {
 
 func getNavigationLinks(content string) ([]NavigationLink, error) {
 	// Extract all HTML comments
-	var htmlCommentExtractor = regexp.MustCompile(`<!--(.*?)-->`)
+	htmlCommentExtractor := regexp.MustCompile(`<!--(.*?)-->`)
 	comments := htmlCommentExtractor.FindAllString(content, -1)
 	log.Debug().
 		Int("navigationLinks", len(comments)).
@@ -563,7 +562,7 @@ func getNavigationLinks(content string) ([]NavigationLink, error) {
 	results := make([]NavigationLink, 0, len(comments))
 	for _, comment := range comments {
 		log.Trace().Msgf("comment: %s", comment)
-		var navigationLinkExtractor = regexp.MustCompile(`{.*}`)
+		navigationLinkExtractor := regexp.MustCompile(`{.*}`)
 		match := navigationLinkExtractor.FindString(comment)
 		if match == "" {
 			continue

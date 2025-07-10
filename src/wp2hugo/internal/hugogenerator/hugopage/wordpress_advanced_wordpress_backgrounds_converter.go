@@ -2,9 +2,10 @@ package hugopage
 
 import (
 	"fmt"
-	"github.com/rs/zerolog/log"
 	"regexp"
 	"strings"
+
+	"github.com/rs/zerolog/log"
 )
 
 type ImageURLProvider interface {

@@ -1,11 +1,10 @@
 package cmd
 
 import (
-	"github.com/rs/zerolog/log"
-	"github.com/spf13/cobra"
-
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/urlsuggest"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/logger"
+	"github.com/rs/zerolog/log"
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -20,7 +19,6 @@ func init() {
 	_urlSuggestCmd.PersistentFlags().BoolVarP(&_colorLogOutput, "color-log-output", "", true,
 		"enable colored log output, set false to structured JSON log")
 	rootCmd.AddCommand(_urlSuggestCmd)
-
 }
 
 var _urlSuggestCmd = &cobra.Command{

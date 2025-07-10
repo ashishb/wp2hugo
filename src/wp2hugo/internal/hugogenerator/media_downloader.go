@@ -2,13 +2,14 @@ package hugogenerator
 
 import (
 	"fmt"
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
-	"github.com/rs/zerolog/log"
 	"io"
 	"net/url"
 	"os"
 	"path"
 	"regexp"
+
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
+	"github.com/rs/zerolog/log"
 )
 
 func writeFavicon(outputDirPath string, faviconData io.Reader) error {
@@ -30,7 +31,7 @@ func download(destFilePath string, reader io.Reader) error {
 	if _hexPattern.MatchString(fileName) {
 		tmp1, err := url.PathUnescape(fileName)
 		if err != nil {
-			return fmt.Errorf("error unescaping filename %s: %s", fileName, err)
+			return fmt.Errorf("error unescaping filename %s: %w", fileName, err)
 		}
 		log.Info().
 			Str("fileName", fileName).
@@ -40,18 +41,18 @@ func download(destFilePath string, reader io.Reader) error {
 		destFilePath = path.Join(path.Dir(destFilePath), fileName)
 	}
 
-	file, err := os.OpenFile(destFilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	file, err := os.OpenFile(destFilePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
 	if err != nil {
-		return fmt.Errorf("error opening file %s: %s", destFilePath, err)
+		return fmt.Errorf("error opening file %s: %w", destFilePath, err)
 	}
 
 	_, err = io.Copy(file, reader)
 	if err != nil {
-		return fmt.Errorf("error writing to file %s: %s", destFilePath, err)
+		return fmt.Errorf("error writing to file %s: %w", destFilePath, err)
 	}
 
 	if err := file.Close(); err != nil {
-		return fmt.Errorf("error closing file %s: %s", destFilePath, err)
+		return fmt.Errorf("error closing file %s: %w", destFilePath, err)
 	}
 
 	return err

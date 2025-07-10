@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
+	"strings"
+
 	"github.com/adrg/frontmatter"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/frontmatterhelper"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/llmhelper"
 	"github.com/openai/openai-go"
 	"github.com/rs/zerolog/log"
-	"os"
-	"strings"
 )
 
 const _seoDescriptionSystemPrompt = "Extract a compelling and SEO-friendly meta description (under 160 characters) from the following" +

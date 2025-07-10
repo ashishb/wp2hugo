@@ -15,7 +15,7 @@ func ConvertAbsoluteLinksToRelative(path string, updateInline bool, hostname str
 	}
 
 	re1 := regexp.MustCompile(fmt.Sprintf(`(http|https)://%s/([^\?]+)`, hostname))
-	if re1.MatchString(string(data)) {
+	if re1.Match(data) {
 		log.Warn().
 			Str("path", path).
 			Msg("Absolute link found in file")
@@ -24,7 +24,7 @@ func ConvertAbsoluteLinksToRelative(path string, updateInline bool, hostname str
 			Str("path", path).
 			Msg("File updated")
 		if updateInline {
-			err := os.WriteFile(path, data, 0644)
+			err := os.WriteFile(path, data, 0o644)
 			if err != nil {
 				return fmt.Errorf("failed to write file %s: %w", path, err)
 			}

@@ -19,14 +19,18 @@ import (
 //     Gutenberg can optionnaly nest <figcaption> into <figure>, below <audio>. We disregard it here.
 //
 // Reference : https://wordpress.org/documentation/article/audio-shortcode/
-var _AudioShortCodeRegEx = regexp.MustCompile(`\[audio ([^\]]+)\](?:.*)(?:\[\/audio\])?`)
-var _AudioHTMLRegEx = regexp.MustCompile(`<figure (?:.*?)class="(?:.*?)wp-block-audio(?:.*?)">\s*<audio ([^<>]*?)\/?>(?:<\/audio>)?(?:[\s\S]*?)</figure>`)
+var (
+	_AudioShortCodeRegEx = regexp.MustCompile(`\[audio ([^\]]+)\](?:.*)(?:\[\/audio\])?`)
+	_AudioHTMLRegEx      = regexp.MustCompile(`<figure (?:.*?)class="(?:.*?)wp-block-audio(?:.*?)">\s*<audio ([^<>]*?)\/?>(?:<\/audio>)?(?:[\s\S]*?)</figure>`)
+)
 
-var _srcRegEx = regexp.MustCompile(`src="([^"]+)"`)
-var _mp3RegEx = regexp.MustCompile(`mp3="([^"]+)"`)
-var _m4aRegEx = regexp.MustCompile(`m4a="([^"]+)"`)
-var _oggRegEx = regexp.MustCompile(`ogg="([^"]+)"`)
-var _wavRegEx = regexp.MustCompile(`wav="([^"]+)"`)
+var (
+	_srcRegEx = regexp.MustCompile(`src="([^"]+)"`)
+	_mp3RegEx = regexp.MustCompile(`mp3="([^"]+)"`)
+	_m4aRegEx = regexp.MustCompile(`m4a="([^"]+)"`)
+	_oggRegEx = regexp.MustCompile(`ogg="([^"]+)"`)
+	_wavRegEx = regexp.MustCompile(`wav="([^"]+)"`)
+)
 
 func replaceAudioShortCode(htmlData string) string {
 	log.Debug().

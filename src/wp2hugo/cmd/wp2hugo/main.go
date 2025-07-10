@@ -2,14 +2,15 @@ package main
 
 import (
 	"flag"
+	"os"
+	"path"
+	"strings"
+
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugogenerator"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/logger"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/mediacache"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
 	"github.com/rs/zerolog/log"
-	"os"
-	"path"
-	"strings"
 )
 
 var (
@@ -58,7 +59,7 @@ func handle(filePath string) error {
 
 func getWebsiteInfo(filePath string) (*wpparser.WebsiteInfo, error) {
 	parser := wpparser.NewParser()
-	file, err := os.OpenFile(filePath, os.O_RDONLY, 0644)
+	file, err := os.OpenFile(filePath, os.O_RDONLY, 0o644)
 	if err != nil {
 		return nil, err
 	}

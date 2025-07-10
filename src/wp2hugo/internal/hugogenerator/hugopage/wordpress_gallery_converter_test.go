@@ -3,7 +3,7 @@ package hugopage
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestReplaceGutenbergGallery(t *testing.T) {
@@ -26,5 +26,5 @@ func TestReplaceGutenbergGallery(t *testing.T) {
 </figure>
 <!-- /wp:gallery -->`
 	const expected = `<br>{{< gallery cols="2" >}}<br>{{< figure src="https://photo.aurelienpierre.com/wp-content/uploads/sites/3/2020/02/haute-diffusion-1.jpg" alt="Lumière fortement diffusée" caption="Lumière fortement diffusée" >}}<br>{{< figure src="https://photo.aurelienpierre.com/wp-content/uploads/sites/3/2020/02/faible-diffusion.jpg" alt="Lumière faiblement diffusée<br/>" caption="Lumière faiblement diffusée<br/>" >}}<br>{{< /gallery >}}<br>`
-	assert.Equal(t, expected, replaceGutembergGalleryWithFigure(htmlData))
+	require.Equal(t, expected, replaceGutembergGalleryWithFigure(htmlData))
 }

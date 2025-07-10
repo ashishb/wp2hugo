@@ -2,13 +2,14 @@ package contentmigratorv1
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/gitutils"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
 	"github.com/rs/zerolog/log"
 	"github.com/samber/lo"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
 func ProcessFile(path string, updateInline bool) (*bool, error) {
@@ -30,7 +31,7 @@ func ProcessFile(path string, updateInline bool) (*bool, error) {
 	// Ignore all files without attachments
 	hasAttachments, err := hasAttachments(path)
 	if err != nil {
-		return lo.ToPtr(false), fmt.Errorf("error checking attachments for file '%s': %s", path, err)
+		return lo.ToPtr(false), fmt.Errorf("error checking attachments for file '%s': %w", path, err)
 	}
 
 	if !*hasAttachments {
@@ -52,7 +53,7 @@ func ProcessFile(path string, updateInline bool) (*bool, error) {
 func moveFileAndAttachmentIntoSameDir(path string) error {
 	images, err := getAllImageAttachmentURLs(path)
 	if err != nil {
-		return fmt.Errorf("error getting image attachment URLs for file '%s': %s", path, err)
+		return fmt.Errorf("error getting image attachment URLs for file '%s': %w", path, err)
 	}
 
 	if len(images) == 0 {
@@ -67,7 +68,7 @@ func moveFileAndAttachmentIntoSameDir(path string) error {
 	// Step 1: move file "./content/posts/filename.md" -> "./content/posts/filename/index.md"
 	blogPostDirPath, err := moveFileToIndexMd(path)
 	if err != nil {
-		return fmt.Errorf("error moving file '%s' to index: %s", path, err)
+		return fmt.Errorf("error moving file '%s' to index: %w", path, err)
 	}
 	newBlogPostMdPath := filepath.Join(*blogPostDirPath, "index.md")
 
@@ -82,12 +83,12 @@ func moveFileAndAttachmentIntoSameDir(path string) error {
 
 		imgFilePath, err := findStaticAttachmentFilePath(path, image)
 		if err != nil {
-			return fmt.Errorf("error finding image attachment file '%s': %s", image, err)
+			return fmt.Errorf("error finding image attachment file '%s': %w", image, err)
 		}
 
 		newImgFilePath := filepath.Join(*blogPostDirPath, filepath.Base(*imgFilePath))
 		if err := gitutils.GitMove(*imgFilePath, newImgFilePath); err != nil {
-			return fmt.Errorf("error moving image attachment file '%s': %s", *imgFilePath, err)
+			return fmt.Errorf("error moving image attachment file '%s': %w", *imgFilePath, err)
 		}
 
 		log.Debug().
@@ -96,7 +97,7 @@ func moveFileAndAttachmentIntoSameDir(path string) error {
 			Msg("Moved image attachment")
 		// Replace the image URL in the markdown file
 		if err := replaceImageURLInMarkdownFile(newBlogPostMdPath, image, filepath.Base(*imgFilePath)); err != nil {
-			return fmt.Errorf("error replacing image URL in markdown file '%s': %s", path, err)
+			return fmt.Errorf("error replacing image URL in markdown file '%s': %w", path, err)
 		}
 	}
 
@@ -117,8 +118,8 @@ func moveFileToIndexMd(path string) (*string, error) {
 		return nil, fmt.Errorf("file '%s' already exists", newFilePath)
 	}
 
-	if err := os.MkdirAll(dirPath, 0755); err != nil {
-		return nil, fmt.Errorf("error creating directory '%s': %s", dirPath, err)
+	if err := os.MkdirAll(dirPath, 0o755); err != nil {
+		return nil, fmt.Errorf("error creating directory '%s': %w", dirPath, err)
 	}
 	log.Debug().
 		Str("path", path).
@@ -131,12 +132,12 @@ func replaceImageURLInMarkdownFile(markdownFilePath string, oldURL, newURL strin
 	// Replace the image URL in the markdown file
 	content, err := os.ReadFile(markdownFilePath)
 	if err != nil {
-		return fmt.Errorf("error reading markdown file '%s': %s", markdownFilePath, err)
+		return fmt.Errorf("error reading markdown file '%s': %w", markdownFilePath, err)
 	}
 
 	newContent := strings.ReplaceAll(string(content), oldURL, newURL)
-	if err := os.WriteFile(markdownFilePath, []byte(newContent), 0600); err != nil {
-		return fmt.Errorf("error writing markdown file '%s': %s", markdownFilePath, err)
+	if err := os.WriteFile(markdownFilePath, []byte(newContent), 0o600); err != nil {
+		return fmt.Errorf("error writing markdown file '%s': %w", markdownFilePath, err)
 	}
 
 	return nil

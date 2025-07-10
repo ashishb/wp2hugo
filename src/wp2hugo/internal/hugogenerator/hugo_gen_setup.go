@@ -64,7 +64,8 @@ type MediaProvider interface {
 
 func NewGenerator(outputDirPath string, fontName string,
 	mediaProvider MediaProvider, downloadMedia bool, downloadAll bool, continueOnMediaDownloadFailure bool,
-	generateNgnixConfig bool, info wpparser.WebsiteInfo) *Generator {
+	generateNgnixConfig bool, info wpparser.WebsiteInfo,
+) *Generator {
 	var ngnixConfig *nginxgenerator.Config
 	if generateNgnixConfig {
 		ngnixConfig = nginxgenerator.NewConfig()
@@ -149,7 +150,7 @@ func (g Generator) Generate() error {
 
 	if g.generateNgnixConfig {
 		nginxConfigPath := path.Join(*siteDir, "nginx.conf")
-		if err = os.WriteFile(nginxConfigPath, []byte(g.ngnixConfig.Generate()), 0644); err != nil {
+		if err = os.WriteFile(nginxConfigPath, []byte(g.ngnixConfig.Generate()), 0o644); err != nil {
 			return err
 		} else {
 			log.Info().
@@ -168,7 +169,7 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 	// Replace spaces and colons with dashes
 	timeFormat := time.Now().Format(
 		strings.ReplaceAll(strings.ReplaceAll(time.DateTime, " ", "-"), ":", "-"))
-	siteName := fmt.Sprintf("generated-%s", timeFormat)
+	siteName := "generated-" + timeFormat
 	log.Debug().
 		Str("siteName", siteName).
 		Msg("Setting up Hugo site")
@@ -178,17 +179,17 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 		log.Fatal().
 			Err(err).
 			Msg("Hugo not found, install it from https://gohugo.io/")
-		return nil, fmt.Errorf("hugo not found, install it from https://gohugo.io/: %s", err)
+		return nil, fmt.Errorf("hugo not found, install it from https://gohugo.io/: %w", err)
 	}
 
 	// Create output directory
-	err = os.MkdirAll(outputDirPath, 0700)
+	err = os.MkdirAll(outputDirPath, 0o700)
 	if err != nil {
 		log.Fatal().
 			Err(err).
 			Str("outputDirPath", outputDirPath).
 			Msg("error creating output directory")
-		return nil, fmt.Errorf("error creating output directory '%s': %s", outputDirPath, err)
+		return nil, fmt.Errorf("error creating output directory '%s': %w", outputDirPath, err)
 	}
 
 	commands := []string{
@@ -225,7 +226,7 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 				Bytes("output", output).
 				Str("cmd", command).
 				Msg("error running Hugo setup command")
-			return nil, fmt.Errorf("error running Hugo setup command '%s' -> %s", command, err)
+			return nil, fmt.Errorf("error running Hugo setup command '%s' -> %w", command, err)
 		}
 		log.Debug().Msgf("Hugo setup output: %s", output)
 	}
@@ -242,7 +243,7 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 				Err(err).
 				Str("dir", dir).
 				Msg("error removing directory")
-			return nil, fmt.Errorf("error removing directory '%s': %s", dir, err)
+			return nil, fmt.Errorf("error removing directory '%s': %w", dir, err)
 		}
 	}
 
@@ -257,10 +258,10 @@ func (g Generator) downloadAllMedia(outputDirPath string, info wpparser.WebsiteI
 	hostname := info.Link().Host
 	prefixes := make([]string, 0)
 	hostname = strings.TrimPrefix(hostname, "www.")
-	prefixes = append(prefixes, fmt.Sprintf("https://%s", hostname))
-	prefixes = append(prefixes, fmt.Sprintf("http://%s", hostname))
-	prefixes = append(prefixes, fmt.Sprintf("https://www.%s", hostname))
-	prefixes = append(prefixes, fmt.Sprintf("http://www.%s", hostname))
+	prefixes = append(prefixes, "https://"+hostname)
+	prefixes = append(prefixes, "http://"+hostname)
+	prefixes = append(prefixes, "https://www."+hostname)
+	prefixes = append(prefixes, "http://www."+hostname)
 
 	for _, attachment := range info.Attachments() {
 		if _, err := downloadMedia(*attachment.GetAttachmentURL(), outputDirPath, prefixes, g, info.Link()); err != nil {
@@ -541,7 +542,7 @@ func sameHost(url1 url.URL, url2 url.URL) bool {
 // Sometimes multiple pages have the same filename
 // Ref: https://github.com/ashishb/wp2hugo/issues/7
 func getFilePath(pagesDir string, baseFileName string) string {
-	pagePath := path.Join(pagesDir, fmt.Sprintf("%s.md", baseFileName))
+	pagePath := path.Join(pagesDir, baseFileName+".md")
 	if utils.FileExists(pagePath) {
 		for i := 1; ; i++ {
 			log.Info().
@@ -605,16 +606,16 @@ func setupSearchPage(siteDir string) error {
 }
 
 func writeFile(filePath string, content []byte) error {
-	w, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	w, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
 	if err != nil {
-		return fmt.Errorf("error opening archive file: %s", err)
+		return fmt.Errorf("error opening archive file: %w", err)
 	}
 	if _, err := w.Write(content); err != nil {
-		return fmt.Errorf("error writing to archive file: %s", err)
+		return fmt.Errorf("error writing to archive file: %w", err)
 	}
 
 	if err := w.Close(); err != nil {
-		return fmt.Errorf("error closing archive file: %s", err)
+		return fmt.Errorf("error closing archive file: %w", err)
 	}
 	return nil
 }
@@ -622,12 +623,12 @@ func writeFile(filePath string, content []byte) error {
 func (g Generator) writePage(outputMediaDirPath string, pagePath string, page wpparser.CommonFields) error {
 	pageURL, err := url.Parse(page.Link)
 	if err != nil {
-		return fmt.Errorf("error parsing page URL: %s", err)
+		return fmt.Errorf("error parsing page URL: %w", err)
 	}
 
 	p, err := g.newHugoPage(pageURL, page)
 	if err != nil {
-		return fmt.Errorf("error creating Hugo page: %s", err)
+		return fmt.Errorf("error creating Hugo page: %w", err)
 	}
 
 	if g.downloadMedia {
@@ -639,17 +640,17 @@ func (g Generator) writePage(outputMediaDirPath string, pagePath string, page wp
 		}
 	}
 
-	w, err := os.OpenFile(pagePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	w, err := os.OpenFile(pagePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
 	if err != nil {
-		return fmt.Errorf("error opening page file: %s", err)
+		return fmt.Errorf("error opening page file: %w", err)
 	}
 
 	if err = p.Write(w); err != nil {
-		return fmt.Errorf("error writing page file: %s", err)
+		return fmt.Errorf("error writing page file: %w", err)
 	}
 
 	if err = w.Close(); err != nil {
-		return fmt.Errorf("error closing page file: %s", err)
+		return fmt.Errorf("error closing page file: %w", err)
 	}
 
 	log.Info().Msgf("Page written: %s", pagePath)
@@ -668,10 +669,9 @@ func (g Generator) newHugoPage(pageURL *url.URL, page wpparser.CommonFields) (*h
 }
 
 func downloadMedia(link string, outputMediaDirPath string, prefixes []string, g Generator, pageURL *url.URL) (map[string]string, error) {
-
 	// Uniformize protocol-less links: add protocol
 	if strings.HasPrefix(link, "//") {
-		link = strings.Replace(link, "//", fmt.Sprintf("%s://", pageURL.Scheme), 1)
+		link = strings.Replace(link, "//", pageURL.Scheme+"://", 1)
 	}
 
 	// Turn all absolute links pointing to current host into relative links
@@ -754,7 +754,7 @@ func downloadMedia(link string, outputMediaDirPath string, prefixes []string, g 
 				Msg("error fetching media file")
 			return urlReplacement, nil
 		} else {
-			return nil, fmt.Errorf("error fetching media file %s: %s", link, err)
+			return nil, fmt.Errorf("error fetching media file %s: %w", link, err)
 		}
 	}
 
@@ -766,7 +766,7 @@ func downloadMedia(link string, outputMediaDirPath string, prefixes []string, g 
 				Str("pageLink", pageURL.String()).
 				Msg("error downloading media file")
 		} else {
-			return nil, fmt.Errorf("error downloading media file: %s embedded in %s", err, pageURL.String())
+			return nil, fmt.Errorf("error downloading media file: %w embedded in %s", err, pageURL.String())
 		}
 	}
 
@@ -787,10 +787,10 @@ func (g Generator) downloadPageMedia(outputMediaDirPath string, p *hugopage.Page
 	hostname := pageURL.Host
 	prefixes := make([]string, 0)
 	hostname = strings.TrimPrefix(hostname, "www.")
-	prefixes = append(prefixes, fmt.Sprintf("https://%s", hostname))
-	prefixes = append(prefixes, fmt.Sprintf("http://%s", hostname))
-	prefixes = append(prefixes, fmt.Sprintf("https://www.%s", hostname))
-	prefixes = append(prefixes, fmt.Sprintf("http://www.%s", hostname))
+	prefixes = append(prefixes, "https://"+hostname)
+	prefixes = append(prefixes, "http://"+hostname)
+	prefixes = append(prefixes, "https://www."+hostname)
+	prefixes = append(prefixes, "http://www."+hostname)
 
 	urlReplacements := make(map[string]string)
 

@@ -2,7 +2,6 @@ package hugogenerator
 
 import (
 	"errors"
-	"fmt"
 	"path"
 
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
@@ -158,6 +157,6 @@ func writeShortCode(siteDir string, shortCodeName string, fileContent string) er
 	if err := utils.CreateDirIfNotExist(path.Join(siteDir, "layouts", "shortcodes")); err != nil {
 		return err
 	}
-	googleMapsFile := path.Join(shortCodeDir, fmt.Sprintf("%s.html", shortCodeName))
+	googleMapsFile := path.Join(shortCodeDir, shortCodeName+".html")
 	return writeFile(googleMapsFile, []byte(fileContent))
 }

@@ -3,8 +3,9 @@ package utils
 import (
 	"bytes"
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"os"
+
+	"gopkg.in/yaml.v3"
 )
 
 func GetYAML(input any) ([]byte, error) {
@@ -13,14 +14,14 @@ func GetYAML(input any) ([]byte, error) {
 	encoder.SetIndent(2)
 	err := encoder.Encode(input)
 	if err != nil {
-		return nil, fmt.Errorf("error marshalling to YAML: %s", err)
+		return nil, fmt.Errorf("error marshalling to YAML: %w", err)
 	}
 	return output.Bytes(), nil
 }
 
 func CreateDirIfNotExist(dirPath string) error {
-	if err := os.MkdirAll(dirPath, 0755); err != nil && !os.IsExist(err) {
-		return fmt.Errorf("error creating directory: %s", err)
+	if err := os.MkdirAll(dirPath, 0o755); err != nil && !os.IsExist(err) {
+		return fmt.Errorf("error creating directory: %w", err)
 	}
 	return nil
 }

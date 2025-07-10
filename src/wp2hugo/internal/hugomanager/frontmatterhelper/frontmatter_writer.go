@@ -2,11 +2,12 @@ package frontmatterhelper
 
 import (
 	"fmt"
+	"os"
+	"strings"
+
 	"github.com/adrg/frontmatter"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
-	"os"
-	"strings"
 )
 
 func UpdateFrontmatter(path string, key string, value string) error {
@@ -37,12 +38,12 @@ func UpdateFrontmatter(path string, key string, value string) error {
 	} else {
 		return fmt.Errorf("key '%s' is not supported", key)
 	}
-	file, err := os.OpenFile(path, os.O_WRONLY|os.O_TRUNC, 0644)
+	file, err := os.OpenFile(path, os.O_WRONLY|os.O_TRUNC, 0o644)
 	if err != nil {
 		return err
 	}
 
-	_, err = file.Write([]byte("---\n"))
+	_, err = file.WriteString("---\n")
 	if err != nil {
 		return err
 	}
@@ -53,7 +54,7 @@ func UpdateFrontmatter(path string, key string, value string) error {
 	if err != nil {
 		return err
 	}
-	_, err = file.Write([]byte("---\n"))
+	_, err = file.WriteString("---\n")
 	if err != nil {
 		return err
 	}

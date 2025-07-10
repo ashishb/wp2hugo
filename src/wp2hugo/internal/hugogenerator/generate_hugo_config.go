@@ -1,15 +1,17 @@
 package hugogenerator
 
 import (
+	"errors"
 	"fmt"
+	"os"
+	"path"
+	"strings"
+
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugogenerator/hugopage"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
-	"os"
-	"path"
-	"strings"
 )
 
 type _HugoNavMenu struct {
@@ -74,9 +76,9 @@ type _HugoConfig struct {
 
 func updateConfig(siteDir string, info wpparser.WebsiteInfo) error {
 	configPath := path.Join(siteDir, "hugo.yaml")
-	r, err := os.OpenFile(configPath, os.O_RDONLY, 0644)
+	r, err := os.OpenFile(configPath, os.O_RDONLY, 0o644)
 	if err != nil {
-		return fmt.Errorf("error opening config file: %s", err)
+		return fmt.Errorf("error opening config file: %w", err)
 	}
 	defer func() {
 		_ = r.Close()
@@ -84,10 +86,10 @@ func updateConfig(siteDir string, info wpparser.WebsiteInfo) error {
 
 	var config _HugoConfig
 	if err := yaml.NewDecoder(r).Decode(&config); err != nil {
-		return fmt.Errorf("error unmarshalling config: %s", err)
+		return fmt.Errorf("error unmarshalling config: %w", err)
 	}
 	if config.Theme == "" {
-		return fmt.Errorf("error: theme is not set in the config file")
+		return errors.New("error: theme is not set in the config file")
 	}
 	// Ref: https://adityatelange.github.io/hugo-PaperMod/posts/papermod/papermod-faq/
 	config.Title = info.Title()
@@ -124,11 +126,11 @@ func updateConfig(siteDir string, info wpparser.WebsiteInfo) error {
 	}
 
 	if err := r.Close(); err != nil {
-		return fmt.Errorf("error closing config file: %s", err)
+		return fmt.Errorf("error closing config file: %w", err)
 	}
 	data, err := utils.GetYAML(config)
 	if err != nil {
-		return fmt.Errorf("error marshalling config: %s", err)
+		return fmt.Errorf("error marshalling config: %w", err)
 	}
 	log.Info().Msgf("Updating config file: %s", configPath)
 	return writeFile(configPath, data)

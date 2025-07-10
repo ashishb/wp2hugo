@@ -3,7 +3,7 @@ package hugopage
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var testCases = []string{
@@ -15,6 +15,6 @@ var testCases = []string{
 
 func TestParallelBlurRegEx(t *testing.T) {
 	for _, testCase := range testCases {
-		assert.True(t, _AWBRegEx.MatchString(testCase))
+		require.True(t, _AWBRegEx.MatchString(testCase))
 	}
 }

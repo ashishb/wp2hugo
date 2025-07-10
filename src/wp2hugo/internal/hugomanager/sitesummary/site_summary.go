@@ -2,13 +2,13 @@ package sitesummary
 
 import (
 	"fmt"
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/frontmatterhelper"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 	"time"
 
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/frontmatterhelper"
 	"github.com/mergestat/timediff"
 	"github.com/rs/zerolog/log"
 )
@@ -119,7 +119,6 @@ func ScanDir(dir string) (*SiteSummary, error) {
 		}
 		return nil
 	})
-
 	if err != nil {
 		return nil, err
 	}

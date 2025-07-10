@@ -6,9 +6,8 @@ import (
 	"regexp"
 	"strings"
 
-	"golang.org/x/net/html"
-
 	"github.com/rs/zerolog/log"
+	"golang.org/x/net/html"
 )
 
 // Example:  [gallery size="medium" link="file" columns="4" ids="1710,1713,1712,1711"]
@@ -17,9 +16,11 @@ import (
 // `size` is legacy from pre-responsive design and should be discarded now
 // `link` is probably something to enforce in Hugo figure shortcode,
 // It is mostly "file" to handle, since "attachment_page" makes no sense for Hugo.
-var _GalleryRegEx = regexp.MustCompile(`\[gallery ([^\[\]]*)\]`)
-var _idRegEx = regexp.MustCompile(`ids="([^"]+)"`)
-var _colsRegEx = regexp.MustCompile(`columns="([^"]+)"`)
+var (
+	_GalleryRegEx = regexp.MustCompile(`\[gallery ([^\[\]]*)\]`)
+	_idRegEx      = regexp.MustCompile(`ids="([^"]+)"`)
+	_colsRegEx    = regexp.MustCompile(`columns="([^"]+)"`)
+)
 
 // Example:
 // <!-- wp:gallery {"ids":[14951,14949],"imageCrop":false,"linkTo":"file","sizeSlug":"full","align":"wide"} -->
@@ -146,7 +147,6 @@ func gutenbergGalleryReplacementFunction(groups []string) string {
 	for _, f := range inners {
 		output.WriteString(f)
 		output.WriteString("<br>") // This will get converted to newline later on
-
 	}
 	output.WriteString(`{{< /gallery >}}`)
 	output.WriteString("<br>") // This will get converted to newline later on

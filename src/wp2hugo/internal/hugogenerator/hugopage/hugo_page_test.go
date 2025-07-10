@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -62,24 +62,24 @@ func TestManualLineBreaks(t *testing.T) {
 
 func testMarkdownExtractor(t *testing.T, htmlInput string, markdownOutput string) {
 	url1, err := url.Parse("https://example.com")
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	page, err := NewPage(nil, *url1, "author", "Title", nil, false, nil, nil, nil, nil, htmlInput, nil, nil, nil, nil, nil, "0", nil)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	md, err := page.getMarkdown(nil, htmlInput, nil)
-	assert.NoError(t, err)
-	assert.Equal(t, markdownOutput, *md)
+	require.NoError(t, err)
+	require.Equal(t, markdownOutput, *md)
 }
 
 func TestPreTagExtractor2(t *testing.T) {
 	const example1 = `<pre class="lang:js decode:true">document.querySelector("video").playbackRate = 2.0;   // For 2X speed-up</pre>`
 	const example2 = `<pre class="theme:solarized-dark lang:sh decode:true">echo "whatever"</pre>`
 	const example3 = `<pre class="lang:sh decode:true"># Sample invocation:\n</pre>`
-	assert.True(t, _preTagExtractor2.MatchString(example1))
-	assert.True(t, _preTagExtractor2.MatchString(example2))
-	assert.True(t, _preTagExtractor2.MatchString(example3))
+	require.True(t, _preTagExtractor2.MatchString(example1))
+	require.True(t, _preTagExtractor2.MatchString(example2))
+	require.True(t, _preTagExtractor2.MatchString(example3))
 
 	result3 := _preTagExtractor2.FindAllStringSubmatch(example3, -1)
-	assert.Len(t, result3, 1)
-	assert.Len(t, result3[0], 3)
-	assert.Equal(t, "sh", result3[0][1])
+	require.Len(t, result3, 1)
+	require.Len(t, result3[0], 3)
+	require.Equal(t, "sh", result3[0][1])
 }

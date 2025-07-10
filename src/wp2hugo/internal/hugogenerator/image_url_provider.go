@@ -2,6 +2,7 @@ package hugogenerator
 
 import (
 	"fmt"
+
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugogenerator/hugopage"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
 	"github.com/rs/zerolog/log"

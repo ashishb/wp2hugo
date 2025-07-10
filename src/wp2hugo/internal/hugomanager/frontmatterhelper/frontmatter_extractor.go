@@ -1,12 +1,13 @@
 package frontmatterhelper
 
 import (
-	"github.com/adrg/frontmatter"
-	"github.com/rs/zerolog/log"
-	"gopkg.in/yaml.v2"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/adrg/frontmatter"
+	"github.com/rs/zerolog/log"
+	"gopkg.in/yaml.v2"
 )
 
 type FrontMatter struct {

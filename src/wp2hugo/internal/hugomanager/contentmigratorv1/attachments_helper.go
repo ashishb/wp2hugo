@@ -1,14 +1,16 @@
 package contentmigratorv1
 
 import (
+	"errors"
 	"fmt"
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
-	"github.com/rs/zerolog/log"
-	"github.com/samber/lo"
 	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
+
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
+	"github.com/rs/zerolog/log"
+	"github.com/samber/lo"
 )
 
 func hasAttachments(path string) (*bool, error) {
@@ -18,7 +20,7 @@ func hasAttachments(path string) (*bool, error) {
 func hasImageAttachments(path string) (*bool, error) {
 	urls, err := getAllImageAttachmentURLs(path)
 	if err != nil {
-		return nil, fmt.Errorf("error getting image attachment URLs for file '%s': %s", path, err)
+		return nil, fmt.Errorf("error getting image attachment URLs for file '%s': %w", path, err)
 	}
 	return lo.ToPtr(len(urls) > 0), nil
 }
@@ -26,7 +28,7 @@ func hasImageAttachments(path string) (*bool, error) {
 func getAllImageAttachmentURLs(path string) ([]string, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("error reading file '%s': %s", path, err)
+		return nil, fmt.Errorf("error reading file '%s': %w", path, err)
 	}
 
 	// Regex 1 for figure shortcodes
@@ -73,7 +75,7 @@ func findStaticAttachmentFilePath(markdownFilePath string, attachmentURL string)
 			Msg("Static directory does not exist, still looking in the parent directory")
 		baseDir2 := filepath.Dir(baseDir)
 		if baseDir2 == baseDir {
-			return nil, fmt.Errorf("static directory not found")
+			return nil, errors.New("static directory not found")
 		}
 		baseDir = baseDir2
 	}
@@ -87,7 +89,7 @@ func findStaticAttachmentFilePath(markdownFilePath string, attachmentURL string)
 	// Sometimes the attachment URL contains URL encoded characters like %5F for underscore
 	attachmentURL, err := url.PathUnescape(attachmentURL)
 	if err != nil {
-		return nil, fmt.Errorf("error unescaping attachment URL '%s': %s", attachmentURL, err)
+		return nil, fmt.Errorf("error unescaping attachment URL '%s': %w", attachmentURL, err)
 	}
 
 	attachmentFilePath = filepath.Join(filepath.Join(baseDir, "static"), attachmentURL)

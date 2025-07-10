@@ -2,10 +2,11 @@ package gitutils
 
 import (
 	"fmt"
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
-	"github.com/rs/zerolog/log"
 	"os/exec"
 	"path/filepath"
+
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
+	"github.com/rs/zerolog/log"
 )
 
 func GitMove(path string, newFilePath string) error {
@@ -22,7 +23,7 @@ func GitMove(path string, newFilePath string) error {
 	cmd.Dir = filepath.Dir(path)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("error moving file '%s' to '%s': %s\n%s", path, newFilePath, err, output)
+		return fmt.Errorf("error moving file '%s' to '%s': %w\n%s", path, newFilePath, err, output)
 	}
 	log.Debug().
 		Str("path", path).
