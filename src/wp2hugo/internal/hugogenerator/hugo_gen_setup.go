@@ -103,10 +103,13 @@ func (g Generator) Generate() error {
 		}
 	}
 
-	if err = g.writePages(*siteDir, info); err != nil {
+	// Non-hierarchical content:
+	if err = g.writePosts(*siteDir, info); err != nil {
 		return err
 	}
-	if err = g.writePosts(*siteDir, info); err != nil {
+
+	// Hierarchical content:
+	if err = g.writePages(*siteDir, info); err != nil {
 		return err
 	}
 	if err = g.writeCustomPosts(*siteDir, info); err != nil {
@@ -268,6 +271,144 @@ func (g Generator) downloadAllMedia(outputDirPath string, info wpparser.WebsiteI
 	return nil
 }
 
+func getPagePath(outputDirPath string, page wpparser.CommonFields, posts []wpparser.CommonFields) (string, error) {
+	pagePath := ""
+
+	if page.PostParentID != nil {
+		for _, parent := range posts {
+			// If the custom post has a parent, we will add its .md file into
+			// the parent page branch bundle.
+			// Note that we don't care if the parent has the same type as the children,
+			// which is designed for WooCommerce : product variations are a different
+			// post type than their parent product. All in all, that seems generic enough.
+			if parent.PostID == *page.PostParentID {
+				parent_file_name, _ := parent.Filename()
+				pagesDir := path.Join(outputDirPath, "content", *parent.PostType+"s", parent_file_name)
+				if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
+					return pagePath, err
+				}
+				file_name, lang := page.Filename()
+				if lang != "" {
+					file_name = fmt.Sprintf("%s.%s", file_name, lang)
+				}
+				pagePath = getFilePath(pagesDir, file_name)
+				break
+			}
+		}
+		if pagePath == "" {
+			log.Error().
+				Str("postID", page.PostID).
+				Str("postParentID", *page.PostParentID).
+				Msg("Critical error: pagePath is undefined for custom post")
+		}
+	}
+
+	// Whether the post has no parent or we could not find it:
+	if pagePath == "" {
+		// Create a branch page bundle using using a dynamic posttype subfolder
+		file_name, lang := page.Filename()
+		pagesDir := path.Join(outputDirPath, "content", *page.PostType+"s", file_name)
+		if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
+			return pagePath, err
+		}
+
+		// If this page has no parent, it is the parent of the page bundle
+		// OR we didn't find its parent and then page bundle will now have more than one _index.md file...
+		// User will have to untangle that mess.
+		file_name = "_index"
+		if lang != "" {
+			file_name = fmt.Sprintf("%s.%s", file_name, lang)
+		}
+		pagePath = getFilePath(pagesDir, file_name)
+	}
+
+	return pagePath, nil
+}
+
+func sanitizePageBundles(dirPath string) error {
+	// For pages and custom post types, at import we assume they are all hierarchical,
+	// meaning the parent page gets written into `/content/pages/parent-page/_index.md`
+	// and then the children go into `/content/pages/parent-page/child.md`.
+	// This defines a subtype of what Hugo calls a page bundle: a branch.
+	// See details : https://gohugo.io/content-management/page-bundles/
+	// WP2Hugo doesn't maintain an internal representation of the content tree,
+	// so we blindly write to subfolders, rigidly assuming branches.
+	// This fuction has to be called after the folders tree is populated on disk,
+	// and will convert branch bundles to leaf bundles (aka rename _index.md to index.md),
+	// for cases where the `/content/pages/parent-page/` subfolder contains only `_index.md`.
+	// Conversely, we also ensure that branch bundles don't use `index.md`, though there is no
+	// usecase for that yet.
+	files, err := os.ReadDir(dirPath)
+	if err != nil {
+		log.Error().Err(err).Str("dirPath", dirPath).Msg("error reading directory")
+		return err
+	}
+
+	fileCount := 0 // normal .md files only, aka not index.md/_index.md
+
+	// 1. Diagnostic loop
+	for _, file := range files {
+		if file.IsDir() {
+			// Recurse into subdirectory
+			if err := sanitizePageBundles(path.Join(dirPath, file.Name())); err != nil {
+				return err
+			}
+		} else {
+			name := file.Name()
+			fmt.Println("Processing file:", name)
+			if !strings.HasPrefix(name, "_index.") && !strings.HasPrefix(name, "index.") {
+				// Normal Markdown file
+				fileCount++
+			}
+		}
+	}
+
+	// 2. Renaming loop
+	for _, file := range files {
+		if !file.IsDir() {
+			name := file.Name()
+			if strings.HasPrefix(name, "_index.") && fileCount == 0 {
+				// _index.md defines a branch but we found no other leaf in the subfolder:
+				// convert to leaf (aka rename to index.md)
+				oldPath := path.Join(dirPath, name)
+				newName := strings.Replace(name, "_index.", "index.", 1)
+				newPath := path.Join(dirPath, newName)
+				if err := os.Rename(oldPath, newPath); err != nil {
+					log.Error().
+						Err(err).
+						Str("oldPath", oldPath).
+						Str("newPath", newPath).
+						Msg("error renaming _index.md to index.md")
+					return err
+				}
+			} else if strings.HasPrefix(name, "index.") && fileCount > 0 {
+				// index.md defines a leaf but we found other leaves in the subfolder:
+				// convert to branch (aka rename to _index.md)
+				oldPath := path.Join(dirPath, name)
+				newName := strings.Replace(name, "index.", "_index.", 1)
+				newPath := path.Join(dirPath, newName)
+				if err := os.Rename(oldPath, newPath); err != nil {
+					log.Error().
+						Err(err).
+						Str("oldPath", oldPath).
+						Str("newPath", newPath).
+						Msg("error renaming index.md to _index.md")
+					return err
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+func sanitizePostType(outputDirPath string, postType string) {
+	if err := sanitizePageBundles(path.Join(outputDirPath, "content", postType)); err != nil {
+		// Intentionally ignore the error
+		fmt.Println("Error sanitizing page bundles:", err)
+	}
+}
+
 func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) error {
 	if len(info.Pages()) == 0 {
 		log.Info().Msg("No pages to write")
@@ -281,17 +422,28 @@ func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) e
 
 	// Write pages
 	for _, page := range info.Pages() {
-		file_name, lang := page.Filename()
-		if lang != "" {
-			file_name = fmt.Sprintf("%s.%s", file_name, lang)
+		// If the current element is a child of another custom post,
+		// ensure it is saved in the same directory and
+		// prepend the name of the parent in the filename
+
+		// Convert info.Pages() to a slice of wpparser.CommonFields
+		pages := make([]wpparser.CommonFields, len(info.Pages()))
+		for i, p := range info.Pages() {
+			pages[i] = p.CommonFields
 		}
-		pagePath := getFilePath(pagesDir, file_name)
-		if err := g.writePage(outputDirPath, pagePath, page.CommonFields); err != nil {
+		if pagePath, err := getPagePath(outputDirPath, page.CommonFields, pages); err != nil {
 			return err
+		} else {
+			if err := g.writePage(outputDirPath, pagePath, page.CommonFields); err != nil {
+				return err
+			}
 		}
 		// Redirect from old URL to new URL
 		g.maybeAddNginxRedirect(page.CommonFields)
 	}
+
+	// Properly set page bundle type
+	sanitizePostType(outputDirPath, "pages")
 
 	return nil
 }
@@ -307,60 +459,33 @@ func (g Generator) writeCustomPosts(outputDirPath string, info wpparser.WebsiteI
 		// If the current element is a child of another custom post,
 		// ensure it is saved in the same directory and
 		// prepend the name of the parent in the filename
-		pagePath := ""
-		if page.PostParentID != nil {
-			for _, parent := range info.CustomPosts() {
-				// If the custom post has a parent, we will add its .md file into
-				// the parent page branch bundle.
-				// Note that we don't care if the parent has the same type as the children,
-				// which is designed for WooCommerce : product variations are a different
-				// post type than their parent product. All in all, that seems generic enough.
-				if parent.PostID == *page.PostParentID {
-					parent_file_name, _ := parent.Filename()
-					pagesDir := path.Join(outputDirPath, "content", *parent.PostType, parent_file_name)
-					if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
-						return err
-					}
-					file_name, lang := page.Filename()
-					if lang != "" {
-						file_name = fmt.Sprintf("%s.%s", file_name, lang)
-					}
-					pagePath = getFilePath(pagesDir, file_name)
-					break
-				}
-			}
-			if pagePath == "" {
-				log.Error().
-					Str("postID", page.PostID).
-					Str("postParentID", *page.PostParentID).
-					Msg("Critical error: pagePath is undefined for custom post")
-			}
-		}
 
-		// Whether the post has no parent or we could not find it:
-		if pagePath == "" {
-			// Create a branch page bundle using using a dynamic posttype subfolder
-			file_name, lang := page.Filename()
-			pagesDir := path.Join(outputDirPath, "content", *page.PostType, file_name)
-			if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
+		// Convert info.CustomPosts() to a slice of wpparser.CommonFields
+		customPosts := make([]wpparser.CommonFields, len(info.CustomPosts()))
+		for i, cp := range info.CustomPosts() {
+			customPosts[i] = cp.CommonFields
+		}
+		if pagePath, err := getPagePath(outputDirPath, page.CommonFields, customPosts); err != nil {
+			return err
+		} else {
+			if err := g.writePage(outputDirPath, pagePath, page.CommonFields); err != nil {
 				return err
 			}
-
-			// If this page has no parent, it is the parent of the page bundle
-			// OR we didn't find its parent and then page bundle will now have more than one _index.md file...
-			// User will have to untangle that mess.
-			file_name = "_index"
-			if lang != "" {
-				file_name = fmt.Sprintf("%s.%s", file_name, lang)
-			}
-			pagePath = getFilePath(pagesDir, file_name)
-		}
-
-		if err := g.writePage(outputDirPath, pagePath, page.CommonFields); err != nil {
-			return err
 		}
 		// Redirect from old URL to new URL
 		g.maybeAddNginxRedirect(page.CommonFields)
+	}
+
+	// Properly set page bundle type
+	postTypes := []string{
+		"products",
+		"product_variations",
+		"avada_faqs",
+		"avada_portfolios",
+	}
+
+	for _, postType := range postTypes {
+		sanitizePostType(outputDirPath, postType)
 	}
 
 	return nil
