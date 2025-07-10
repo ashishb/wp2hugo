@@ -39,6 +39,8 @@ for example, [Mkdocs](https://www.mkdocs.org/) or [Jekyll](https://jekyllrb.com/
 1. [It's a Binary World 2.0](https://www.ericsbinaryworld.com/posts/wordpress-to-hugo-migration-process/)
 1. [The Legal Beaver](https://legalbeaver.ca/2024/06/12/migration-to-hugo/)
 1. [Deuts Log](https://deuts.org/x/446-wp2hugo/)
+1. [cloudowski](https://cloudowski.com/articles/how-ai-helped-me-to-migrate-my-website/)
+1. [Population: One](https://popone.innocence.com/archives/2024/10/06/wordpress-and-migrations-oh-my.php)
 
 ## Commercial usage
 
