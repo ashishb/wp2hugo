@@ -48,7 +48,7 @@ func TestCaption4Replace(t *testing.T) {
 }
 
 // This test is failing see https://github.com/ashishb/wp2hugo/pull/177
-//func TestFigure5Replace(t *testing.T) {
+// func TestFigure5Replace(t *testing.T) {
 //	expected := "\n{{< figure src=\"https://photo.aurelienpierre.com/wp-content/uploads/sites/3/2016/03/Shooting-Minh-Ly-0155-%5FDSC0155-Minh-Ly-WEB-1100x1100.jpg\" alt=\"\" caption=\"Minh-Ly\" >}}\n"
 //	require.Equal(t, expected, replaceImageBlockWithFigure(example5))
 //}

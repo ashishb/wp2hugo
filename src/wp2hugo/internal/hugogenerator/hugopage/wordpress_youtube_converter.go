@@ -18,8 +18,10 @@ var _YoutubeRegEx = regexp.MustCompile(`(?m)(^|\s)http[sav]?://(?:m\.|www\.)?(?:
 // https://www.youtube.com/watch?v=7l6FjphZXsk
 // </div></figure>
 // <!-- /wp:embed -->
-var _YoutubeGutenbergRegEx = regexp.MustCompile(`(?ms)(^|\s)<!-- wp:embed {"url":"[^"]+v=([^"]+)".*?<!-- /wp:embed -->`)
-var _YoutubeEmbedRegEx = regexp.MustCompile(`(?m)(^|\s)(?:[embed])http[sav]?://(?:m\.|www\.)?(?:youtu\.be|youtube\.com)/(?:watch|w)\?v=([^&\s]+)(?:[/embed])`)
+var (
+	_YoutubeGutenbergRegEx = regexp.MustCompile(`(?ms)(^|\s)<!-- wp:embed {"url":"[^"]+v=([^"]+)".*?<!-- /wp:embed -->`)
+	_YoutubeEmbedRegEx     = regexp.MustCompile(`(?m)(^|\s)(?:[embed])http[sav]?://(?:m\.|www\.)?(?:youtu\.be|youtube\.com)/(?:watch|w)\?v=([^&\s]+)(?:[/embed])`)
+)
 
 func replacePlaintextYoutubeURL(htmlData string) string {
 	log.Debug().
