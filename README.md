@@ -7,7 +7,7 @@
 
 [![Build wp2hugo](https://github.com/ashishb/wp2hugo/actions/workflows/build-go.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/build-go.yaml)
 [![Validate Go code formatting](https://github.com/ashishb/wp2hugo/actions/workflows/format-go.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/format-go.yaml)
-[![Lint Go](https://github.com/ashishb/wp2hugo/actions/workflows/lint-go.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/lint-go.yaml)
+[![Lint and Test Go](https://github.com/ashishb/wp2hugo/actions/workflows/lint-and-test-go.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/lint-and-test-go.yaml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/ashishb/wp2hugo/src/wp2hugo)](https://goreportcard.com/report/github.com/ashishb/wp2hugo/src/wp2hugo)
 
 [![Lint Markdown](https://github.com/ashishb/wp2hugo/actions/workflows/lint-markdown.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/lint-markdown.yaml)
