@@ -7,7 +7,7 @@
 
 [![Build wp2hugo](https://github.com/ashishb/wp2hugo/actions/workflows/build-go.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/build-go.yaml)
 [![Validate Go code formatting](https://github.com/ashishb/wp2hugo/actions/workflows/format-go.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/format-go.yaml)
-[![Lint Go](https://github.com/ashishb/wp2hugo/actions/workflows/lint-go.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/lint-go.yaml)
+[![Lint and Test Go](https://github.com/ashishb/wp2hugo/actions/workflows/lint-and-test-go.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/lint-and-test-go.yaml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/ashishb/wp2hugo/src/wp2hugo)](https://goreportcard.com/report/github.com/ashishb/wp2hugo/src/wp2hugo)
 
 [![Lint Markdown](https://github.com/ashishb/wp2hugo/actions/workflows/lint-markdown.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/lint-markdown.yaml)
@@ -39,6 +39,8 @@ for example, [Mkdocs](https://www.mkdocs.org/) or [Jekyll](https://jekyllrb.com/
 1. [It's a Binary World 2.0](https://www.ericsbinaryworld.com/posts/wordpress-to-hugo-migration-process/)
 1. [The Legal Beaver](https://legalbeaver.ca/2024/06/12/migration-to-hugo/)
 1. [Deuts Log](https://deuts.org/x/446-wp2hugo/)
+1. [cloudowski](https://cloudowski.com/articles/how-ai-helped-me-to-migrate-my-website/)
+1. [Population: One](https://popone.innocence.com/archives/2024/10/06/wordpress-and-migrations-oh-my.php)
 
 ## Commercial usage
 
