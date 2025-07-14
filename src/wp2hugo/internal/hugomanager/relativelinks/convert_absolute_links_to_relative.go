@@ -24,7 +24,7 @@ func ConvertAbsoluteLinksToRelative(path string, updateInline bool, hostname str
 			Str("path", path).
 			Msg("File updated")
 		if updateInline {
-			err := os.WriteFile(path, data, 0o644)
+			err := os.WriteFile(path, data, 0o600)
 			if err != nil {
 				return fmt.Errorf("failed to write file %s: %w", path, err)
 			}

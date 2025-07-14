@@ -2,6 +2,7 @@ package logger
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -27,7 +28,12 @@ func ConfigureLogging(colorLogOutput bool) {
 		// Pretty printing is a bit inefficient for production
 		output := zerolog.ConsoleWriter{Out: os.Stderr}
 		output.FormatTimestamp = func(t any) string {
-			ms, err := t.(json.Number).Int64()
+			number, ok := t.(json.Number)
+			if !ok {
+				panic(fmt.Sprintf("Expected a json.Number for timestamp, got: %v", t))
+			}
+
+			ms, err := number.Int64()
 			if err != nil {
 				panic(err)
 			}
