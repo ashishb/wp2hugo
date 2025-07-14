@@ -1,6 +1,7 @@
 package mediacache
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
@@ -55,7 +56,7 @@ func waitOrStop(resp *http.Response) (int, bool) {
 	return timeout, stop
 }
 
-func (m MediaCache) GetReader(url string) (io.Reader, error) {
+func (m MediaCache) GetReader(ctx context.Context, url string) (io.Reader, error) {
 	if strings.Contains(url, "blog/blog") {
 		log.Panic().
 			Str("url", url).
@@ -79,17 +80,22 @@ func (m MediaCache) GetReader(url string) (io.Reader, error) {
 		Str("url", url).
 		Msg("media will be fetched")
 
-	var httpErr error
-	var resp *http.Response = nil
-
 	retries := 0
 	timeout := 1
 	stop := false
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request for media %s: %w", url, err)
+	}
+
+	var httpErr error
+	var resp *http.Response
+
 	for retries < 5 && !stop {
 		// Send at most 1 request per second
 		// to avoid hammering servers and getting rate-limited.
 		time.Sleep(time.Duration(timeout) * time.Second)
-		resp, httpErr = http.Get(url)
+		resp, httpErr = http.DefaultClient.Do(req)
 		timeout, stop = waitOrStop(resp)
 		retries++
 		timeout *= retries

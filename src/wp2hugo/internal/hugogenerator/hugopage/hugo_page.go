@@ -176,8 +176,8 @@ func getPDFLinks(content []byte) []string {
 }
 
 func getMarkdownLinks(regex *regexp.Regexp, markdown string) []string {
-	var links []string
 	matches := regex.FindAllStringSubmatch(markdown, -1)
+	links := make([]string, 0, len(matches))
 	for _, match := range matches {
 		links = append(links, match[1])
 	}

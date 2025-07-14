@@ -90,7 +90,7 @@ func sanitizeQuotes(alt string) string {
 func imageBlockReplacementFunction(groups []string) string {
 	src := sanitizeLinks(groups[1])
 	alt := ""
-	caption := ""
+	var caption string
 
 	if len(groups) > 2 {
 		alt = groups[2]

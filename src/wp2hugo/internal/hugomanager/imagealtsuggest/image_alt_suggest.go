@@ -69,7 +69,7 @@ func ProcessFile(ctx context.Context, mdFilePath string, updateInline bool) (*Re
 }
 
 // Only "cover" image is handle for now
-func processImagesInFrontmatter(ctx context.Context, mdFilePath string, updateInline bool) (*Result, error) {
+func processImagesInFrontmatter(_ context.Context, mdFilePath string, updateInline bool) (*Result, error) {
 	fm, err := frontmatterhelper.GetSelectiveFrontMatter(mdFilePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get frontmatter for file %s: %w", mdFilePath, err)
@@ -174,7 +174,7 @@ func processImagesInMarkdown(ctx context.Context, mdFilePath string, updateInlin
 		}
 
 		altMatches := _figureShortCodeAltRegEx.FindAllStringSubmatch(figureMatch, -1)
-		if len(altMatches) == 0 || len(altMatches[0]) < 2 || string(altMatches[0][1]) == "" {
+		if len(altMatches) == 0 || len(altMatches[0]) < 2 || altMatches[0][1] == "" {
 			log.Warn().
 				Str("mdFilePath", mdFilePath).
 				Msg("No alt attribute found in figure shortcode")

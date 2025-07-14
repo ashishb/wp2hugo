@@ -1,6 +1,7 @@
 package hugogenerator
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/url"
@@ -59,7 +60,7 @@ type Generator struct {
 }
 
 type MediaProvider interface {
-	GetReader(url string) (io.Reader, error)
+	GetReader(ctx context.Context, url string) (io.Reader, error)
 }
 
 func NewGenerator(outputDirPath string, fontName string,
@@ -89,6 +90,7 @@ func NewGenerator(outputDirPath string, fontName string,
 }
 
 func (g Generator) Generate() error {
+	ctx := context.Background()
 	info := g.wpInfo
 	siteDir, err := g.setupHugo(g.outputDirPath)
 	if err != nil {
@@ -135,7 +137,7 @@ func (g Generator) Generate() error {
 
 	if g.downloadMedia {
 		url1 := info.Link().Scheme + "://" + info.Link().Host + "/favicon.ico"
-		media, err := g.mediaProvider.GetReader(url1)
+		media, err := g.mediaProvider.GetReader(ctx, url1)
 		if err != nil {
 			log.Error().
 				Err(err).
@@ -669,6 +671,7 @@ func (g Generator) newHugoPage(pageURL *url.URL, page wpparser.CommonFields) (*h
 }
 
 func downloadMedia(link string, outputMediaDirPath string, prefixes []string, g Generator, pageURL *url.URL) (map[string]string, error) {
+	ctx := context.Background()
 	// Uniformize protocol-less links: add protocol
 	if strings.HasPrefix(link, "//") {
 		link = strings.Replace(link, "//", pageURL.Scheme+"://", 1)
@@ -708,7 +711,7 @@ func downloadMedia(link string, outputMediaDirPath string, prefixes []string, g 
 	// It is assumed here that Hugo will handle responsive sizes and such internally.
 	// see https://discourse.gohugo.io/t/hugo-image-processing-and-responsive-images/43110/4
 	fullResLink := _resizedMedia.ReplaceAllString(link, "$1.$2")
-	media, err := g.mediaProvider.GetReader(fullResLink)
+	media, err := g.mediaProvider.GetReader(ctx, fullResLink)
 
 	urlReplacement := make(map[string]string)
 
@@ -719,7 +722,7 @@ func downloadMedia(link string, outputMediaDirPath string, prefixes []string, g 
 				Str("fullResLink", fullResLink).
 				Str("link", link).
 				Msg("full-resolution image file not found, falling back to resized thumbnail")
-			media, err = g.mediaProvider.GetReader(link)
+			media, err = g.mediaProvider.GetReader(ctx, link)
 		} else {
 			new_link := _resizedMedia.ReplaceAllString(relativeLink, "$1.$2")
 			urlReplacement[relativeLink] = new_link
