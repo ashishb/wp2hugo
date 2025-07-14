@@ -10,6 +10,7 @@ import (
 )
 
 func TestFootnote(t *testing.T) {
+	t.Parallel()
 	file, err := os.Open("./testdata/testcase.WordPress.2024-07-01.xml")
 	require.NoError(t, err)
 
@@ -33,6 +34,7 @@ func TestFootnote(t *testing.T) {
 }
 
 func TestPost(t *testing.T) {
+	t.Parallel()
 	file, err := os.Open("./testdata/testcase.WordPress_2.xml")
 	require.NoError(t, err)
 

@@ -7,6 +7,7 @@ import (
 )
 
 func TestReplaceGutenbergGallery(t *testing.T) {
+	t.Parallel()
 	const htmlData = `<!-- wp:gallery {"ids":[14951,14949],"imageCrop":false,"linkTo":"file","sizeSlug":"full","align":"wide"} -->
 <figure class="wp-block-gallery alignwide columns-2">
 <ul class="blocks-gallery-grid">
