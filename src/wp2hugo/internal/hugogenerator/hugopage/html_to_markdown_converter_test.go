@@ -29,6 +29,7 @@ some more text
 `
 
 func TestIframe(t *testing.T) {
+	t.Parallel()
 	converter := getMarkdownConverter()
 	result, err := converter.ConvertString(_textWithIframe)
 	require.NoError(t, err)
@@ -36,6 +37,7 @@ func TestIframe(t *testing.T) {
 }
 
 func TestBlockGist(t *testing.T) {
+	t.Parallel()
 	converter := getMarkdownConverter()
 	result, err := converter.ConvertString(_textWithBlockGist)
 	require.NoError(t, err)
@@ -43,6 +45,7 @@ func TestBlockGist(t *testing.T) {
 }
 
 func TestBlockGistDoesNotBreakImgParsing(t *testing.T) {
+	t.Parallel()
 	converter := getMarkdownConverter()
 	result, err := converter.ConvertString(_textWithImgFigureBlock)
 	require.NoError(t, err)
@@ -50,6 +53,7 @@ func TestBlockGistDoesNotBreakImgParsing(t *testing.T) {
 }
 
 func TestMarkdownGist(t *testing.T) {
+	t.Parallel()
 	converter := getMarkdownConverter()
 	result, err := converter.ConvertString(_textMarkdownGist)
 	require.NoError(t, err)

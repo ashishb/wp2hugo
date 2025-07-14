@@ -14,6 +14,7 @@ var testCases = []string{
 }
 
 func TestParallelBlurRegEx(t *testing.T) {
+	t.Parallel()
 	for _, testCase := range testCases {
 		require.True(t, _AWBRegEx.MatchString(testCase))
 	}

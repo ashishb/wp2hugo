@@ -7,6 +7,7 @@ import (
 )
 
 func Test_regex1(t *testing.T) {
+	t.Parallel()
 	const input = `something {{< figure align=aligncenter width=740 src="IMG_0384-1-1024x768.jpg" alt="" >}}`
 	const expectedSrc = "IMG_0384-1-1024x768.jpg"
 	const expectedAlt = ""

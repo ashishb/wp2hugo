@@ -29,6 +29,7 @@ const example5 = `
 `
 
 func TestRegExMatches(t *testing.T) {
+	t.Parallel()
 	require.True(t, _CaptionRegEx1.MatchString(example1), "RegEx should match")
 	require.True(t, _CaptionRegEx1.MatchString(example2), "RegEx should match")
 	require.True(t, _CaptionRegEx1.MatchString(example4), "RegEx should match")
@@ -43,6 +44,7 @@ func TestRegExMatches(t *testing.T) {
 }
 
 func TestCaption4Replace(t *testing.T) {
+	t.Parallel()
 	expected := "\n</p>\n{{< figure align=\"aligncenter\" width=2048 src=\"https://photo.aurelienpierre.com/wp-content/uploads/sites/3/2014/06/20140513%5F0036-Place-Jacques-Cartier-v2-web.jpg\" alt=\"Place Jacques Cartier v2\" caption=\"Place Jacques Cartier v2\" >}}\n<p>"
 	require.Equal(t, expected, replaceCaptionWithFigure(example4))
 }

@@ -37,10 +37,12 @@ const (
 )
 
 func TestMarkdownExtractorWithLink1(t *testing.T) {
+	t.Parallel()
 	testMarkdownExtractor(t, _sampleHTMLInput2, _sampleMarkdownOutput2)
 }
 
 func TestMarkdownExtractorWithLink2(t *testing.T) {
+	t.Parallel()
 	// Ref:
 	// 1. https://github.com/ashishb/wp2hugo/issues/11
 	// 2. https://github.com/JohannesKaufmann/html-to-markdown/issues/95
@@ -49,14 +51,17 @@ func TestMarkdownExtractorWithLink2(t *testing.T) {
 }
 
 func TestListExtractor(t *testing.T) {
+	t.Parallel()
 	testMarkdownExtractor(t, _sampleHTMLInput3, _sampleMarkdownOutput3)
 }
 
 func TestConsecutiveNewlines(t *testing.T) {
+	t.Parallel()
 	testMarkdownExtractor(t, _sampleHTMLInput4, _sampleMarkdownOutput4)
 }
 
 func TestManualLineBreaks(t *testing.T) {
+	t.Parallel()
 	testMarkdownExtractor(t, _sampleHTMLInput5, _sampleMarkdownOutput5)
 }
 
@@ -72,6 +77,7 @@ func testMarkdownExtractor(t *testing.T, htmlInput string, markdownOutput string
 }
 
 func TestPreTagExtractor2(t *testing.T) {
+	t.Parallel()
 	const example1 = `<pre class="lang:js decode:true">document.querySelector("video").playbackRate = 2.0;   // For 2X speed-up</pre>`
 	const example2 = `<pre class="theme:solarized-dark lang:sh decode:true">echo "whatever"</pre>`
 	const example3 = `<pre class="lang:sh decode:true"># Sample invocation:\n</pre>`
