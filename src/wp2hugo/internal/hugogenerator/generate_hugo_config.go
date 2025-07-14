@@ -121,10 +121,7 @@ func updateConfig(siteDir string, info wpparser.WebsiteInfo) error {
 	// Same as WordPress's feed.xml
 	config.OutputFormats.RSS.BaseName = "feed"
 
-	if err := addNavigationLinks(info, &config); err != nil {
-		return err
-	}
-
+	addNavigationLinks(info, &config)
 	if err := r.Close(); err != nil {
 		return fmt.Errorf("error closing config file: %w", err)
 	}
@@ -136,9 +133,9 @@ func updateConfig(siteDir string, info wpparser.WebsiteInfo) error {
 	return writeFile(configPath, data)
 }
 
-func addNavigationLinks(info wpparser.WebsiteInfo, config *_HugoConfig) error {
+func addNavigationLinks(info wpparser.WebsiteInfo, config *_HugoConfig) {
 	if len(info.NavigationLinks()) == 0 {
-		return nil
+		return
 	}
 
 	searchPresent := false
@@ -161,5 +158,4 @@ func addNavigationLinks(info wpparser.WebsiteInfo, config *_HugoConfig) error {
 			Weight: len(info.NavigationLinks()) + 1,
 		})
 	}
-	return nil
 }
