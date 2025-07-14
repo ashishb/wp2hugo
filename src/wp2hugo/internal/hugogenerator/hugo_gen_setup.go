@@ -150,7 +150,7 @@ func (g Generator) Generate() error {
 
 	if g.generateNgnixConfig {
 		nginxConfigPath := path.Join(*siteDir, "nginx.conf")
-		if err = os.WriteFile(nginxConfigPath, []byte(g.ngnixConfig.Generate()), 0o644); err != nil {
+		if err = os.WriteFile(nginxConfigPath, []byte(g.ngnixConfig.Generate()), 0o600); err != nil {
 			return err
 		} else {
 			log.Info().

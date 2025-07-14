@@ -137,7 +137,7 @@ func updateConfig(siteDir string, info wpparser.WebsiteInfo) error {
 }
 
 func addNavigationLinks(info wpparser.WebsiteInfo, config *_HugoConfig) error {
-	if len(info.NavigationLinks()) <= 0 {
+	if len(info.NavigationLinks()) == 0 {
 		return nil
 	}
 

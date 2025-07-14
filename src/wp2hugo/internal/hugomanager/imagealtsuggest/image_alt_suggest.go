@@ -226,7 +226,7 @@ func replaceInFile(filePath string, old string, new string) error {
 	}
 
 	modifiedBody := strings.Replace(string(fileData), old, new, 1)
-	if err := os.WriteFile(filePath, []byte(modifiedBody), 0o644); err != nil {
+	if err := os.WriteFile(filePath, []byte(modifiedBody), 0o600); err != nil {
 		return fmt.Errorf("failed to write updated file %s: %w", filePath, err)
 	}
 

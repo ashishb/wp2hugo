@@ -79,7 +79,7 @@ func (m MediaCache) GetReader(url string) (io.Reader, error) {
 		Str("url", url).
 		Msg("media will be fetched")
 
-	var http_err error
+	var httpErr error
 	var resp *http.Response = nil
 
 	retries := 0
@@ -87,16 +87,16 @@ func (m MediaCache) GetReader(url string) (io.Reader, error) {
 	stop := false
 	for retries < 5 && !stop {
 		// Send at most 1 request per second
-		// to avoid hammering servers and getting thresholded
+		// to avoid hammering servers and getting rate-limited.
 		time.Sleep(time.Duration(timeout) * time.Second)
-		resp, http_err = http.Get(url)
+		resp, httpErr = http.Get(url)
 		timeout, stop = waitOrStop(resp)
 		retries++
 		timeout *= retries
 	}
 
-	if http_err != nil {
-		return nil, fmt.Errorf("error fetching media %s: %w", url, http_err)
+	if httpErr != nil {
+		return nil, fmt.Errorf("error fetching media %s: %w", url, httpErr)
 	}
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("error fetching media %s: %s", url, resp.Status)
