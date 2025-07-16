@@ -139,9 +139,9 @@ More details on [the documentation](https://github.com/ashishb/wp2hugo/tree/main
     1. [x] Migrate WordPress [footnotes](https://github.com/ashishb/wp2hugo/issues/24)
     1. [x] Migrate Youtube embed Gutenberg blocks
     1. [x] Migrate image and gallery Gutenberg blocks
-  
+
 More details on [the documentation](https://github.com/ashishb/wp2hugo/tree/main/doc/shortcodes.md).
-  
+
 ### Migrate post metadata and attributes
 
 1. [x] Maintain the draft status for draft and pending posts
