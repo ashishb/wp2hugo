@@ -285,16 +285,12 @@ func getPagePath(outputDirPath string, page wpparser.CommonFields, posts []wppar
 			// which is designed for WooCommerce : product variations are a different
 			// post type than their parent product. All in all, that seems generic enough.
 			if parent.PostID == *page.PostParentID {
-				parent_file_name, _ := parent.Filename()
-				pagesDir := path.Join(outputDirPath, "content", *parent.PostType+"s", parent_file_name)
+				parentFileName := parent.GetFileInfo().FileNameNoLanguage()
+				pagesDir := path.Join(outputDirPath, "content", *parent.PostType+"s", parentFileName)
 				if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
 					return pagePath, err
 				}
-				file_name, lang := page.Filename()
-				if lang != "" {
-					file_name = fmt.Sprintf("%s.%s", file_name, lang)
-				}
-				pagePath = getFilePath(pagesDir, file_name)
+				pagePath = getFilePath(pagesDir, page.GetFileInfo().FileNameWithLanguage())
 				break
 			}
 		}
@@ -309,8 +305,8 @@ func getPagePath(outputDirPath string, page wpparser.CommonFields, posts []wppar
 	// Whether the post has no parent or we could not find it:
 	if pagePath == "" {
 		// Create a branch page bundle using using a dynamic posttype subfolder
-		file_name, lang := page.Filename()
-		pagesDir := path.Join(outputDirPath, "content", *page.PostType+"s", file_name)
+		lang := page.GetFileInfo().Language()
+		pagesDir := path.Join(outputDirPath, "content", *page.PostType+"s", page.GetFileInfo().FileNameNoLanguage())
 		if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
 			return pagePath, err
 		}
@@ -318,11 +314,11 @@ func getPagePath(outputDirPath string, page wpparser.CommonFields, posts []wppar
 		// If this page has no parent, it is the parent of the page bundle
 		// OR we didn't find its parent and then page bundle will now have more than one _index.md file...
 		// User will have to untangle that mess.
-		file_name = "_index"
-		if lang != "" {
-			file_name = fmt.Sprintf("%s.%s", file_name, lang)
+		fileName := "_index"
+		if lang != nil {
+			fileName = fmt.Sprintf("%s.%s", fileName, *lang)
 		}
-		pagePath = getFilePath(pagesDir, file_name)
+		pagePath = getFilePath(pagesDir, fileName)
 	}
 
 	return pagePath, nil
@@ -579,11 +575,8 @@ func (g Generator) writePosts(outputDirPath string, info wpparser.WebsiteInfo) e
 
 	// Write posts
 	for _, post := range info.Posts() {
-		file_name, lang := post.Filename()
-		if lang != "" {
-			file_name = fmt.Sprintf("%s.%s", file_name, lang)
-		}
-		postPath := getFilePath(postsDir, file_name)
+		filename := post.GetFileInfo().FileNameWithLanguage()
+		postPath := getFilePath(postsDir, filename)
 		if err := g.writePage(outputDirPath, postPath, post.CommonFields); err != nil {
 			return err
 		}
