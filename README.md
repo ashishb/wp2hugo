@@ -41,6 +41,7 @@ for example, [Mkdocs](https://www.mkdocs.org/) or [Jekyll](https://jekyllrb.com/
 1. [Deuts Log](https://deuts.org/x/446-wp2hugo/)
 1. [cloudowski](https://cloudowski.com/articles/how-ai-helped-me-to-migrate-my-website/)
 1. [Population: One](https://popone.innocence.com/archives/2024/10/06/wordpress-and-migrations-oh-my.php)
+1. [Aurélien Pierre Engineering](https://eng.aurelienpierre.com)
 
 ## Commercial usage
 
@@ -101,10 +102,10 @@ More details on [the documentation](https://github.com/ashishb/wp2hugo/tree/main
 ### Migrate post types, taxonomies, and their archive pages
 
 1. [x] Migrate posts
-1. [x] Migrate pages
-1. [x] Migrate tags
-1. [x] Migrate categories
+1. [x] Migrate pages in a hierarchical way, using Hugo [page bundles](https://gohugo.io/content-management/page-bundles/),
+1. [x] Migrate tags, categories and [custom taxonomies](https://learn.wordpress.org/lesson/custom-taxonomies/) for all types of posts,
 1. [x] Migrate [Avada](https://themeforest.net/item/avada-responsive-multipurpose-theme/2833226) custom post types (FAQ, Portfolios)
+1. [x] Migrate [Woocommerce](https://woocommerce.com/) products and product variations (custom post types) into Hugo page bundles, along with their attributes (custom taxonomies, custom fields),
 1. [x] Set the WordPress homepage correctly
 1. [x] Create WordPress author page
 1. [x] Migrate [WPML](https://wpml.org/) translated posts, pages, and custom post types that use the [URL parameter scheme](https://wpml.org/documentation/getting-started-guide/language-setup/language-url-options/#language-name-added-as-a-parameter) (switch the WPML language URL option prior to exporting your blog content to XML).
@@ -133,9 +134,13 @@ More details on [the documentation](https://github.com/ashishb/wp2hugo/tree/main
 1. Migrate WordPress shortcodes:
     1. [x] Migrate [WordPress [caption] shortcode](https://codex.wordpress.org/Caption_Shortcode) to [Hugo's {{< figure >}}](https://codex.wordpress.org/Caption_Shortcode))
     1. [x] Migrate [WordPress [audio] shortcode](https://wordpress.org/documentation/article/audio-shortcode/))
+    1. [x] Migrate Wordpress [gallery] shortcode, including [empty Gallery](https://github.com/ashishb/wp2hugo/issues/68)
 1. Migrate Gutenberg blocks and features:
     1. [x] Migrate WordPress [footnotes](https://github.com/ashishb/wp2hugo/issues/24)
-    1. [x] Migrate WordPress [gallery shortcode](https://codex.wordpress.org/Gallery_Shortcode) including [empty Gallery](https://github.com/ashishb/wp2hugo/issues/68)
+    1. [x] Migrate Youtube embed Gutenberg blocks
+    1. [x] Migrate image and gallery Gutenberg blocks
+
+More details on [the documentation](https://github.com/ashishb/wp2hugo/tree/main/doc/shortcodes.md).
 
 ### Migrate post metadata and attributes
 
@@ -144,7 +149,6 @@ More details on [the documentation](https://github.com/ashishb/wp2hugo/tree/main
 1. [x] Featured images - export featured image associations with pages and posts correctly
 1. [x] WordPress [Post formats](https://developer.wordpress.org/advanced-administration/wordpress/post-formats/)
 1. [x] WordPress [Custom fields](https://wordpress.org/documentation/article/assign-custom-fields/), including PHP array deserialization for fields using them
-1. [x] WordPress [Custom taxonomies](https://learn.wordpress.org/lesson/custom-taxonomies/)
 
 ### Migrate media attachments
 
