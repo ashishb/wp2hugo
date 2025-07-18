@@ -131,6 +131,10 @@ func (g Generator) Generate() error {
 		return err
 	}
 
+	if err = setupLibraryData(*siteDir, info); err != nil {
+		return err
+	}
+
 	if err = setupRssFeedFormat(*siteDir); err != nil {
 		return err
 	}

@@ -155,6 +155,8 @@ More details on [the documentation](https://github.com/ashishb/wp2hugo/tree/main
 1. [x] Migrate favicon.ico
 1. [x] Migrate `wp-content/uploads` images embedded in pages to Hugo static files while maintaining relative URLs
 1. [x] Migrate external images (on different hosts) to Hugo static files
+1. [x] Optionally import all media attachments from WordPress library
+1. [x] Import user-defined attachment titles into a Hugo database into `/data/library.yaml`
 
 ### Misc
 
