@@ -55,7 +55,7 @@ When importing images as [global resources](https://gohugo.io/methods/resource/t
 
 <!-- If that did not work, fallback to WordPress library published date -->
 {{ if not $date }}
-  {{ $date = index (index $image 0) "date" }}
+  {{ $date = index (index $image 0) "published" }}
 {{ end }}
 
 ```
