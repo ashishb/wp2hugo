@@ -184,7 +184,7 @@ func getMarkdownLinks(regex *regexp.Regexp, markdown string) []string {
 	return links
 }
 
-func unserialiazePHParray(array string) any {
+func UnserialiazePHParray(array string) any {
 	/* Ex:
 	a:2:{s:10:"taxonomies";s:32:"f166db6f0df2a3df4c2715a8bcc30eec";s:15:"postmeta_fields";s:32:"0edff5c6e53a54394f90f7b5a8fc1e76";}
 	*/
@@ -241,7 +241,7 @@ func getMetadata(provider ImageURLProvider, pageURL url.URL, author string, titl
 
 	for _, metadatum := range customMetaData {
 		if strings.HasPrefix(metadatum.Value, "a:") {
-			phpArray := unserialiazePHParray(metadatum.Value)
+			phpArray := UnserialiazePHParray(metadatum.Value)
 			if phpArray != nil {
 				// Decoded array is a nested dictionnary
 				metadata[metadatum.Key] = phpArray

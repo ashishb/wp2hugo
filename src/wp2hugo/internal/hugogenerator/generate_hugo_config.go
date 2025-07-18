@@ -21,6 +21,12 @@ type _HugoNavMenu struct {
 	Weight int `yaml:"weight"`
 }
 
+type _HugoAttachment struct {
+	Path  string `yaml:"path"`
+	Title string `yaml:"title"`
+	ID    string `yaml:"id"`
+}
+
 type _HugoConfig struct {
 	BaseURL      string `yaml:"baseURL"`
 	LanguageCode string `yaml:"languageCode"`
@@ -72,6 +78,44 @@ type _HugoConfig struct {
 	Menu struct {
 		Main []_HugoNavMenu `yaml:"main"`
 	} `yaml:"menu"`
+}
+
+func setupLibraryData(siteDir string, info wpparser.WebsiteInfo) error {
+	dataPath := path.Join(siteDir, "data", "library.yaml")
+	dataDir := path.Dir(dataPath)
+
+	// Create the directory if it doesn't exist
+	err := os.MkdirAll(dataDir, 0755)
+	if err != nil {
+		return fmt.Errorf("error creating directory: %w", err)
+	}
+
+	// Create the YAML file
+	r, err := os.Create(dataPath)
+	if err != nil {
+		return fmt.Errorf("error creating data file: %w", err)
+	}
+	defer func() {
+		_ = r.Close()
+	}()
+
+	// Write the WP media library into data
+	var library []_HugoAttachment
+	for _, attachment := range info.Attachments() {
+		library = append(library, _HugoAttachment{
+			Path:  hugopage.ReplaceAbsoluteLinksWithRelative(info.Link().Host, *attachment.GetAttachmentURL()),
+			ID:    attachment.PostID,
+			Title: attachment.Title,
+		})
+	}
+
+	data, err := utils.GetYAML(library)
+	if err != nil {
+		return fmt.Errorf("error marshalling config: %w", err)
+	}
+
+	log.Info().Msgf("Updating config file: %s", dataPath)
+	return writeFile(dataPath, data)
 }
 
 func updateConfig(siteDir string, info wpparser.WebsiteInfo) error {
