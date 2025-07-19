@@ -79,6 +79,8 @@ type CommonFields struct {
 	FeaturedImageID *string // Optional WordPress attachment ID of the featured image
 
 	attachmentURL *string
+
+	Comments []CommentInfo
 }
 
 func titleToFilename(title string) string {
@@ -214,6 +216,18 @@ type PostInfo struct {
 
 type AttachmentInfo struct {
 	CommonFields
+}
+
+type CommentInfo struct {
+	ID          string     `yaml:"id"`
+	AuthorName  string     `yaml:"author_name"`
+	AuthorEmail string     `yaml:"author_email"`
+	AuthorURL   string     `yaml:"author_url"`
+	PublishDate *time.Time `yaml:"published"`
+	ParentID    string     `yaml:"parent_id"`
+	Content     string     `yaml:"content"`
+	PostLink    string     `yaml:"post_url"`
+	PostID      string     `yaml:"post_id"`
 }
 
 type Footnote struct {
@@ -521,6 +535,37 @@ func getCommonFields(item *rss.Item, taxonomies []TaxonomyInfo) (*CommonFields, 
 		postParent = nil
 	}
 
+	comments := make([]CommentInfo, 0, len(item.Extensions["wp"]["comment"]))
+	if len(item.Extensions["wp"]["comment"]) > 0 {
+		for _, comment := range item.Extensions["wp"]["comment"] {
+			// Don't append spams and unapproved comments
+			if comment.Children["comment_approved"][0].Value == "1" {
+
+				var pubDate *time.Time
+				tmp, err := time.Parse("2006-01-02 15:04:05", comment.Children["comment_date"][0].Value)
+				if err != nil {
+					log.Warn().
+						Str("date", item.Extensions["wp"]["post_date"][0].Value).
+						Msg("Error parsing date")
+				} else {
+					pubDate = &tmp
+				}
+
+				comments = append(comments, CommentInfo{
+					ID:          comment.Children["comment_id"][0].Value,
+					ParentID:    comment.Children["comment_parent"][0].Value,
+					AuthorName:  comment.Children["comment_author"][0].Value,
+					AuthorEmail: comment.Children["comment_author_email"][0].Value,
+					AuthorURL:   comment.Children["comment_author_url"][0].Value,
+					PublishDate: pubDate,
+					Content:     comment.Children["comment_content"][0].Value,
+					PostLink:    item.Link,
+					PostID:      item.Extensions["wp"]["post_id"][0].Value,
+				})
+			}
+		}
+	}
+
 	return &CommonFields{
 		Author:           getAuthor(item),
 		PostID:           item.Extensions["wp"]["post_id"][0].Value,
@@ -545,6 +590,8 @@ func getCommonFields(item *rss.Item, taxonomies []TaxonomyInfo) (*CommonFields, 
 		FeaturedImageID: getThumbnailID(item),
 
 		attachmentURL: attachmentURL,
+
+		Comments: comments,
 	}, nil
 }
 
