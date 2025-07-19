@@ -28,6 +28,7 @@ In case you don't want to retain the ability to add new comments, but still want
 From there, you can insert old comments into your pages by adding the following snippet into your theme's `single.html` template:
 
 ```html
+<!-- fetch /data/comments.yaml -->
 {{ $site_comments := .Site.Data.comments }}
 
 <!-- find all comments whose post_id matches current post/page post_id -->
@@ -44,6 +45,9 @@ From there, you can insert old comments into your pages by adding the following 
   {{ $site_comments := .site_comments }}
   {{ $query_parent_id := .parent_id }}
 
+  <!-- Note : we iterate over comments using the order in which they appear
+  in /data/comments.yaml. WordPress exports them in increasing order of ID
+  and ID is incremented with time, so this is chronological without having to sort -->
   {{ range .post_comments }}
     {{ $author_name := index . "author_name" }}
     {{ $author_link := index . "author_url" }}
