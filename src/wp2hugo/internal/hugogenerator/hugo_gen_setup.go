@@ -18,6 +18,7 @@ import (
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
 	"github.com/rs/zerolog/log"
+	"gopkg.in/yaml.v3"
 )
 
 const _archiveContent = `
@@ -437,7 +438,7 @@ func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) e
 		if pagePath, err := getPagePath(outputDirPath, page.CommonFields, pages); err != nil {
 			return err
 		} else {
-			if err := g.writePage(outputDirPath, pagePath, page.CommonFields); err != nil {
+			if err := g.writePage(outputDirPath, pagePath, page.CommonFields, info); err != nil {
 				return err
 			}
 		}
@@ -471,7 +472,7 @@ func (g Generator) writeCustomPosts(outputDirPath string, info wpparser.WebsiteI
 		if pagePath, err := getPagePath(outputDirPath, page.CommonFields, customPosts); err != nil {
 			return err
 		} else {
-			if err := g.writePage(outputDirPath, pagePath, page.CommonFields); err != nil {
+			if err := g.writePage(outputDirPath, pagePath, page.CommonFields, info); err != nil {
 				return err
 			}
 		}
@@ -581,7 +582,7 @@ func (g Generator) writePosts(outputDirPath string, info wpparser.WebsiteInfo) e
 	for _, post := range info.Posts() {
 		filename := post.GetFileInfo().FileNameWithLanguage()
 		postPath := getFilePath(postsDir, filename)
-		if err := g.writePage(outputDirPath, postPath, post.CommonFields); err != nil {
+		if err := g.writePage(outputDirPath, postPath, post.CommonFields, info); err != nil {
 			return err
 		}
 		// Redirect from old URL to new URL
@@ -619,7 +620,57 @@ func writeFile(filePath string, content []byte) error {
 	return nil
 }
 
-func (g Generator) writePage(outputMediaDirPath string, pagePath string, page wpparser.CommonFields) error {
+func updateComments(siteDir string, pageData wpparser.CommonFields, info wpparser.WebsiteInfo) error {
+	dataPath := path.Join(siteDir, "data", "comments.yaml")
+	dataDir := path.Dir(dataPath)
+
+	// Create the directory if it doesn't exist
+	err := os.MkdirAll(dataDir, 0755)
+	if err != nil {
+		return fmt.Errorf("error creating directory: %w", err)
+	}
+
+	// Open/Create the YAML file
+	r, err := os.OpenFile(dataPath, os.O_RDWR|os.O_CREATE, 0o644)
+	if err != nil {
+		return fmt.Errorf("error opening data file: %w", err)
+	}
+	defer func() {
+		_ = r.Close()
+	}()
+
+	// Check if file is empty
+	stat, err := r.Stat()
+	if err != nil {
+		return fmt.Errorf("error stating file: %w", err)
+	}
+
+	// Fetch existing comments
+	var comments []wpparser.CommentInfo
+	if stat.Size() > 0 {
+		if err := yaml.NewDecoder(r).Decode(&comments); err != nil {
+			return fmt.Errorf("error unmarshalling comments: %w", err)
+		}
+	}
+
+	// Append comments for the current post
+	for _, comment := range pageData.Comments {
+		comment.PostLink = hugopage.ReplaceAbsoluteLinksWithRelative(info.Link().Host, comment.PostLink)
+		comments = append(comments, comment)
+	}
+
+	// Update the file
+	data, err := utils.GetYAML(comments)
+	if err != nil {
+		return fmt.Errorf("error marshalling comments: %w", err)
+	}
+
+	log.Info().Msgf("Updating comments file: %s", dataPath)
+
+	return writeFile(dataPath, data)
+}
+
+func (g Generator) writePage(outputMediaDirPath string, pagePath string, page wpparser.CommonFields, info wpparser.WebsiteInfo) error {
 	pageURL, err := url.Parse(page.Link)
 	if err != nil {
 		return fmt.Errorf("error parsing page URL: %w", err)
@@ -653,6 +704,10 @@ func (g Generator) writePage(outputMediaDirPath string, pagePath string, page wp
 	}
 
 	log.Info().Msgf("Page written: %s", pagePath)
+
+	if err := updateComments(outputMediaDirPath, page, info); err != nil {
+		return fmt.Errorf("error saving comments: %w", err)
+	}
 
 	return nil
 }
