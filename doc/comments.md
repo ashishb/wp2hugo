@@ -75,7 +75,7 @@ From there, you can insert old comments into your pages by adding the following 
         </div>
 
         <div class="comment-content">
-          {{ index . "content" }}
+          {{ index . "content" | safeHTML }}<!-- don't escape HTML if content uses it -->
         </div>
 
         <!-- Embed children comments (replies), aka find comments whose parent_id match current id -->
