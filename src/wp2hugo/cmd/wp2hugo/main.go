@@ -68,7 +68,7 @@ func getWebsiteInfo(filePath string) (*wpparser.WebsiteInfo, error) {
 
 	defaultCustomPosts := []string{"avada_portfolio", "avada_faq", "product", "product_variation"}
 	defaultCustomPosts = append(defaultCustomPosts, strings.Split(*customPostTypes, ",")...)
-	
+
 	return parser.Parse(file, strings.Split(*authors, ","), defaultCustomPosts)
 }
 
