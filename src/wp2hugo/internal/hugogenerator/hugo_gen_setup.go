@@ -406,6 +406,11 @@ func sanitizePageBundles(dirPath string) error {
 }
 
 func sanitizePostType(outputDirPath string, postType string) {
+	// Content type subfolder always uses the plural form of the type name
+	if !strings.HasSuffix(postType, "s") {
+		postType += "s"
+	}
+
 	if err := sanitizePageBundles(path.Join(outputDirPath, "content", postType)); err != nil {
 		// Intentionally ignore the error
 		fmt.Println("Error sanitizing page bundles:", err)
