@@ -50,7 +50,7 @@ This project is completely free for non-commercial and personal usage.
 Commercial usage is restricted via a license.
 Feel free to contact me if you want to license this commercially.
 
-## What does wp2hugo do better than other migration tools ?
+## What does wp2hugo do better than other migration tools
 
 - wp2hugo is distributed as a single and portable binary executable, requiring no installation and no dependence. The binary is compiled code (written in Go), which provides _much_ better performance than scripted tools.
 - It can run locally on your computer, or on server with shell access, and processes WordPress XML export file. This makes it able to migrate very large blogs in a matter of minutes, while other migration tools (e.g. those running server-side PHP code, as WordPress plugins) may time-out, overflow RAM, overload server and fail completely on shared hosting.
