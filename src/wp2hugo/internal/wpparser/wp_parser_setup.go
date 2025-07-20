@@ -228,7 +228,7 @@ type CustomMetaDatum struct {
 
 // Parse parses the XML data and returns the WebsiteInfo.
 // authors is a list of author names. If it is empty, all authors are considered.
-func (p *Parser) Parse(xmlData io.Reader, authors []string) (*WebsiteInfo, error) {
+func (p *Parser) Parse(xmlData io.Reader, authors []string, customPostTypes []string) (*WebsiteInfo, error) {
 	fp := rss.Parser{}
 	feed, err := fp.Parse(InvalidatorCharacterRemover{reader: xmlData})
 	if err != nil {
@@ -244,10 +244,19 @@ func (p *Parser) Parse(xmlData io.Reader, authors []string) (*WebsiteInfo, error
 			nonEmptyAuthors = append(nonEmptyAuthors, a)
 		}
 	}
-	return p.getWebsiteInfo(feed, nonEmptyAuthors)
+	return p.getWebsiteInfo(feed, nonEmptyAuthors, customPostTypes)
 }
 
-func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo, error) {
+func contains(list []string, value string) bool {
+	for _, v := range list {
+		if v == value {
+			return true
+		}
+	}
+	return false
+}
+
+func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string, customPostTypes []string) (*WebsiteInfo, error) {
 	if feed.PubDateParsed == nil {
 		log.Warn().Msgf("error parsing published date: %s", feed.PubDateParsed)
 	}
@@ -310,26 +319,6 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 					Msg("processing Post")
 				posts = append(posts, *post)
 			}
-		case "avada_portfolio", "avada_faq", "product", "product_variation":
-			// TODO: let user pass custom post types from CLI arguments ?
-			// Most custom post types are more or less regular posts handled with special templates
-			// and having their own archives, aside from blog posts.
-			// They fall within what Hugo calls sections and page bundles.
-			// Problem is some themes use custom post types for really weird stuff (layouts, etc.)
-			if customPost, err := getCustomPostInfo(item, taxonomies); err != nil && !errors.Is(err, errTrashItem) {
-				return nil, err
-			} else if customPost != nil {
-				if customPost.Content == "" {
-					log.Warn().
-						Str("title", customPost.Title).
-						Msg("Empty content")
-				}
-				customPosts = append(customPosts, *customPost)
-				log.Debug().
-					Str("postID", customPost.PostID).
-					Str("postType", wpPostType).
-					Msg("processing post")
-			}
 		case "wp_navigation":
 			var err error
 			navigationLinks, err = getNavigationLinks(item.Content)
@@ -340,10 +329,27 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 			// Ignoring these for now
 			continue
 		default:
-			log.Info().
-				Str("title", item.Title).
-				Str("type", wpPostType).
-				Msg("Ignoring item due to unknown type")
+			if contains(customPostTypes, wpPostType) {
+				if customPost, err := getCustomPostInfo(item, taxonomies); err != nil && !errors.Is(err, errTrashItem) {
+					return nil, err
+				} else if customPost != nil {
+					if customPost.Content == "" {
+						log.Warn().
+							Str("title", customPost.Title).
+							Msg("Empty content")
+					}
+					customPosts = append(customPosts, *customPost)
+					log.Debug().
+						Str("postID", customPost.PostID).
+						Str("postType", wpPostType).
+						Msg("processing post")
+				}
+			} else {
+				log.Info().
+					Str("title", item.Title).
+					Str("type", wpPostType).
+					Msg("Ignoring item due to unknown type")
+			}
 		}
 	}
 
@@ -368,6 +374,8 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string) (*WebsiteInfo,
 		posts:           posts,
 		customPosts:     customPosts,
 		navigationLinks: navigationLinks,
+
+		customPostTypes: customPostTypes,
 
 		postIDToAttachmentCache: getPostIDToAttachmentsMap(attachments),
 	}

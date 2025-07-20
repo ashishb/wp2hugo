@@ -62,22 +62,26 @@ Feel free to contact me if you want to license this commercially.
 ```bash
 $ wp2hugo
 Usage of wp2hugo:
- -authors string
-   CSV list of author name(s), if provided, only posts by these authors will be processed
-  -color-log-output
-   enable colored log output, set false to structured JSON log (default true)
-  -continue-on-media-download-error
-   continue processing even if one or more media downloads fail
-  -download-media
-   download media files embedded in the WordPress content
-  -font string
-   custom font for the output website (default "Lexend")
-  -media-cache-dir string
-   dir path to cache the downloaded media files (default "/tmp/wp2hugo-cache")
-  -output string
-   dir path to write the Hugo-generated data to (default "/tmp")
-  -source string
-   file path to the source WordPress XML file
+  --authors string
+    CSV list of author name(s), if provided, only posts by these authors will be processed (using author slug)
+  --color-log-output
+    enable colored log output, set false to structured JSON log (default true)
+  --continue-on-media-download-error
+    continue processing even if one or more media downloads fail
+  --download-media
+    download media files embedded in the WordPress content
+  --download-all
+    download all media files from the WordPress library, whether embedded in content or not
+  --font string
+    custom font for the output website (default "Lexend")
+  --media-cache-dir string
+    dir path to cache the downloaded media files (default "/tmp/wp2hugo-cache")
+  --output string
+    dir path to write the Hugo-generated data to (default "/tmp")
+  --source string
+    file path to the source WordPress XML file
+  --custom-post-types string
+    CSV list of additional WordPress custom post types to import (using type slug)
 ```
 
 ### Build from source
@@ -104,11 +108,13 @@ More details on [the documentation](https://github.com/ashishb/wp2hugo/tree/main
 1. [x] Migrate posts
 1. [x] Migrate pages in a hierarchical way, using Hugo [page bundles](https://gohugo.io/content-management/page-bundles/),
 1. [x] Migrate tags, categories and [custom taxonomies](https://learn.wordpress.org/lesson/custom-taxonomies/) for all types of posts,
-1. [x] Migrate [Avada](https://themeforest.net/item/avada-responsive-multipurpose-theme/2833226) custom post types (FAQ, Portfolios)
-1. [x] Migrate [Woocommerce](https://woocommerce.com/) products and product variations (custom post types) into Hugo page bundles, along with their attributes (custom taxonomies, custom fields),
 1. [x] Set the WordPress homepage correctly
 1. [x] Create WordPress author page
-1. [x] Migrate [WPML](https://wpml.org/) translated posts, pages, and custom post types that use the [URL parameter scheme](https://wpml.org/documentation/getting-started-guide/language-setup/language-url-options/#language-name-added-as-a-parameter) (switch the WPML language URL option prior to exporting your blog content to XML).
+1. [x] Migrate [WPML](https://wpml.org/) translated posts, pages, and custom post types that use the [URL parameter scheme](https://wpml.org/documentation/getting-started-guide/language-setup/language-url-options/#language-name-added-as-a-parameter) (switch the WPML language URL option prior to exporting your blog content to XML),
+1. [x] Migrate any arbitrary WordPress [custom post type](https://learn.wordpress.org/lesson/custom-post-types/) and store them into their own `/content/post-type` subfolder (hierarchical custom posts are fully supported):
+  - [Avada](https://themeforest.net/item/avada-responsive-multipurpose-theme/2833226) FAQ and Portfolios types are supported natively,
+  - [Woocommerce](https://woocommerce.com/) products and product variations types are supported natively,
+  - user can specify a CSV list of arbitrary post types, using the `--custom-post-types` argument when calling the executable. Only post types that have a publishing status (`<wp:status>` in export XML) matching one of the [values of native posts](https://wordpress.org/documentation/article/post-status/) are supported.
 
 ### Migrate permalinks
 

@@ -27,6 +27,8 @@ var (
 	// Custom font for Hugo's papermod theme
 	font           = flag.String("font", "Lexend", "custom font for the output website")
 	colorLogOutput = flag.Bool("color-log-output", true, "enable colored log output, set false to structured JSON log")
+
+	customPostTypes = flag.String("custom-post-types", "", "CSV list of custom post types to import")
 )
 
 func main() {
@@ -63,7 +65,11 @@ func getWebsiteInfo(filePath string) (*wpparser.WebsiteInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	return parser.Parse(file, strings.Split(*authors, ","))
+
+	defaultCustomPosts := []string{"avada_portfolio", "avada_faq", "product", "product_variation"}
+	defaultCustomPosts = append(defaultCustomPosts, strings.Split(*customPostTypes, ",")...)
+	
+	return parser.Parse(file, strings.Split(*authors, ","), defaultCustomPosts)
 }
 
 func generate(info wpparser.WebsiteInfo, outputDirPath string) error {

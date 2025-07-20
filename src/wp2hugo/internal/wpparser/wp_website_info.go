@@ -25,6 +25,8 @@ type WebsiteInfo struct {
 	customPosts     []CustomPostInfo
 	taxonomies      []TaxonomyInfo
 
+	customPostTypes []string
+
 	postIDToAttachmentCache map[string][]AttachmentInfo
 }
 
@@ -89,6 +91,10 @@ func (w *WebsiteInfo) Posts() []PostInfo {
 
 func (w *WebsiteInfo) CustomPosts() []CustomPostInfo {
 	return w.customPosts
+}
+
+func (w *WebsiteInfo) CustomPostTypes() []string {
+	return w.customPostTypes
 }
 
 func getPostIDToAttachmentsMap(attachments []AttachmentInfo) map[string][]AttachmentInfo {

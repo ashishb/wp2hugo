@@ -480,14 +480,7 @@ func (g Generator) writeCustomPosts(outputDirPath string, info wpparser.WebsiteI
 	}
 
 	// Properly set page bundle type
-	postTypes := []string{
-		"products",
-		"product_variations",
-		"avada_faqs",
-		"avada_portfolios",
-	}
-
-	for _, postType := range postTypes {
+	for _, postType := range info.CustomPostTypes() {
 		sanitizePostType(outputDirPath, postType)
 	}
 
