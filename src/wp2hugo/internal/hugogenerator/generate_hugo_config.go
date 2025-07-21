@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugogenerator/hugopage"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
@@ -22,9 +23,10 @@ type _HugoNavMenu struct {
 }
 
 type _HugoAttachment struct {
-	Path  string `yaml:"path"`
-	Title string `yaml:"title"`
-	ID    string `yaml:"id"`
+	Path  string    `yaml:"path"`
+	Title string    `yaml:"title"`
+	ID    string    `yaml:"id"`
+	Date  time.Time `yaml:"published"`
 }
 
 type _HugoConfig struct {
@@ -106,6 +108,7 @@ func setupLibraryData(siteDir string, info wpparser.WebsiteInfo) error {
 			Path:  hugopage.ReplaceAbsoluteLinksWithRelative(info.Link().Host, *attachment.GetAttachmentURL()),
 			ID:    attachment.PostID,
 			Title: attachment.Title,
+			Date:  *attachment.PublishDate,
 		})
 	}
 
