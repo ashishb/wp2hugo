@@ -25,6 +25,12 @@ type WebsiteInfo struct {
 	customPosts     []CustomPostInfo
 	taxonomies      []TaxonomyInfo
 
+	// WordPress non-native post types slugs to import.
+	// By default, we handle avada_portfolio, avada_faq (Advada theme),
+	// product, product_variation (WooCommerce plugin).
+	// This is mapped to the <wp:post_type> field in the XML export
+	customPostTypes []string
+
 	postIDToAttachmentCache map[string][]AttachmentInfo
 }
 
@@ -89,6 +95,10 @@ func (w *WebsiteInfo) Posts() []PostInfo {
 
 func (w *WebsiteInfo) CustomPosts() []CustomPostInfo {
 	return w.customPosts
+}
+
+func (w *WebsiteInfo) CustomPostTypes() []string {
+	return w.customPostTypes
 }
 
 func getPostIDToAttachmentsMap(attachments []AttachmentInfo) map[string][]AttachmentInfo {

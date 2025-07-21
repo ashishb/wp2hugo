@@ -15,7 +15,7 @@ func TestFootnote(t *testing.T) {
 	require.NoError(t, err)
 
 	parser := wpparser.NewParser()
-	websiteInfo, err := parser.Parse(file, nil)
+	websiteInfo, err := parser.Parse(file, nil, nil)
 	require.NoError(t, err)
 	require.Len(t, websiteInfo.Posts(), 1)
 
@@ -39,7 +39,7 @@ func TestPost(t *testing.T) {
 	require.NoError(t, err)
 
 	parser := wpparser.NewParser()
-	websiteInfo, err := parser.Parse(file, nil)
+	websiteInfo, err := parser.Parse(file, nil, nil)
 	require.NoError(t, err)
 	require.Len(t, websiteInfo.Posts(), 1)
 
