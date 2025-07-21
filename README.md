@@ -50,6 +50,15 @@ This project is completely free for non-commercial and personal usage.
 Commercial usage is restricted via a license.
 Feel free to contact me if you want to license this commercially.
 
+## What does wp2hugo do better than other migration tools
+
+- wp2hugo is distributed as a single and portable binary executable, requiring no installation and no dependence. The binary is compiled code (written in Go), which provides _much_ better performance than scripted tools.
+- It can run locally on your computer, or on server with shell access, and processes WordPress XML export file. This makes it able to migrate very large blogs in a matter of minutes, while other migration tools (e.g. those running server-side PHP code, as WordPress plugins) may time-out, overflow RAM, overload server and fail completely on shared hosting.
+- It migrates all post metadata like GUID, custom fields, taxonomies, and more, so you retain all of your original posts' information, even hidden from user front-end. _(Posts front-matters may need some manual cleanup after migration)_
+- It converts a large range of native WordPress shortcodes and Gutenberg blocks to Hugo shortcodes.
+- It fully imports WordPress media library (files and metadata) and fully supports WordPress galeries (legacy and Gutenberg), which makes it particularly well-suited for photo blogs.
+- It supports translated pages and hierarchical pages and custom post types.
+
 ## Usage
 
 ### Binary
@@ -163,11 +172,6 @@ More details on [the documentation](https://github.com/ashishb/wp2hugo/tree/main
 1. [x] Ability to filter posts by author(s), useful for [WordPress multi-site](https://www.smashingmagazine.com/2020/01/complete-guide-wordpress-multisite/) migrations
 1. [x] Custom font - defaults to Lexend
 1. [x] Support for parallax blur backgrounds (similar to [WordPress Advanced Backgrounds](https://wordpress.org/plugins/advanced-backgrounds/))
-
-### Why existing tools don't work
-
-[Existing tools](https://gohugo.io/tools/migrations/) do a half-baked job of migrating content.
-They rarely migrate the metadata like GUID, YouTube embeds, Google Map embeds, and code embeds properly.
 
 ## Hugo Manager
 
