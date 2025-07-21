@@ -12,14 +12,18 @@ const _commentsPartial = `
 <!-- fetch /data/comments.yaml -->
 {{ $site_comments := .Site.Data.comments }}
 
+<!-- /data/comments.yaml not found: abort -->
+{{ if not $site_comments }}
+	{{ return "" }}
+{{ end }}
+
 <!-- find all comments whose post_id matches current post/page post_id -->
 {{ with (where .Site.Data.comments "post_id" .Params.post_id ) }}
-  <ul id="comments">
+  <ul id="comments" style="list-style: none;">
     <!-- Call the top level of comments (parent_id = 0). Each of them will call their own children (replies) internally -->
     {{ template "comments" (dict "post_comments" . "site_comments" $site_comments "parent_id" "0" ) }}
   </ul>
 {{ end }}
-
 
 {{- define "comments" -}}
 
@@ -61,7 +65,7 @@ const _commentsPartial = `
 
         <!-- Embed children comments (replies), aka find comments whose parent_id match current id -->
         {{ with (where $site_comments "parent_id" $id) }}
-          <ul class="children-comments">
+          <ul class="children-comments" style="list-style: none;">
             {{ template "comments" (dict "post_comments" . "site_comments" $site_comments "parent_id" $id ) }}
           </ul>
         {{ end }}
