@@ -110,7 +110,7 @@ More details on [the documentation](https://github.com/ashishb/wp2hugo/tree/main
 1. [x] Create WordPress author page
 1. [x] Migrate [WPML](https://wpml.org/) translated posts, pages, and custom post types that use the [URL parameter scheme](https://wpml.org/documentation/getting-started-guide/language-setup/language-url-options/#language-name-added-as-a-parameter) (switch the WPML language URL option prior to exporting your blog content to XML).
 
-### Migrate read-only comments
+### Migrate comments
 
 Provided you don't want to accept new comments, old comments are automatically migrated for all post types (posts, pages and custom). You will need to insert the provided snippet into your relevant theme's `single.html` template. See the [documentation](https://github.com/ashishb/wp2hugo/blob/main/doc/comments.md).
 

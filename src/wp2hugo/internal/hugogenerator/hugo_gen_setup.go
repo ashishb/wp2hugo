@@ -131,6 +131,9 @@ func (g Generator) Generate() error {
 	if err = WriteCustomShortCodes(*siteDir); err != nil {
 		return err
 	}
+	if err = WriteCustomPartials(*siteDir); err != nil {
+		return err
+	}
 
 	if err = setupLibraryData(*siteDir, info); err != nil {
 		return err
