@@ -25,8 +25,8 @@ const (
 	// Seems to be undocumented, but this is the date format used by Hugo
 	_hugoDateFormat = "2006-01-02T15:04:05-07:00"
 
-	CategoryName = "category"
-	TagName      = "tag"
+	CategoryName = "categories"
+	TagName      = "tags"
 )
 
 type Page struct {
