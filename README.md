@@ -125,6 +125,10 @@ More details on [the documentation](https://github.com/ashishb/wp2hugo/tree/main
   - [Woocommerce](https://woocommerce.com/) products and product variations types are supported natively,
   - user can specify a CSV list of arbitrary post types, using the `--custom-post-types` argument when calling the executable. Only post types that have a publishing status (`<wp:status>` in export XML) matching one of the [values of native posts](https://wordpress.org/documentation/article/post-status/) are supported.
 
+### Migrate comments
+
+Provided you don't want to accept new comments, old comments are automatically migrated for all post types (posts, pages and custom). You will need to insert the provided snippet into your relevant theme's `single.html` template. See the [documentation](https://github.com/ashishb/wp2hugo/blob/main/doc/comments.md).
+
 ### Migrate permalinks
 
 1. [x] Migrate all the URLs, including media URL,s correctly
