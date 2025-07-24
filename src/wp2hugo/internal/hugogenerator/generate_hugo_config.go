@@ -87,7 +87,7 @@ func setupLibraryData(siteDir string, info wpparser.WebsiteInfo) error {
 	dataDir := path.Dir(dataPath)
 
 	// Create the directory if it doesn't exist
-	err := os.MkdirAll(dataDir, 0755)
+	err := os.MkdirAll(dataDir, 0o755)
 	if err != nil {
 		return fmt.Errorf("error creating directory: %w", err)
 	}
@@ -102,7 +102,7 @@ func setupLibraryData(siteDir string, info wpparser.WebsiteInfo) error {
 	}()
 
 	// Write the WP media library into data
-	var library []_HugoAttachment
+	library := make([]_HugoAttachment, 0, len(info.Attachments()))
 	for _, attachment := range info.Attachments() {
 		library = append(library, _HugoAttachment{
 			Path:  hugopage.ReplaceAbsoluteLinksWithRelative(info.Link().Host, *attachment.GetAttachmentURL()),
