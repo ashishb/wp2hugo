@@ -1,6 +1,7 @@
 package gitutils
 
 import (
+	"context"
 	"fmt"
 	"os/exec"
 	"path/filepath"
@@ -9,7 +10,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func GitMove(path string, newFilePath string) error {
+func GitMove(ctx context.Context, path string, newFilePath string) error {
 	if !utils.FileExists(path) {
 		return fmt.Errorf("file '%s' does not exist", path)
 	}
@@ -18,7 +19,7 @@ func GitMove(path string, newFilePath string) error {
 		return fmt.Errorf("file '%s' already exists", newFilePath)
 	}
 
-	cmd := exec.Command("git", "mv", path, newFilePath)
+	cmd := exec.CommandContext(ctx, "git", "mv", path, newFilePath)
 	// Run the command in the directory of the file for "git" to work
 	cmd.Dir = filepath.Dir(path)
 	output, err := cmd.CombinedOutput()

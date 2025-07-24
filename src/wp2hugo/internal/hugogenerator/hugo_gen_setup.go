@@ -90,10 +90,9 @@ func NewGenerator(outputDirPath string, fontName string,
 	}
 }
 
-func (g Generator) Generate() error {
-	ctx := context.Background()
+func (g Generator) Generate(ctx context.Context) error {
 	info := g.wpInfo
-	siteDir, err := g.setupHugo(g.outputDirPath)
+	siteDir, err := g.setupHugo(ctx, g.outputDirPath)
 	if err != nil {
 		return err
 	}
@@ -102,21 +101,21 @@ func (g Generator) Generate() error {
 	}
 
 	if g.downloadAll {
-		if err = g.downloadAllMedia(*siteDir, info); err != nil {
+		if err = g.downloadAllMedia(ctx, *siteDir, info); err != nil {
 			return err
 		}
 	}
 
 	// Non-hierarchical content:
-	if err = g.writePosts(*siteDir, info); err != nil {
+	if err = g.writePosts(ctx, *siteDir, info); err != nil {
 		return err
 	}
 
 	// Hierarchical content:
-	if err = g.writePages(*siteDir, info); err != nil {
+	if err = g.writePages(ctx, *siteDir, info); err != nil {
 		return err
 	}
-	if err = g.writeCustomPosts(*siteDir, info); err != nil {
+	if err = g.writeCustomPosts(ctx, *siteDir, info); err != nil {
 		return err
 	}
 	if err = setupArchivePage(*siteDir); err != nil {
@@ -175,7 +174,7 @@ func (g Generator) Generate() error {
 	return nil
 }
 
-func (g Generator) setupHugo(outputDirPath string) (*string, error) {
+func (g Generator) setupHugo(ctx context.Context, outputDirPath string) (*string, error) {
 	// Replace spaces and colons with dashes
 	timeFormat := time.Now().Format(
 		strings.ReplaceAll(strings.ReplaceAll(time.DateTime, " ", "-"), ":", "-"))
@@ -225,10 +224,10 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 			err    error
 		)
 		if runtime.GOOS == "windows" {
-			output, err = exec.Command("cmd", "/C", command).Output()
+			output, err = exec.CommandContext(ctx, "cmd", "/C", command).Output()
 		} else {
 			// mac & Linux
-			output, err = exec.Command("bash", "-c", command).Output()
+			output, err = exec.CommandContext(ctx, "bash", "-c", command).Output()
 		}
 		if err != nil {
 			log.Error().
@@ -264,7 +263,7 @@ func (g Generator) setupHugo(outputDirPath string) (*string, error) {
 	return &siteDir, nil
 }
 
-func (g Generator) downloadAllMedia(outputDirPath string, info wpparser.WebsiteInfo) error {
+func (g Generator) downloadAllMedia(ctx context.Context, outputDirPath string, info wpparser.WebsiteInfo) error {
 	hostname := info.Link().Host
 	prefixes := make([]string, 0)
 	hostname = strings.TrimPrefix(hostname, "www.")
@@ -274,7 +273,7 @@ func (g Generator) downloadAllMedia(outputDirPath string, info wpparser.WebsiteI
 	prefixes = append(prefixes, "http://www."+hostname)
 
 	for _, attachment := range info.Attachments() {
-		if _, err := downloadMedia(*attachment.GetAttachmentURL(), outputDirPath, prefixes, g, info.Link()); err != nil {
+		if _, err := downloadMedia(ctx, *attachment.GetAttachmentURL(), outputDirPath, prefixes, g, info.Link()); err != nil {
 			return err
 		}
 	}
@@ -421,7 +420,7 @@ func sanitizePostType(outputDirPath string, postType string) {
 	}
 }
 
-func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) error {
+func (g Generator) writePages(ctx context.Context, outputDirPath string, info wpparser.WebsiteInfo) error {
 	if len(info.Pages()) == 0 {
 		log.Info().Msg("No pages to write")
 		return nil
@@ -446,7 +445,7 @@ func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) e
 		if pagePath, err := getPagePath(outputDirPath, page.CommonFields, pages); err != nil {
 			return err
 		} else {
-			if err := g.writePage(outputDirPath, pagePath, page.CommonFields, info); err != nil {
+			if err := g.writePage(ctx, outputDirPath, pagePath, page.CommonFields, info); err != nil {
 				return err
 			}
 		}
@@ -460,7 +459,7 @@ func (g Generator) writePages(outputDirPath string, info wpparser.WebsiteInfo) e
 	return nil
 }
 
-func (g Generator) writeCustomPosts(outputDirPath string, info wpparser.WebsiteInfo) error {
+func (g Generator) writeCustomPosts(ctx context.Context, outputDirPath string, info wpparser.WebsiteInfo) error {
 	if len(info.CustomPosts()) == 0 {
 		log.Info().Msg("No custom posts to write")
 		return nil
@@ -480,7 +479,7 @@ func (g Generator) writeCustomPosts(outputDirPath string, info wpparser.WebsiteI
 		if pagePath, err := getPagePath(outputDirPath, page.CommonFields, customPosts); err != nil {
 			return err
 		} else {
-			if err := g.writePage(outputDirPath, pagePath, page.CommonFields, info); err != nil {
+			if err := g.writePage(ctx, outputDirPath, pagePath, page.CommonFields, info); err != nil {
 				return err
 			}
 		}
@@ -568,7 +567,7 @@ func getFilePath(pagesDir string, baseFileName string) string {
 	return pagePath
 }
 
-func (g Generator) writePosts(outputDirPath string, info wpparser.WebsiteInfo) error {
+func (g Generator) writePosts(ctx context.Context, outputDirPath string, info wpparser.WebsiteInfo) error {
 	if len(info.Posts()) == 0 {
 		log.Info().Msg("No posts to write")
 		return nil
@@ -583,7 +582,7 @@ func (g Generator) writePosts(outputDirPath string, info wpparser.WebsiteInfo) e
 	for _, post := range info.Posts() {
 		filename := post.GetFileInfo().FileNameWithLanguage()
 		postPath := getFilePath(postsDir, filename)
-		if err := g.writePage(outputDirPath, postPath, post.CommonFields, info); err != nil {
+		if err := g.writePage(ctx, outputDirPath, postPath, post.CommonFields, info); err != nil {
 			return err
 		}
 		// Redirect from old URL to new URL
@@ -672,7 +671,9 @@ func updateComments(siteDir string, pageData wpparser.CommonFields, info wpparse
 	return writeFile(dataPath, data)
 }
 
-func (g Generator) writePage(outputMediaDirPath string, pagePath string, page wpparser.CommonFields, info wpparser.WebsiteInfo) error {
+func (g Generator) writePage(ctx context.Context, outputMediaDirPath string, pagePath string,
+	page wpparser.CommonFields, info wpparser.WebsiteInfo,
+) error {
 	pageURL, err := url.Parse(page.Link)
 	if err != nil {
 		return fmt.Errorf("error parsing page URL: %w", err)
@@ -684,7 +685,7 @@ func (g Generator) writePage(outputMediaDirPath string, pagePath string, page wp
 	}
 
 	if g.downloadMedia {
-		urlReplacements, err := g.downloadPageMedia(outputMediaDirPath, p, pageURL)
+		urlReplacements, err := g.downloadPageMedia(ctx, outputMediaDirPath, p, pageURL)
 		if err != nil {
 			return err
 		} else {
@@ -724,8 +725,7 @@ func (g Generator) newHugoPage(pageURL *url.URL, page wpparser.CommonFields) (*h
 		page.CustomMetaData, page.Taxonomies, page.PostID, page.PostParentID)
 }
 
-func downloadMedia(link string, outputMediaDirPath string, prefixes []string, g Generator, pageURL *url.URL) (map[string]string, error) {
-	ctx := context.Background()
+func downloadMedia(ctx context.Context, link string, outputMediaDirPath string, prefixes []string, g Generator, pageURL *url.URL) (map[string]string, error) {
 	// Uniformize protocol-less links: add protocol
 	if strings.HasPrefix(link, "//") {
 		link = strings.Replace(link, "//", pageURL.Scheme+"://", 1)
@@ -830,7 +830,7 @@ func downloadMedia(link string, outputMediaDirPath string, prefixes []string, g 
 	return urlReplacement, nil
 }
 
-func (g Generator) downloadPageMedia(outputMediaDirPath string, p *hugopage.Page, pageURL *url.URL) (map[string]string, error) {
+func (g Generator) downloadPageMedia(ctx context.Context, outputMediaDirPath string, p *hugopage.Page, pageURL *url.URL) (map[string]string, error) {
 	links := p.WPMediaLinks()
 	log.Debug().
 		Str("page", pageURL.String()).
@@ -852,7 +852,7 @@ func (g Generator) downloadPageMedia(outputMediaDirPath string, p *hugopage.Page
 	urlReplacements := make(map[string]string)
 
 	for _, link := range links {
-		if replacement, err := downloadMedia(link, outputMediaDirPath, prefixes, g, pageURL); err != nil {
+		if replacement, err := downloadMedia(ctx, link, outputMediaDirPath, prefixes, g, pageURL); err != nil {
 			return nil, err
 		} else {
 			for k, v := range replacement {
