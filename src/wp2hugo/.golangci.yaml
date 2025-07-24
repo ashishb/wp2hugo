@@ -1,0 +1,259 @@
+version: "2"
+run:
+  go: "1.24"
+linters:
+  enable:
+    - asasalint
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - canonicalheader
+    - containedctx
+    - contextcheck
+    - copyloopvar
+#    - cyclop  # Eventually enable this
+    - decorder
+    - dogsled
+    - dupl
+    - durationcheck
+    - errchkjson
+    - errname
+    - errorlint
+    - exptostd
+    - fatcontext
+#    - forbidigo  # Eventually enable this
+    - forcetypeassert
+#    - funlen  # Eventually enable this
+    - gocheckcompilerdirectives
+#    - gochecknoglobals  # Eventually enable this
+    - gochecksumtype
+#    - gocognit
+    - gocritic
+    - gocyclo
+    - gomodguard
+    - goprintffuncname
+    - gosec
+    - grouper
+#    - lll  # Eventually enable this
+#    - maintidx  # Eventually enable this
+    - makezero
+    - mirror
+    - nakedret
+#    - nestif  # Eventually enable this
+    - noctx
+    - nosprintfhostport
+    - paralleltest
+    - perfsprint
+    - prealloc
+#    - predeclared  # Eventually enable this
+    - promlinter
+#    - revive  # Eventually enable this
+    - rowserrcheck
+    - sqlclosecheck
+    - staticcheck
+    - tagalign
+    - testifylint
+    - thelper
+    - tparallel
+    - unconvert
+    - unparam
+    - usestdlibvars
+    - usetesting
+    - wastedassign
+    - whitespace
+    - zerologlint
+  disable:
+    - depguard
+    - godox
+    - gosmopolitan
+    - interfacebloat
+    - ireturn
+    - nlreturn
+    - tagliatelle
+    - testpackage
+    - varnamelen
+    - wrapcheck
+#    - wsl
+  settings:
+    cyclop:
+      max-complexity: 12
+      package-average: 10
+    errcheck:
+      check-type-assertions: true
+    funlen:
+      lines: 80
+      statements: 40
+    gocognit:
+      min-complexity: 25
+    gocritic:
+      disabled-checks:
+        - singleCaseSwitch
+      settings:
+        captLocal:
+          paramsOnly: false
+        ifElseChain:
+          minThreshold: 4
+        underef:
+          skipRecvDeref: false
+    gomodguard:
+      blocked:
+        modules:
+          - github.com/golang/protobuf:
+              recommendations:
+                - google.golang.org/protobuf
+              reason: see https://developers.google.com/protocol-buffers/docs/reference/go/faq#modules
+    gosec:
+      includes:
+        - G101
+        - G102
+        - G103
+        - G104
+        - G106
+        - G107
+        - G108
+        - G109
+        - G110
+        - G111
+        - G112
+        - G114
+        - G201
+        - G202
+        - G203
+        - G204
+        - G301
+        - G302
+        - G303
+        - G304
+        - G305
+        - G306
+        - G307
+        - G401
+        - G402
+        - G403
+        - G404
+        - G501
+        - G502
+        - G503
+        - G504
+        - G505
+        - G601
+        - G602
+      severity: medium
+      confidence: medium
+      config:
+        G101:
+          entropy_threshold: "80.0"
+          ignore_entropy: false
+          pattern: (?i)example
+          per_char_threshold: "3.0"
+          truncate: "32"
+        G104:
+          fmt:
+            - Fscanf
+        G111:
+          pattern: custom\.Dir\(\)
+        G301: "0750"
+        G302: "0600"
+        G306: "0600"
+        global:
+          '#nosec': '#my-custom-nosec'
+          audit: true
+          nosec: true
+          show-ignored: true
+      concurrency: 12
+    govet:
+      disable:
+        - fieldalignment
+      enable-all: true
+      settings:
+        shadow:
+          strict: false
+    lll:
+      line-length: 100
+    maintidx:
+      under: 33
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+      allow-no-explanation:
+        - funlen
+        - gocognit
+        - lll
+    tagalign:
+      align: true
+      sort: true
+      order:
+        - json
+        - yaml
+        - yml
+        - toml
+        - mapstructure
+        - binding
+        - validate
+      strict: false
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - lll
+        source: ^//\s*go:generate\s
+      - linters:
+          - lll
+        source: ^//
+      - linters:
+          - lll
+        source: https://
+      - linters:
+          - godot
+        source: (noinspection|TODO)
+      - linters:
+          - gocritic
+        source: //noinspection
+      - linters:
+          - errorlint
+        source: ^\s+if _, ok := err\.\([^.]+\.InternalError\); ok {
+      - linters:
+          - bodyclose
+          - errcheck
+          - forcetypeassert
+          - funlen
+          - gochecknoglobals
+          - goconst
+          - gosec
+          - noctx
+          - unparam
+          - wrapcheck
+        path: _test\.go
+      - path: (.+)\.go$
+        text: declaration of "err" shadows declaration at
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+issues:
+  max-same-issues: 50
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+    - goimports
+  settings:
+    gofmt:
+      simplify: false
+      rewrite-rules:
+        - pattern: interface{}
+          replacement: any
+        - pattern: a[b:len(a)]
+          replacement: a[b:]
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
