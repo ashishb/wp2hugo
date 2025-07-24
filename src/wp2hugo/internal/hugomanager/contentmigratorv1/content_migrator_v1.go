@@ -1,6 +1,7 @@
 package contentmigratorv1
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -12,7 +13,7 @@ import (
 	"github.com/samber/lo"
 )
 
-func ProcessFile(path string, updateInline bool) (*bool, error) {
+func ProcessFile(ctx context.Context, path string, updateInline bool) (*bool, error) {
 	// Ignore all non-markdown files
 	if !strings.HasSuffix(path, ".md") {
 		return lo.ToPtr(false), nil
@@ -44,13 +45,13 @@ func ProcessFile(path string, updateInline bool) (*bool, error) {
 		Msg("Processing file")
 
 	if updateInline {
-		return lo.ToPtr(true), moveFileAndAttachmentIntoSameDir(path)
+		return lo.ToPtr(true), moveFileAndAttachmentIntoSameDir(ctx, path)
 	}
 
 	return lo.ToPtr(false), nil
 }
 
-func moveFileAndAttachmentIntoSameDir(path string) error {
+func moveFileAndAttachmentIntoSameDir(ctx context.Context, path string) error {
 	images, err := getAllImageAttachmentURLs(path)
 	if err != nil {
 		return fmt.Errorf("error getting image attachment URLs for file '%s': %w", path, err)
@@ -66,7 +67,7 @@ func moveFileAndAttachmentIntoSameDir(path string) error {
 		Msg("Moving file and attachments into same directory")
 
 	// Step 1: move file "./content/posts/filename.md" -> "./content/posts/filename/index.md"
-	blogPostDirPath, err := moveFileToIndexMd(path)
+	blogPostDirPath, err := moveFileToIndexMd(ctx, path)
 	if err != nil {
 		return fmt.Errorf("error moving file '%s' to index: %w", path, err)
 	}
@@ -87,7 +88,7 @@ func moveFileAndAttachmentIntoSameDir(path string) error {
 		}
 
 		newImgFilePath := filepath.Join(*blogPostDirPath, filepath.Base(*imgFilePath))
-		if err := gitutils.GitMove(*imgFilePath, newImgFilePath); err != nil {
+		if err := gitutils.GitMove(ctx, *imgFilePath, newImgFilePath); err != nil {
 			return fmt.Errorf("error moving image attachment file '%s': %w", *imgFilePath, err)
 		}
 
@@ -104,7 +105,7 @@ func moveFileAndAttachmentIntoSameDir(path string) error {
 	return nil
 }
 
-func moveFileToIndexMd(path string) (*string, error) {
+func moveFileToIndexMd(ctx context.Context, path string) (*string, error) {
 	// Step 1: move file "./content/posts/filename.md" -> "./content/posts/filename/index.md"
 	if !strings.HasSuffix(path, ".md") {
 		return nil, fmt.Errorf("path '%s' is not a markdown file", path)
@@ -125,7 +126,7 @@ func moveFileToIndexMd(path string) (*string, error) {
 		Str("path", path).
 		Str("newFilePath", newFilePath).
 		Msg("Moving file to index.md")
-	return &dirPath, gitutils.GitMove(path, newFilePath)
+	return &dirPath, gitutils.GitMove(ctx, path, newFilePath)
 }
 
 func replaceImageURLInMarkdownFile(markdownFilePath string, oldURL, newURL string) error {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"os"
 	"path"
@@ -42,13 +43,13 @@ func main() {
 	if len(*outputDir) == 0 {
 		log.Fatal().Msg("Output directory is required")
 	}
-	err := handle(*sourceFile)
+	err := handle(context.Background(), *sourceFile)
 	if err != nil {
 		log.Fatal().Msgf("Error: %s", err)
 	}
 }
 
-func handle(filePath string) error {
+func handle(ctx context.Context, filePath string) error {
 	log.Debug().
 		Str("source", filePath).
 		Msg("Reading website export")
@@ -56,7 +57,7 @@ func handle(filePath string) error {
 	if err != nil {
 		return err
 	}
-	return generate(*websiteInfo, *outputDir)
+	return generate(ctx, *websiteInfo, *outputDir)
 }
 
 func getWebsiteInfo(filePath string) (*wpparser.WebsiteInfo, error) {
@@ -72,9 +73,9 @@ func getWebsiteInfo(filePath string) (*wpparser.WebsiteInfo, error) {
 	return parser.Parse(file, strings.Split(*authors, ","), defaultCustomPosts)
 }
 
-func generate(info wpparser.WebsiteInfo, outputDirPath string) error {
+func generate(ctx context.Context, info wpparser.WebsiteInfo, outputDirPath string) error {
 	log.Debug().Msgf("Output: %s", outputDirPath)
 	generator := hugogenerator.NewGenerator(outputDirPath, *font, mediacache.New(*mediaCacheDir),
 		*downloadMedia, *downloadAll, *continueOnMediaDownloadFailure, *generateNgnixConfig, info)
-	return generator.Generate()
+	return generator.Generate(ctx)
 }

@@ -26,7 +26,7 @@ var moveContentWithAttachmentsCmd = &cobra.Command{
 
 		modifiedCount := 0
 		action := func(path string, updateInline bool) error {
-			processedFile, err := contentmigratorv1.ProcessFile(path, updateInline)
+			processedFile, err := contentmigratorv1.ProcessFile(cmd.Context(), path, updateInline)
 			if err != nil {
 				return err
 			}
