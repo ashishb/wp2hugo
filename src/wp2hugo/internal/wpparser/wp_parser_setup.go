@@ -548,8 +548,7 @@ func getCommonFields(item *rss.Item, taxonomies []TaxonomyInfo) (*CommonFields, 
 		for _, comment := range item.Extensions["wp"]["comment"] {
 			// Don't append spams and unapproved comments
 			if comment.Children["comment_approved"][0].Value == "1" {
-
-				var pubDate *time.Time
+				var commentPubDate *time.Time
 				tmp, err := time.Parse("2006-01-02 15:04:05", comment.Children["comment_date"][0].Value)
 				if err != nil {
 					log.Warn().
@@ -565,7 +564,7 @@ func getCommonFields(item *rss.Item, taxonomies []TaxonomyInfo) (*CommonFields, 
 					AuthorName:  comment.Children["comment_author"][0].Value,
 					AuthorEmail: comment.Children["comment_author_email"][0].Value,
 					AuthorURL:   comment.Children["comment_author_url"][0].Value,
-					PublishDate: pubDate,
+					PublishDate: commentPubDate,
 					Content:     comment.Children["comment_content"][0].Value,
 					PostLink:    item.Link,
 					PostID:      item.Extensions["wp"]["post_id"][0].Value,

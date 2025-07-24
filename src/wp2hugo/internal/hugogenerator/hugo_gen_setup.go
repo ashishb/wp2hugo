@@ -626,7 +626,7 @@ func updateComments(siteDir string, pageData wpparser.CommonFields, info wpparse
 	dataDir := path.Dir(dataPath)
 
 	// Create the directory if it doesn't exist
-	err := os.MkdirAll(dataDir, 0755)
+	err := os.MkdirAll(dataDir, 0o755)
 	if err != nil {
 		return fmt.Errorf("error creating directory: %w", err)
 	}
@@ -647,7 +647,8 @@ func updateComments(siteDir string, pageData wpparser.CommonFields, info wpparse
 	}
 
 	// Fetch existing comments
-	var comments []wpparser.CommentInfo
+	// pre-allocate len(pageData.Comments) accepting that there might be more comments
+	comments := make([]wpparser.CommentInfo, 0, len(pageData.Comments))
 	if stat.Size() > 0 {
 		if err := yaml.NewDecoder(r).Decode(&comments); err != nil {
 			return fmt.Errorf("error unmarshalling comments: %w", err)
