@@ -3,9 +3,9 @@ package cmd
 import (
 	"context"
 	"errors"
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/logger"
 
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/descriptionsuggest"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/logger"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
