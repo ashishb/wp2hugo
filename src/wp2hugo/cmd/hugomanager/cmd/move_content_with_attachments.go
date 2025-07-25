@@ -10,6 +10,7 @@ import (
 )
 
 func init() {
+	var colorLogOutput bool
 	var hugoDir string
 	var updateInline bool
 
@@ -19,19 +20,19 @@ func init() {
 		Long: "Update the posts with attachments to a single directory where the attachments are stored next " +
 			"to the markdown file for better long-term maintenance",
 		Run: func(cmd *cobra.Command, args []string) {
+			logger.ConfigureLogging(colorLogOutput)
 			moveContentNextToAttachments(cmd.Context(), hugoDir, updateInline)
 		},
 	}
 
 	moveContentWithAttachmentsCmd.Flags().StringVarP(&hugoDir, "hugo-dir", "", "", "Hugo base directory or any directory containing Hugo markdown files")
-	moveContentWithAttachmentsCmd.PersistentFlags().BoolVarP(&_colorLogOutput, "color-log-output", "", true,
+	moveContentWithAttachmentsCmd.PersistentFlags().BoolVarP(&colorLogOutput, "color-log-output", "", true,
 		"enable colored log output, set false to structured JSON log")
 	moveContentWithAttachmentsCmd.Flags().BoolVarP(&updateInline, "in-place", "", false, "Update titles in in markdown files")
 	rootCmd.AddCommand(moveContentWithAttachmentsCmd)
 }
 
 func moveContentNextToAttachments(ctx context.Context, hugoDir string, updateInline bool) {
-	logger.ConfigureLogging(_colorLogOutput)
 	log.Info().Msg("Move content with attachments command called")
 
 	modifiedCount := 0

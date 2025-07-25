@@ -12,6 +12,7 @@ import (
 )
 
 func init() {
+	var colorLogOutput bool
 	var hugoDir string
 	var updateInline bool
 	var limit int
@@ -21,13 +22,14 @@ func init() {
 		Short: "Suggests image alt text for all the images if missing",
 		Long:  "Suggests image alt text for all the images that are missing alt text (useful for accessibility and SEO)",
 		Run: func(cmd *cobra.Command, args []string) {
+			logger.ConfigureLogging(colorLogOutput)
 			suggestImageAlt(cmd.Context(), hugoDir, updateInline, limit)
 		},
 	}
 
 	suggestImageAltCmd.Flags().StringVarP(&hugoDir, "hugo-dir", "", "", "Hugo base directory or any directory containing Hugo markdown files")
 	suggestImageAltCmd.Flags().BoolVarP(&updateInline, "inline", "i", false, "Add image alt in markdown files")
-	suggestImageAltCmd.PersistentFlags().BoolVarP(&_colorLogOutput, "color-log-output", "", true,
+	suggestImageAltCmd.PersistentFlags().BoolVarP(&colorLogOutput, "color-log-output", "", true,
 		"enable colored log output, set false to structured JSON log")
 	suggestImageAltCmd.Flags().IntVarP(&limit, "limit", "n", 10, "Limit the number of images to update")
 	rootCmd.AddCommand(suggestImageAltCmd)
@@ -35,7 +37,6 @@ func init() {
 
 func suggestImageAlt(ctx context.Context, hugoDir string, updateInline bool, limit int) {
 	log.Info().Msg("suggest-image-alt command called")
-	logger.ConfigureLogging(_colorLogOutput)
 	numImageWithAlt := 0
 	numImageMissingAlt := 0
 	numImageUpdated := 0
