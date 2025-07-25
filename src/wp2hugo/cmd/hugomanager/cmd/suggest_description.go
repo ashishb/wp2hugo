@@ -3,9 +3,9 @@ package cmd
 import (
 	"context"
 	"errors"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/logger"
 
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/descriptionsuggest"
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/logger"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -20,6 +20,7 @@ func init() {
 		Short: "Suggests description for all the posts that are missing a description in the front matter",
 		Long:  "Suggests description for all the posts that are missing a description in the front matter",
 		Run: func(cmd *cobra.Command, args []string) {
+			logger.ConfigureLogging(_colorLogOutput)
 			suggestDescription(cmd.Context(), hugoDir, updateInline, limit)
 		},
 	}
@@ -33,7 +34,6 @@ func init() {
 
 func suggestDescription(ctx context.Context, hugoDir string, updateInline bool, _limit int) {
 	log.Info().Msg("suggest-description command called")
-	logger.ConfigureLogging(_colorLogOutput)
 
 	numHasDescription := 0
 	numMissingDescription := 0

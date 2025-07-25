@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"context"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/logger"
 
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/contentmigratorv1"
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/logger"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -19,6 +19,7 @@ func init() {
 		Long: "Update the posts with attachments to a single directory where the attachments are stored next " +
 			"to the markdown file for better long-term maintenance",
 		Run: func(cmd *cobra.Command, args []string) {
+			logger.ConfigureLogging(_colorLogOutput)
 			moveContentNextToAttachments(cmd.Context(), hugoDir, updateInline)
 		},
 	}
@@ -31,7 +32,6 @@ func init() {
 }
 
 func moveContentNextToAttachments(ctx context.Context, hugoDir string, updateInline bool) {
-	logger.ConfigureLogging(_colorLogOutput)
 	log.Info().Msg("Move content with attachments command called")
 
 	modifiedCount := 0

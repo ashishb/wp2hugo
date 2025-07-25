@@ -3,10 +3,10 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/logger"
 	"strings"
 
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/imagealtsuggest"
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/logger"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -21,6 +21,7 @@ func init() {
 		Short: "Suggests image alt text for all the images if missing",
 		Long:  "Suggests image alt text for all the images that are missing alt text (useful for accessibility and SEO)",
 		Run: func(cmd *cobra.Command, args []string) {
+			logger.ConfigureLogging(_colorLogOutput)
 			suggestImageAlt(cmd.Context(), hugoDir, updateInline, limit)
 		},
 	}
@@ -35,7 +36,6 @@ func init() {
 
 func suggestImageAlt(ctx context.Context, hugoDir string, updateInline bool, limit int) {
 	log.Info().Msg("suggest-image-alt command called")
-	logger.ConfigureLogging(_colorLogOutput)
 	numImageWithAlt := 0
 	numImageMissingAlt := 0
 	numImageUpdated := 0

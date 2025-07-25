@@ -18,6 +18,7 @@ func init() {
 		Short: "Suggests URLs for all the pending/future posts that are missing a URL",
 		Long:  "Suggests URLs for all the pending/future posts that are missing a URL",
 		Run: func(cmd *cobra.Command, args []string) {
+			logger.ConfigureLogging(_colorLogOutput)
 			suggestURL(hugoDir, updateInline)
 		},
 	}
@@ -31,7 +32,6 @@ func init() {
 
 func suggestURL(hugoDir string, updateInline bool) {
 	log.Info().Msg("URL Suggest command called")
-	logger.ConfigureLogging(_colorLogOutput)
 	action := func(path string, updateInline bool) error {
 		_, err := urlsuggest.ProcessFile(path, updateInline)
 		return err
