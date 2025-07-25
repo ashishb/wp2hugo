@@ -9,6 +9,7 @@ import (
 )
 
 func init() {
+	var colorLogOutput bool
 	var hugoDir string
 	siteSummaryCmd := &cobra.Command{
 		Use:   "sitesummary",
@@ -16,13 +17,13 @@ func init() {
 		Long:  "Print site stats (e.g. number of posts, number of drafts etc.)",
 		Run: func(cmd *cobra.Command, args []string) {
 			log.Info().Msg("Site Summary command called")
-			logger.ConfigureLogging(_colorLogOutput)
+			logger.ConfigureLogging(colorLogOutput)
 			generateDirSummary(hugoDir)
 		},
 	}
 
 	siteSummaryCmd.Flags().StringVarP(&hugoDir, "hugo-dir", "", "", "Hugo base directory or any directory containing Hugo markdown files")
-	siteSummaryCmd.PersistentFlags().BoolVarP(&_colorLogOutput, "color-log-output", "", true,
+	siteSummaryCmd.PersistentFlags().BoolVarP(&colorLogOutput, "color-log-output", "", true,
 		"enable colored log output, set false to structured JSON log")
 	rootCmd.AddCommand(siteSummaryCmd)
 }

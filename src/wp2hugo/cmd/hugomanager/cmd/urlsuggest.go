@@ -7,9 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var _colorLogOutput bool
-
 func init() {
+	var colorLogOutput bool
 	var hugoDir string
 	var updateInline bool
 
@@ -18,14 +17,14 @@ func init() {
 		Short: "Suggests URLs for all the pending/future posts that are missing a URL",
 		Long:  "Suggests URLs for all the pending/future posts that are missing a URL",
 		Run: func(cmd *cobra.Command, args []string) {
-			logger.ConfigureLogging(_colorLogOutput)
+			logger.ConfigureLogging(colorLogOutput)
 			suggestURL(hugoDir, updateInline)
 		},
 	}
 
 	urlSuggestCmd.Flags().StringVarP(&hugoDir, "hugo-dir", "", "", "Hugo base directory or any directory containing Hugo markdown files")
 	urlSuggestCmd.Flags().BoolVarP(&updateInline, "in-place", "", false, "Update URLs in markdown files")
-	urlSuggestCmd.PersistentFlags().BoolVarP(&_colorLogOutput, "color-log-output", "", true,
+	urlSuggestCmd.PersistentFlags().BoolVarP(&colorLogOutput, "color-log-output", "", true,
 		"enable colored log output, set false to structured JSON log")
 	rootCmd.AddCommand(urlSuggestCmd)
 }

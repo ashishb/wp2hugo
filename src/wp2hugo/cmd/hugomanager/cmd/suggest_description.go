@@ -3,14 +3,15 @@ package cmd
 import (
 	"context"
 	"errors"
-	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/logger"
 
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/descriptionsuggest"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/logger"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
 func init() {
+	var colorLogOutput bool
 	var hugoDir string
 	var updateInline bool
 	var limit int
@@ -20,13 +21,13 @@ func init() {
 		Short: "Suggests description for all the posts that are missing a description in the front matter",
 		Long:  "Suggests description for all the posts that are missing a description in the front matter",
 		Run: func(cmd *cobra.Command, args []string) {
-			logger.ConfigureLogging(_colorLogOutput)
+			logger.ConfigureLogging(colorLogOutput)
 			suggestDescription(cmd.Context(), hugoDir, updateInline, limit)
 		},
 	}
 	_suggestDescriptionCmd.Flags().StringVarP(&hugoDir, "hugo-dir", "", "", "Hugo base directory or any directory containing Hugo markdown files")
 	_suggestDescriptionCmd.Flags().BoolVarP(&updateInline, "inline", "i", false, "Add description in markdown files")
-	_suggestDescriptionCmd.PersistentFlags().BoolVarP(&_colorLogOutput, "color-log-output", "", true,
+	_suggestDescriptionCmd.PersistentFlags().BoolVarP(&colorLogOutput, "color-log-output", "", true,
 		"enable colored log output, set false to structured JSON log")
 	_suggestDescriptionCmd.Flags().IntVarP(&limit, "limit", "n", 10, "Limit the number of files to update")
 	rootCmd.AddCommand(_suggestDescriptionCmd)
