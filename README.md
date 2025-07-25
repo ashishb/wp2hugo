@@ -204,6 +204,7 @@ Usage:
   hugomanager [command]
 
 Available Commands:
+  analyze-backlinks                     Analyzes backlinks and shows good quality backlinks
   completion                            Generate the autocompletion script for the specified shell
   help                                  Help about any command
   make-absolute-internal-links-relative Converts all the absolute internal links to relative links
@@ -218,7 +219,6 @@ Flags:
   -a, --author string    author name for copyright attribution (default "YOUR NAME")
       --config string    config file (default is $HOME/.cobra.yaml)
   -h, --help             help for hugomanager
-  -l, --license string   name of license for the project
       --viper            use Viper for configuration (default true)
 ```
 
