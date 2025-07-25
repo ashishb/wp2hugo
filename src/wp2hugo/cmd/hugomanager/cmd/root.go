@@ -9,17 +9,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-var (
-	// Used for flags.
-	cfgFile     string
-	userLicense string
-
-	rootCmd = &cobra.Command{
-		Use:   "hugomanager",
-		Short: "A tool for managing Hugo sites",
-		Long:  "A tool for managing Hugo sites e.g. adding URL suggestions, generating site status summary etc.",
-	}
-)
+var rootCmd = &cobra.Command{
+	Use:   "hugomanager",
+	Short: "A tool for managing Hugo sites",
+	Long:  "A tool for managing Hugo sites e.g. adding URL suggestions, generating site status summary etc.",
+}
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
@@ -28,11 +22,15 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	// Used for flags.
+	var cfgFile string
+
+	cobra.OnInitialize(func() {
+		initConfig(cfgFile)
+	})
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
 	rootCmd.PersistentFlags().StringP("author", "a", "YOUR NAME", "author name for copyright attribution")
-	rootCmd.PersistentFlags().StringVarP(&userLicense, "license", "l", "", "name of license for the project")
 	rootCmd.PersistentFlags().Bool("viper", true, "use Viper for configuration")
 	if err := viper.BindPFlag("author", rootCmd.PersistentFlags().Lookup("author")); err != nil {
 		log.Fatal().Err(err).Msg("Error binding author flag")
@@ -43,7 +41,7 @@ func init() {
 	viper.SetDefault("author", "Ashish Bhatia")
 }
 
-func initConfig() {
+func initConfig(cfgFile string) {
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
