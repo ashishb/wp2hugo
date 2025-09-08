@@ -31,7 +31,7 @@ jobs:
         run: git fetch --force --tags
 
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: src/wp2hugo/go.mod
           cache-dependency-path: src/wp2hugo/go.sum
@@ -69,7 +69,7 @@ jobs:
       - name: Fetch git tags
         run: git fetch --force --tags
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: stable
           # To prevent cache poisoning
