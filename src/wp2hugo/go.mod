@@ -15,7 +15,7 @@ require (
 	github.com/openai/openai-go v1.12.0
 	github.com/rs/zerolog v1.34.0
 	github.com/samber/lo v1.51.0
-	github.com/stretchr/testify v1.11.0
+	github.com/stretchr/testify v1.11.1
 	golang.org/x/text v0.28.0
 	gopkg.in/yaml.v3 v3.0.1
 )
