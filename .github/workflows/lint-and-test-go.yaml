@@ -41,7 +41,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           cache-dependency-path: |
             src/wp2hugo/go.mod
@@ -50,7 +50,7 @@ jobs:
       - name: Run golangci-lint on src/wp2hugo
         uses: golangci/golangci-lint-action@v8
         with:
-          # We use cache provided by "actions/setup-go@v5"
+          # We use cache provided by "actions/setup-go@v6"
           skip-cache: true
           # Directory containing go.mod file
           working-directory: "src/wp2hugo"

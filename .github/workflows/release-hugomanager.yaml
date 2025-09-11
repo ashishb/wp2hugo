@@ -31,7 +31,7 @@ jobs:
         run: git fetch --force --tags
 
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version-file: src/wp2hugo/go.mod
           cache-dependency-path: src/wp2hugo/go.sum
@@ -72,7 +72,7 @@ jobs:
           git fetch --force --tags origin 'refs/tags/*-hugomanager:refs/tags/*-hugomanager'
           git tag -d $(git tag -l | grep -v 'hugomanager$')
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version: stable
           # To prevent cache poisoning
