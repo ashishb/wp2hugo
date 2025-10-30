@@ -16,6 +16,17 @@ func scanDir(dir string, updateInline bool, action func(string, bool) error) {
 	log.Info().
 		Str("dir", dir).
 		Msg("Scanning directory")
+	// Expand ~ to home directory
+	if strings.HasPrefix(dir, "~") {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			log.Fatal().
+				Err(err).
+				Msg("Error getting home directory")
+		}
+		dir = filepath.Join(homeDir, dir[1:])
+	}
+
 	if !utils.DirExists(dir) {
 		log.Fatal().
 			Str("dir", dir).
@@ -34,6 +45,7 @@ func scanDir(dir string, updateInline bool, action func(string, bool) error) {
 		if info.IsDir() {
 			return nil
 		}
+
 		if !strings.HasSuffix(path, ".md") {
 			return nil
 		}
