@@ -7,9 +7,10 @@ import (
 
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
 	"github.com/rs/zerolog/log"
+	"github.com/samber/lo"
 )
 
-func scanDir(dir string, updateInline bool, action func(string, bool) error) {
+func scanDir(dir string, updateInline bool, action func(string, bool) error, extensions ...string) {
 	if dir == "" {
 		log.Fatal().Msg("Hugo directory not provided")
 	}
@@ -32,6 +33,16 @@ func scanDir(dir string, updateInline bool, action func(string, bool) error) {
 			Str("dir", dir).
 			Msg("Directory does not exist")
 	}
+
+	if len(extensions) == 0 {
+		log.Fatal().Msg("No extensions provided to scan for")
+	}
+
+	// Normalize extensions
+	extensions = lo.Map(extensions, func(ext string, _ int) string {
+		return strings.ToLower("." + strings.TrimPrefix(ext, "."))
+	})
+
 	failed := 0
 	processed := 0
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
@@ -46,9 +57,14 @@ func scanDir(dir string, updateInline bool, action func(string, bool) error) {
 			return nil
 		}
 
-		if !strings.HasSuffix(path, ".md") {
+		if !lo.Contains(extensions, strings.ToLower(filepath.Ext(path))) {
+			log.Trace().
+				Str("path", path).
+				Strs("extensions", extensions).
+				Msg("Skipping file with unsupported extension")
 			return nil
 		}
+
 		log.Trace().
 			Str("path", path).
 			Msg("Processing file")

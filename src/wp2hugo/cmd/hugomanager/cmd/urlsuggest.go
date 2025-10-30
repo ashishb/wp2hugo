@@ -35,5 +35,5 @@ func suggestURL(hugoDir string, updateInline bool) {
 		_, err := urlsuggest.ProcessFile(path, updateInline)
 		return err
 	}
-	scanDir(hugoDir, updateInline, action)
+	scanDir(hugoDir, updateInline, action, "md")
 }

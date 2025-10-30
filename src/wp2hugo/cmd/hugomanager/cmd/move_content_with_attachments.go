@@ -51,5 +51,5 @@ func moveContentNextToAttachments(ctx context.Context, hugoDir string, updateInl
 			Msg("Processed file")
 		return nil
 	}
-	scanDir(hugoDir, updateInline, action)
+	scanDir(hugoDir, updateInline, action, "md")
 }

@@ -71,7 +71,7 @@ func suggestDescription(ctx context.Context, hugoDir string, updateInline bool, 
 
 		return err
 	}
-	scanDir(hugoDir, updateInline, action)
+	scanDir(hugoDir, updateInline, action, "md")
 	log.Info().
 		Int("numHasDescription", numHasDescription).
 		Int("numMissingDescription", numMissingDescription).

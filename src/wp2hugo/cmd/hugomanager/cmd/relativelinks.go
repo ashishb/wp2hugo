@@ -39,5 +39,5 @@ func moveAbsoluteLinksToRelative(hugoDir string, updateInline bool, hostname str
 	action := func(path string, updateInline bool) error {
 		return relativelinks.ConvertAbsoluteLinksToRelative(path, updateInline, hostname)
 	}
-	scanDir(hugoDir, updateInline, action)
+	scanDir(hugoDir, updateInline, action, "md")
 }

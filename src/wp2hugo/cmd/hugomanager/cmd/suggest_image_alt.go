@@ -71,7 +71,7 @@ func suggestImageAlt(ctx context.Context, hugoDir string, updateInline bool, lim
 
 		return err
 	}
-	scanDir(hugoDir, updateInline, action)
+	scanDir(hugoDir, updateInline, action, "md")
 	log.Info().
 		Int("numImageWithAlt", numImageWithAlt).
 		Int("numImageMissingAlt", numImageMissingAlt).
