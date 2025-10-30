@@ -209,6 +209,7 @@ Available Commands:
   help                                  Help about any command
   make-absolute-internal-links-relative Converts all the absolute internal links to relative links
   move-post-next-to-attachments         Move markdown blog posts with attachments to a single directory
+  shrink-images                         Shrinks all images to be below a certain width/height
   sitesummary                           Print site stats (e.g. number of posts, number of drafts etc.)
   suggest-description                   Suggests description for all the posts that are missing a description in the front matter
   suggest-image-alt                     Suggests image alt text for all the images if missing
@@ -216,10 +217,12 @@ Available Commands:
   version                               Print the version number of HugoManager
 
 Flags:
-  -a, --author string    author name for copyright attribution (default "YOUR NAME")
-      --config string    config file (default is $HOME/.cobra.yaml)
-  -h, --help             help for hugomanager
-      --viper            use Viper for configuration (default true)
+  -a, --author string   author name for copyright attribution (default "YOUR NAME")
+      --config string   config file (default is $HOME/.cobra.yaml)
+  -h, --help            help for hugomanager
+      --viper           use Viper for configuration (default true)
+
+Use "hugomanager [command] --help" for more information about a command.
 ```
 
 Feel free to send a Pull request if you migrated your website using `wp2hugo`
