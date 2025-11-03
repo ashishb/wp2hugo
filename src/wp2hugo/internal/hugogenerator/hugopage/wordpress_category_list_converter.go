@@ -3,6 +3,7 @@ package hugopage
 import (
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
 	"github.com/rs/zerolog/log"
@@ -31,15 +32,17 @@ func replaceAllStringSubmatchFunc(re *regexp.Regexp, str string, repl func([]str
 	result := ""
 	lastIndex := 0
 
+	var resultSb strings.Builder
 	for _, v := range re.FindAllStringSubmatchIndex(str, -1) {
 		var groups []string
 		for i := 0; i < len(v); i += 2 {
 			groups = append(groups, str[v[i]:v[i+1]])
 		}
 
-		result += str[lastIndex:v[0]] + repl(groups)
+		resultSb.WriteString(str[lastIndex:v[0]] + repl(groups))
 		lastIndex = v[1]
 	}
+	result += resultSb.String()
 
 	return result + str[lastIndex:]
 }
