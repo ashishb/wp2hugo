@@ -40,11 +40,15 @@ func ResizeImage(srcPath string, destPath string, newWidth int) error {
 		return err
 	}
 
+	originalSize := getFileSize(srcPath)
+	newSize := getFileSize(destPath)
+	shrunkPct := 100.0 * (float64(originalSize-newSize) / float64(originalSize))
 	log.Info().
 		Str("srcPath", srcPath).
 		Str("destPath", destPath).
 		Int("newWidth", newWidth).
 		Int("newHeight", newHeight).
+		Str("ShrinkBy", fmt.Sprintf("%.0f%%", shrunkPct)).
 		Msg("Resized image successfully")
 	return nil
 }
@@ -99,4 +103,17 @@ func encode(dst *image.RGBA, destPath string) error {
 	default:
 		return fmt.Errorf("unsupported image format: %s", path.Ext(destPath))
 	}
+}
+
+func getFileSize(filePath string) int64 {
+	info, err := os.Stat(filePath)
+	if err != nil {
+		log.Error().
+			Err(err).
+			Str("filePath", filePath).
+			Msg("Error getting file info")
+		return -1
+	}
+
+	return info.Size()
 }
