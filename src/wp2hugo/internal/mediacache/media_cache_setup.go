@@ -87,6 +87,7 @@ func (m MediaCache) GetReader(ctx context.Context, url string) (io.Reader, error
 	if err != nil {
 		return nil, fmt.Errorf("error creating request for media %s: %w", url, err)
 	}
+	req.Header.Set("User-Agent", "ashishb/wp2hugo")
 
 	var httpErr error
 	var resp *http.Response
