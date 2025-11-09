@@ -50,7 +50,7 @@ func shrinkImages(hugoDir string, maxSize int32, updateInline bool) {
 			return err
 		}
 
-		if int32(dims.Width()) <= maxSize && int32(dims.Height()) <= maxSize {
+		if int32(dims.Width()) <= maxSize {
 			log.Trace().
 				Str("filePath", filePath).
 				Int("width", dims.Width()).
