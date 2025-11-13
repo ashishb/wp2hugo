@@ -48,7 +48,7 @@ jobs:
           go-version-file: src/wp2hugo/go.mod
 
       - name: Run golangci-lint on src/wp2hugo
-        uses: golangci/golangci-lint-action@v8
+        uses: golangci/golangci-lint-action@v9
         with:
           # We use cache provided by "actions/setup-go@v6"
           skip-cache: true
