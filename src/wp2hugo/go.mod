@@ -6,6 +6,7 @@ require (
 	github.com/JohannesKaufmann/html-to-markdown v1.6.0
 	github.com/PuerkitoBio/goquery v1.11.0
 	github.com/adrg/frontmatter v0.2.0
+	github.com/barasher/go-exiftool v1.10.0
 	github.com/disintegration/imaging v1.6.2
 	github.com/go-enry/go-enry/v2 v2.9.2
 	github.com/gomarkdown/markdown v0.0.0-20241105142532-d03b89096d81

@@ -40,8 +40,8 @@ func ResizeImage(srcPath string, destPath string, newWidth int) error {
 		return err
 	}
 
-	originalSize := getFileSize(srcPath)
-	newSize := getFileSize(destPath)
+	originalSize := GetFileSize(srcPath)
+	newSize := GetFileSize(destPath)
 	shrunkPct := 100.0 * (float64(originalSize-newSize) / float64(originalSize))
 	log.Info().
 		Str("srcPath", srcPath).
@@ -105,7 +105,7 @@ func encode(dst *image.RGBA, destPath string) error {
 	}
 }
 
-func getFileSize(filePath string) int64 {
+func GetFileSize(filePath string) int64 {
 	info, err := os.Stat(filePath)
 	if err != nil {
 		log.Error().

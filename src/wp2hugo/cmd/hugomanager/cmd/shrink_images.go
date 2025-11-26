@@ -27,10 +27,10 @@ func init() {
 		},
 	}
 
-	cmd.Flags().StringVarP(&hugoDir, "hugo-dir", "", "", "Hugo base directory or any directory containing Hugo markdown files")
+	cmd.Flags().StringVarP(&hugoDir, "hugo-dir", "d", "", "Hugo base directory or any directory containing Hugo markdown files")
 	cmd.PersistentFlags().BoolVarP(&colorLogOutput, "color-log-output", "", true,
 		"enable colored log output, set false to structured JSON log")
-	cmd.Flags().BoolVarP(&updateInline, "in-place", "", false, "Shrink images in place")
+	cmd.Flags().BoolVarP(&updateInline, "in-place", "i", false, "Shrink images in place")
 	maxSize = cmd.PersistentFlags().Int32P("max-dimension", "m", 1500, "Maximum dimension (height/width) of the image, the image would be shrunk proportionately")
 	rootCmd.AddCommand(cmd)
 }
