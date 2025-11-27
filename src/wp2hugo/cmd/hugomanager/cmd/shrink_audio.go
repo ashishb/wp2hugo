@@ -51,10 +51,13 @@ func shrinkAudioFiles(ctx context.Context, hugoDir string, maxBitRate int, updat
 			return err
 		}
 
-		if *bitrate <= maxBitRate {
+		// If you shrink a file to 48kbps, sometimes the resulting bitrate is 64kbps,
+		// so we give a 33% buffer to avoid unnecessary re-processing
+		if *bitrate <= (maxBitRate * 4 / 3) {
 			log.Trace().
 				Str("filePath", filePath).
 				Int("bitrate", *bitrate).
+				Int("maxBitRate", maxBitRate).
 				Msg("Audio file within bitrate limits, skipping")
 			return nil
 		}
