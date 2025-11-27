@@ -209,6 +209,7 @@ Available Commands:
   help                                  Help about any command
   make-absolute-internal-links-relative Converts all the absolute internal links to relative links
   move-post-next-to-attachments         Move markdown blog posts with attachments to a single directory
+  shrink-audio-files                    Shrinks all audio files to be below a certain bitrate
   shrink-images                         Shrinks all images to be below a certain width/height
   sitesummary                           Print site stats (e.g. number of posts, number of drafts etc.)
   suggest-description                   Suggests description for all the posts that are missing a description in the front matter
