@@ -14,6 +14,7 @@ import (
 
 var _randomAggregators = []string{
 	"aerowisatahotels.com", // spam site
+	"ainews.lucasprim.org", // Random news aggregator
 	"android.libhunt.com",
 	"biggo.com",
 	"brandonkaz.com",
@@ -21,6 +22,7 @@ var _randomAggregators = []string{
 	"cipha.net",
 	"discovery.cooperpress.com",
 	"duesenklipper.de",
+	"follow.it", // Feed reader
 	"geek.ds3783.com",
 	"gitea.treehouse.systems",
 	"gitlibrary.club",
@@ -28,20 +30,26 @@ var _randomAggregators = []string{
 	"hackurls.com",
 	"hckrnews.com", // Hacker News clone
 	"hnsummary.ai",
+	"illuping24.tistory.com", // A Korean blog aggregator
 	"isthistechdead.com",
 	"jimmyr.com",
 	"href.ninja",
 	"libhunt.com",
+	"minifeed.net", // A feed reader
 	"news.routley.io",
 	"news.starmorph.com",
 	"news.mcan.sh",        // Hacker News clone
+	"nilaykhandelwal.com", // Hacker News clone
 	"old.programming.dev", // Reddit aggregator
 	"pandia.org",
 	"progscrape.com",
-	"programming.dev",       // Reddit aggregator
-	"r.genit.al",            // Reddit aggregator
-	"reddit.ny4.dev",        // Reddit aggregator
-	"ser2.dastresanart.com", // Hacker News clone
+	"programming.dev",            // Reddit aggregator
+	"r.genit.al",                 // Reddit aggregator
+	"reddit.ny4.dev",             // Reddit aggregator
+	"redlib.private.coffee",      // Reddit aggregator
+	"ser2.dastresanart.com",      // Hacker News clone
+	"salondemassagebordeaux.com", // Spam website
+	"stage.androidweekly.net",    // Clone of androidweekly.net
 	"telegra.ph",
 	"uocat.com",
 	"upstract.com",
