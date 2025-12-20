@@ -32,7 +32,7 @@ func waitOrStop(resp *http.Response) (int, bool) {
 	// May want to bump the timeout but since we've not got a valid
 	// response, it's not entirely clear if we even made a request.
 	if resp == nil {
-		return timeout, stop
+		return timeout, false
 	}
 
 	switch resp.StatusCode {
