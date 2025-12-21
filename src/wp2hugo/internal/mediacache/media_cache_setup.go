@@ -27,6 +27,14 @@ func New(cacheDirPath string) MediaCache {
 func waitOrStop(resp *http.Response) (int, bool) {
 	timeout := 1
 	stop := false
+
+	// If we've got a `nil` `resp`, we can't do anything.
+	// May want to bump the timeout but since we've not got a valid
+	// response, it's not entirely clear if we even made a request.
+	if resp == nil {
+		return timeout, false
+	}
+
 	switch resp.StatusCode {
 	case http.StatusOK:
 		// Success
