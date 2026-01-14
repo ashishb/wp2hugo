@@ -5,6 +5,7 @@ import (
 	"flag"
 	"os"
 	"path"
+	"slices"
 	"strings"
 
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugogenerator"
@@ -31,6 +32,8 @@ var (
 
 	customPostTypes = flag.String("custom-post-types", "", "CSV list of custom post types to import")
 )
+
+var _defaultCustomPosts = []string{"avada_portfolio", "avada_faq", "product", "product_variation"}
 
 func main() {
 	flag.Parse()
@@ -67,7 +70,7 @@ func getWebsiteInfo(filePath string) (*wpparser.WebsiteInfo, error) {
 		return nil, err
 	}
 
-	defaultCustomPosts := []string{"avada_portfolio", "avada_faq", "product", "product_variation"}
+	defaultCustomPosts := slices.Clone(_defaultCustomPosts)
 	defaultCustomPosts = append(defaultCustomPosts, strings.Split(*customPostTypes, ",")...)
 
 	return parser.Parse(file, strings.Split(*authors, ","), defaultCustomPosts)

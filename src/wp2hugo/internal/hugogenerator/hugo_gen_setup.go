@@ -265,7 +265,7 @@ func (g Generator) setupHugo(ctx context.Context, outputDirPath string) (*string
 
 func (g Generator) downloadAllMedia(ctx context.Context, outputDirPath string, info wpparser.WebsiteInfo) error {
 	hostname := info.Link().Host
-	prefixes := make([]string, 0)
+	prefixes := make([]string, 0, 4)
 	hostname = strings.TrimPrefix(hostname, "www.")
 	prefixes = append(prefixes, "https://"+hostname)
 	prefixes = append(prefixes, "http://"+hostname)
@@ -842,7 +842,7 @@ func (g Generator) downloadPageMedia(ctx context.Context, outputMediaDirPath str
 		Msg("Downloading media files")
 
 	hostname := pageURL.Host
-	prefixes := make([]string, 0)
+	prefixes := make([]string, 0, 4)
 	hostname = strings.TrimPrefix(hostname, "www.")
 	prefixes = append(prefixes, "https://"+hostname)
 	prefixes = append(prefixes, "http://"+hostname)
