@@ -555,7 +555,7 @@ func getCommonFields(item *rss.Item, taxonomies []TaxonomyInfo) (*CommonFields, 
 						Str("date", item.Extensions["wp"]["post_date"][0].Value).
 						Msg("Error parsing date")
 				} else {
-					pubDate = &tmp
+					commentPubDate = &tmp
 				}
 
 				comments = append(comments, CommentInfo{
