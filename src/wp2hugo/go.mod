@@ -8,7 +8,7 @@ require (
 	github.com/adrg/frontmatter v0.2.0
 	github.com/barasher/go-exiftool v1.10.0
 	github.com/disintegration/imaging v1.6.2
-	github.com/go-enry/go-enry/v2 v2.9.2
+	github.com/go-enry/go-enry/v2 v2.9.3
 	github.com/gomarkdown/markdown v0.0.0-20241105142532-d03b89096d81
 	github.com/leeqvip/gophp v1.2.0
 	github.com/mergestat/timediff v0.0.4
