@@ -42,6 +42,9 @@ for example, [Mkdocs](https://www.mkdocs.org/) or [Jekyll](https://jekyllrb.com/
 1. [cloudowski](https://cloudowski.com/articles/how-ai-helped-me-to-migrate-my-website/)
 1. [Population: One](https://popone.innocence.com/archives/2024/10/06/wordpress-and-migrations-oh-my.php)
 1. [Aurélien Pierre Engineering](https://eng.aurelienpierre.com)
+1. [Spinning Code](https://spinningcode.org/2025/welcome-to-hugo/)
+1. [ITTY](https://itty.nl/converting-wordpress-to-hugo/)
+1. [Sean Graham](https://sean-graham.com/2025/08/01/wordpress-to-hugo/)
 
 ## Commercial usage
 
