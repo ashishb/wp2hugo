@@ -251,6 +251,12 @@ formatters:
           replacement: any
         - pattern: a[b:len(a)]
           replacement: a[b:]
+    goimports:
+      # A list of prefixes, which, if set, checks import paths
+      # with the given prefixes are grouped after 3rd-party packages.
+      # Default: []
+      local-prefixes:
+        - github.com/ashishb/wp2hugo
   exclusions:
     generated: lax
     paths:
