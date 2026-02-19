@@ -45,6 +45,7 @@ for example, [Mkdocs](https://www.mkdocs.org/) or [Jekyll](https://jekyllrb.com/
 1. [Spinning Code](https://spinningcode.org/2025/welcome-to-hugo/)
 1. [ITTY](https://itty.nl/converting-wordpress-to-hugo/)
 1. [Sean Graham](https://sean-graham.com/2025/08/01/wordpress-to-hugo/)
+1. [skyboo.net](https://skyboo.net/2026/02/hello-hugo/)
 
 ## Commercial usage
 
