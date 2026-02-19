@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"maps"
 	"net/url"
 	"os"
 	"os/exec"
@@ -855,9 +856,7 @@ func (g Generator) downloadPageMedia(ctx context.Context, outputMediaDirPath str
 		if replacement, err := downloadMedia(ctx, link, outputMediaDirPath, prefixes, g, pageURL); err != nil {
 			return nil, err
 		} else {
-			for k, v := range replacement {
-				urlReplacements[k] = v
-			}
+			maps.Copy(urlReplacements, replacement)
 		}
 	}
 	return urlReplacements, nil

@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/url"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -261,15 +262,6 @@ func (p *Parser) Parse(xmlData io.Reader, authors []string, customPostTypes []st
 	return p.getWebsiteInfo(feed, nonEmptyAuthors, customPostTypes)
 }
 
-func contains(list []string, value string) bool {
-	for _, v := range list {
-		if v == value {
-			return true
-		}
-	}
-	return false
-}
-
 func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string, customPostTypes []string) (*WebsiteInfo, error) {
 	if feed.PubDateParsed == nil {
 		log.Warn().Msgf("error parsing published date: %s", feed.PubDateParsed)
@@ -343,7 +335,7 @@ func (p *Parser) getWebsiteInfo(feed *rss.Feed, authors []string, customPostType
 			// Ignoring these for now
 			continue
 		default:
-			if contains(customPostTypes, wpPostType) {
+			if slices.Contains(customPostTypes, wpPostType) {
 				if customPost, err := getCustomPostInfo(item, taxonomies); err != nil && !errors.Is(err, errTrashItem) {
 					return nil, err
 				} else if customPost != nil {
@@ -606,10 +598,8 @@ func hasValidAuthor(authors []string, fields CommonFields) bool {
 	if len(authors) == 0 {
 		return true
 	}
-	for _, a := range authors {
-		if a == fields.Author {
-			return true
-		}
+	if slices.Contains(authors, fields.Author) {
+		return true
 	}
 	log.Warn().
 		Str("author", fields.Author).
