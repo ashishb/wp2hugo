@@ -45,7 +45,7 @@ func (c *Config) AddRedirect(source string, destination string) error {
 func (c *Config) generateRedirects() string {
 	var sb strings.Builder
 	for sourceQueryString, destination := range c.redirects {
-		sb.WriteString(fmt.Sprintf(_redirectHomepageQueryStringTemplate, sourceQueryString, destination))
+		fmt.Fprintf(&sb, _redirectHomepageQueryStringTemplate, sourceQueryString, destination)
 	}
 	return sb.String()
 }

@@ -141,7 +141,7 @@ func gutenbergGalleryReplacementFunction(groups []string) string {
 
 	var output strings.Builder
 	output.WriteString("<br>") // This will get converted to newline later on
-	output.WriteString(fmt.Sprintf(`{{< gallery cols="%s" >}}`, cols))
+	fmt.Fprintf(&output, `{{< gallery cols="%s" >}}`, cols)
 	output.WriteString("<br>") // This will get converted to newline later on
 
 	for _, f := range inners {
@@ -188,7 +188,7 @@ func galleryReplacementFunction(provider ImageURLProvider, attachmentIDs []strin
 	output.WriteString("<br>") // This will get converted to newline later on
 
 	// Opening tag :
-	output.WriteString(fmt.Sprintf(`{{< gallery cols="%s" >}}`, colNb))
+	fmt.Fprintf(&output, `{{< gallery cols="%s" >}}`, colNb)
 
 	// For each image ID in WP gallery shortcode, get the URL
 	for _, s := range idsArray {
@@ -198,7 +198,7 @@ func galleryReplacementFunction(provider ImageURLProvider, attachmentIDs []strin
 			title := sanitizeQuotes(tmp.Title)
 
 			output.WriteString("<br>") // This will get converted to newline later on
-			output.WriteString(fmt.Sprintf(`{{< figure src="%s" title="%s" alt="%s" >}}`, src, title, title))
+			fmt.Fprintf(&output, `{{< figure src="%s" title="%s" alt="%s" >}}`, src, title, title)
 			output.WriteString("<br>") // This will get converted to newline later on
 		} else {
 			log.Warn().
