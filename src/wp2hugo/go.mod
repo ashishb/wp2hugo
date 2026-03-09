@@ -1,6 +1,6 @@
 module github.com/ashishb/wp2hugo/src/wp2hugo
 
-go 1.24.1
+go 1.25.0
 
 require (
 	github.com/JohannesKaufmann/html-to-markdown v1.6.0
@@ -50,7 +50,7 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/spf13/viper v1.21.0
-	golang.org/x/net v0.50.0
+	golang.org/x/net v0.51.0
 	golang.org/x/sys v0.41.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 )
