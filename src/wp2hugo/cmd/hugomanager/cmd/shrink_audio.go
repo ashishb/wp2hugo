@@ -98,7 +98,7 @@ func shrinkAudioFiles(ctx context.Context, hugoDir string, maxBitRate int, updat
 
 		return nil
 	}
-	supportedExtensions := []string{"mp3", "wav", "aac", "flac", "ogg", "m4a"}
+	supportedExtensions := []string{"mp3", "wav", "aac", "flac", "ogg", "m4a", "m4b"}
 
 	scanDir(hugoDir, updateInline, action, supportedExtensions...)
 }
