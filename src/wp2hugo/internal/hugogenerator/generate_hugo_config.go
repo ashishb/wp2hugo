@@ -54,6 +54,11 @@ type _HugoConfig struct {
 			Favicon     string `yaml:"favicon"`
 			DisableHLJS bool   `yaml:"disableHLJS"`
 		} `yaml:"assets"`
+		// Author is required by PaperMod's RSS template
+		Author struct {
+			Name  string `yaml:"name"`
+			Email string `yaml:"email,omitempty"`
+		} `yaml:"author"`
 	} `yaml:"params"`
 	Markup struct {
 		Highlight struct {
@@ -169,6 +174,7 @@ func updateConfig(siteDir string, info wpparser.WebsiteInfo) error {
 	config.OutputFormats.RSS.BaseName = "feed"
 
 	addNavigationLinks(info, &config)
+	setAuthor(info, &config)
 	if err := r.Close(); err != nil {
 		return fmt.Errorf("error closing config file: %w", err)
 	}
@@ -205,4 +211,29 @@ func addNavigationLinks(info wpparser.WebsiteInfo, config *_HugoConfig) {
 			Weight: len(info.NavigationLinks()) + 1,
 		})
 	}
+}
+
+// setAuthor sets the author name in the config using the most common author across posts.
+// This is required by the PaperMod theme's RSS template.
+func setAuthor(info wpparser.WebsiteInfo, config *_HugoConfig) {
+	authorCount := make(map[string]int)
+	for _, post := range info.Posts() {
+		if post.Author != "" {
+			authorCount[post.Author]++
+		}
+	}
+
+	authorName := ""
+	maxCount := 0
+	for name, count := range authorCount {
+		if count > maxCount || (count == maxCount && (authorName == "" || name < authorName)) {
+			maxCount = count
+			authorName = name
+		}
+	}
+
+	if authorName == "" {
+		authorName = info.Title()
+	}
+	config.Params.Author.Name = authorName
 }
