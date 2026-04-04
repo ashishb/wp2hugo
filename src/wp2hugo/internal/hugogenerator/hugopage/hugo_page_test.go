@@ -8,12 +8,13 @@ import (
 )
 
 const (
+	// Ref: https://github.com/ashishb/wp2hugo/issues/11
 	_sampleHTMLInput1 = `
 <!-- wp:paragraph -->
-<p><a href="https://example.com">Hello world</a>. "<a href="https://example.com">Example 1</a>".</p>
+<p><a href="https://example.com">Hello world</a>. "<a href="https://example.com">Example 1</a>". (<a href="https://example.com">Example 2</a>)</p>
 <!-- /wp:paragraph -->
 `
-	_sampleMarkdownOutput1 = `[Hello world](https://example.com). "[Example 1](https://example.com)".`
+	_sampleMarkdownOutput1 = `[Hello world](https://example.com). "[Example 1](https://example.com)". ([Example 2](https://example.com))`
 )
 
 const (
@@ -36,6 +37,12 @@ const (
 	_sampleMarkdownOutput5 = "First line  \nSecond line  \nThird line"
 )
 
+const (
+	// Ref: https://github.com/ashishb/wp2hugo/issues/11 (single-quote case)
+	_sampleHTMLInput6      = `<p>'<a href="https://example.com">Example</a>'</p>`
+	_sampleMarkdownOutput6 = `'[Example](https://example.com)'`
+)
+
 func TestMarkdownExtractorWithLink1(t *testing.T) {
 	t.Parallel()
 	testMarkdownExtractor(t, _sampleHTMLInput2, _sampleMarkdownOutput2)
@@ -46,8 +53,13 @@ func TestMarkdownExtractorWithLink2(t *testing.T) {
 	// Ref:
 	// 1. https://github.com/ashishb/wp2hugo/issues/11
 	// 2. https://github.com/JohannesKaufmann/html-to-markdown/issues/95
-	t.Skipf("This is failing due to a bug in the underlying library. Skipping for now.")
 	testMarkdownExtractor(t, _sampleHTMLInput1, _sampleMarkdownOutput1)
+}
+
+func TestMarkdownExtractorWithLink3(t *testing.T) {
+	t.Parallel()
+	// Ref: https://github.com/ashishb/wp2hugo/issues/11 (single-quote case)
+	testMarkdownExtractor(t, _sampleHTMLInput6, _sampleMarkdownOutput6)
 }
 
 func TestListExtractor(t *testing.T) {
