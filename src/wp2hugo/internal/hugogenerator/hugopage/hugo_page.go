@@ -60,6 +60,12 @@ var (
 
 	// Catch \nspace\n
 	_spaceSurroundedByNewlines = regexp.MustCompile(`\n[ \t]+\n`)
+
+	// Workaround for https://github.com/ashishb/wp2hugo/issues/11
+	// The html-to-markdown library inserts an extra space before links when they directly
+	// follow certain punctuation (e.g. `"<a>`, `(<a>`).
+	// Ref: https://github.com/JohannesKaufmann/html-to-markdown/issues/95
+	_extraSpaceBeforeLinkRegex = regexp.MustCompile(`([\"'(]) \[`)
 )
 
 // Extracts "src" from Hugo figure shortcode
@@ -409,6 +415,8 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 	markdown = replaceConsecutiveNewlines(markdown)
 	markdown = replacePlaintextYoutubeURL(markdown)
 	markdown = removeTrailingSpaces(markdown)
+	// Workaround for https://github.com/ashishb/wp2hugo/issues/11
+	markdown = removeExtraSpaceBeforeLinks(markdown)
 
 	return &markdown, nil
 }
@@ -416,6 +424,14 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 func removeAllHugoShortcodes(summary string) string {
 	// Ref: https://gohugo.io/content-management/shortcodes/#remove-shortcodes
 	return _hugoShortCodeMatcher.ReplaceAllString(summary, " ")
+}
+
+// removeExtraSpaceBeforeLinks removes the spurious space that the html-to-markdown
+// library inserts before links when they directly follow punctuation like `"` or `(`.
+// Workaround for https://github.com/ashishb/wp2hugo/issues/11
+// Ref: https://github.com/JohannesKaufmann/html-to-markdown/issues/95
+func removeExtraSpaceBeforeLinks(markdown string) string {
+	return _extraSpaceBeforeLinkRegex.ReplaceAllString(markdown, "$1[")
 }
 
 // Markdown converter will automatically pick up "class" attribute fromn "code" tag
