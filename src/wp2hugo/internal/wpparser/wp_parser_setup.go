@@ -424,8 +424,8 @@ func getCommonFields(item *rss.Item, taxonomies []TaxonomyInfo) (*CommonFields, 
 		}
 	}
 
-	publishStatus := item.Extensions["wp"]["status"][0].Value
-	switch PublishStatus(publishStatus) {
+	publishStatus := PublishStatus(item.Extensions["wp"]["status"][0].Value)
+	switch publishStatus {
 	case PublishStatusAttachment, PublishStatusDraft, PublishStatusFuture, PublishStatusInherit, PublishStatusPending,
 		PublishStatusPrivate, PublishStatusPublish, PublishStatusStatic:
 		// OK
@@ -433,7 +433,7 @@ func getCommonFields(item *rss.Item, taxonomies []TaxonomyInfo) (*CommonFields, 
 		return nil, fmt.Errorf("%w, ignored: %s", errTrashItem, item.Title)
 	default:
 		log.Warn().Msgf("Unknown publish status: '%s' for '%s'. Mapping to draft.", publishStatus, item.Title)
-		publishStatus = string(PublishStatusDraft)
+		publishStatus = PublishStatusDraft
 	}
 	pageCategories := make([]string, 0, len(item.Categories))
 	pageTags := make([]string, 0, len(item.Categories))
@@ -574,7 +574,7 @@ func getCommonFields(item *rss.Item, taxonomies []TaxonomyInfo) (*CommonFields, 
 		PublishDate:      pubDate,
 		GUID:             item.GUID,
 		LastModifiedDate: lastModifiedDate,
-		PublishStatus:    PublishStatus(publishStatus),
+		PublishStatus:    publishStatus,
 		PostFormat:       postFormat,
 		PostType:         postType,
 		PostParentID:     postParent,
