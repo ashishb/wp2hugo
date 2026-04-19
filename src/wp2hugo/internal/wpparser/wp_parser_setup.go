@@ -432,7 +432,8 @@ func getCommonFields(item *rss.Item, taxonomies []TaxonomyInfo) (*CommonFields, 
 	case PublishStatusTrash:
 		return nil, fmt.Errorf("%w, ignored: %s", errTrashItem, item.Title)
 	default:
-		log.Fatal().Msgf("Unknown publish status: '%s' for '%s'", publishStatus, item.Title)
+		log.Warn().Msgf("Unknown publish status: '%s' for '%s'. Mapping to draft.", publishStatus, item.Title)
+		publishStatus = string(PublishStatusDraft)
 	}
 	pageCategories := make([]string, 0, len(item.Categories))
 	pageTags := make([]string, 0, len(item.Categories))
