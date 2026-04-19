@@ -1,7 +1,6 @@
 package wpparser
 
 import (
-	"errors"
 	"testing"
 
 	ext "github.com/mmcdole/gofeed/extensions"
@@ -24,7 +23,7 @@ func TestGetCommonFields_TrashReturnsIgnoredError(t *testing.T) {
 	fields, err := getCommonFields(newRSSItemWithStatus(string(PublishStatusTrash)), nil)
 	require.Nil(t, fields)
 	require.Error(t, err)
-	require.True(t, errors.Is(err, errTrashItem))
+	require.ErrorIs(t, err, errTrashItem)
 }
 
 func newRSSItemWithStatus(status string) *rss.Item {
