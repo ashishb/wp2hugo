@@ -20,8 +20,8 @@ var _YoutubeRegEx = regexp.MustCompile(`(?m)(^|\s)http[sav]?://(?:m\.|www\.)?(?:
 // <!-- /wp:embed -->
 var (
 	_YoutubeGutenbergRegEx = regexp.MustCompile(`(?ms)(^|\s)<!-- wp:embed {"url":"[^"]+v=([A-Za-z0-9_-]+)[^"]*".*?<!-- /wp:embed -->`)
-	// Excludes whitespace, '\' and ']' in the optional tail to support both [youtube ...] and \[youtube ...\].
-	_YoutubeShortCodeRegEx = regexp.MustCompile(`(?m)(^|\s)\\?\[youtube\s+http[sav]?://(?:m\.|www\.)?(?:youtu\.be|youtube\.com)/(?:watch|w)\?v=([A-Za-z0-9_-]+)(?:[^\s\]\\]*)\\?\]`)
+	// Excludes '\' and ']' in the optional tail to support both [youtube ...] and \[youtube ...\].
+	_YoutubeShortCodeRegEx = regexp.MustCompile(`(?m)(^|\s)\\?\[youtube\s+http[sav]?://(?:m\.|www\.)?(?:youtu\.be|youtube\.com)/(?:watch|w)\?v=([A-Za-z0-9_-]+)(?:[^\\\]]*)\\?\]`)
 	_YoutubeEmbedRegEx     = regexp.MustCompile(`(?m)(^|\s)(?:[embed])http[sav]?://(?:m\.|www\.)?(?:youtu\.be|youtube\.com)/(?:watch|w)\?v=([A-Za-z0-9_-]+)(?:[/embed])`)
 )
 
