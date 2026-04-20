@@ -67,3 +67,10 @@ func TestReplaceEscapedYoutubeShortCode(t *testing.T) {
 	const expected = "{{< youtube 1cNDSPutas8 >}}"
 	require.Equal(t, expected, replacePlaintextYoutubeURL(htmlData))
 }
+
+func TestReplaceYoutubeShortCodeWithExtraParams(t *testing.T) {
+	t.Parallel()
+	const htmlData = "[youtube http://www.youtube.com/watch?v=1cNDSPutas8&feature=related]"
+	const expected = "{{< youtube 1cNDSPutas8 >}}"
+	require.Equal(t, expected, replacePlaintextYoutubeURL(htmlData))
+}
