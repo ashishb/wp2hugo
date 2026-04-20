@@ -10,7 +10,7 @@ import (
 // Example: Plain-text Youtube URLs on their own line in post content are turned by WP into embeds
 // The YouTube Lyte plug-in additionally uses "httpa://" for audio and "httpv://" for video embeds:
 // https://wordpress.com/plugins/wp-youtube-lyte
-var _YoutubeRegEx = regexp.MustCompile(`(?m)(^|\s)http[sav]?://(?:m\.|www\.)?(?:youtu\.be|youtube\.com)/(?:watch|w)\?v=([^&\s]+)`)
+var _YoutubeRegEx = regexp.MustCompile(`(?m)(^|\s)http[sav]?://(?:m\.|www\.)?(?:youtu\.be|youtube\.com)/(?:watch|w)\?v=([A-Za-z0-9_-]+)`)
 
 // Gutenberg Youtube embed into figure:
 // <!-- wp:embed {"url":"https://www.youtube.com/watch?v=7l6FjphZXsk","type":"video","providerNameSlug":"youtube","responsive":true,"align":"full","className":"wp-embed-aspect-16-9 wp-has-aspect-ratio"} -->
@@ -19,7 +19,8 @@ var _YoutubeRegEx = regexp.MustCompile(`(?m)(^|\s)http[sav]?://(?:m\.|www\.)?(?:
 // </div></figure>
 // <!-- /wp:embed -->
 var (
-	_YoutubeGutenbergRegEx = regexp.MustCompile(`(?ms)(^|\s)<!-- wp:embed {"url":"[^"]+v=([^"]+)".*?<!-- /wp:embed -->`)
+	_YoutubeGutenbergRegEx = regexp.MustCompile(`(?ms)(^|\s)<!-- wp:embed {"url":"[^"]+v=([A-Za-z0-9_-]+)[^"]*".*?<!-- /wp:embed -->`)
+	_YoutubeShortCodeRegEx = regexp.MustCompile(`(?m)(^|\s)\\?\[youtube\s+http[sav]?://(?:m\.|www\.)?(?:youtu\.be|youtube\.com)/(?:watch|w)\?v=([A-Za-z0-9_-]+)(?:[^\s\\\]]*)\\?\]`)
 	_YoutubeEmbedRegEx     = regexp.MustCompile(`(?m)(^|\s)(?:[embed])http[sav]?://(?:m\.|www\.)?(?:youtu\.be|youtube\.com)/(?:watch|w)\?v=([^&\s]+)(?:[/embed])`)
 )
 
@@ -28,6 +29,7 @@ func replacePlaintextYoutubeURL(htmlData string) string {
 		Msg("Replacing Youtube URLs with embeds")
 
 	htmlData = replaceAllStringSubmatchFunc(_YoutubeGutenbergRegEx, htmlData, YoutubeReplacementFunction)
+	htmlData = replaceAllStringSubmatchFunc(_YoutubeShortCodeRegEx, htmlData, YoutubeReplacementFunction)
 	htmlData = replaceAllStringSubmatchFunc(_YoutubeRegEx, htmlData, YoutubeReplacementFunction)
 	htmlData = replaceAllStringSubmatchFunc(_YoutubeEmbedRegEx, htmlData, YoutubeReplacementFunction)
 	return htmlData
