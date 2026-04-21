@@ -28,6 +28,7 @@ func TestReplaceYoutubeURL3(t *testing.T) {
 }
 
 func TestReplaceYoutubeURL4(t *testing.T) {
+	t.Parallel()
 	const htmlData = "[embed]https://www.youtube.com/watch?v=gJ7AAJXHeeg[/embed]"
 	const expected = "{{< youtube gJ7AAJXHeeg >}}"
 	require.Equal(t, expected, replacePlaintextYoutubeURL(htmlData))
@@ -50,5 +51,13 @@ func TestReplaceYoutubeURL5(t *testing.T) {
 	</div></figure>
 	<!-- /wp:embed -->`
 	const expected = "{{< youtube 7l6FjphZXsk >}}"
+	require.Equal(t, expected, replacePlaintextYoutubeURL(htmlData))
+}
+
+func TestReplaceYoutubeURL6(t *testing.T) {
+	t.Parallel()
+	// Ref: https://github.com/ashishb/wp2hugo/issues/268
+	const htmlData = "[youtube http://www.youtube.com/watch?v=1cNDSPutas8]"
+	const expected = "{{< youtube 1cNDSPutas8 >}}"
 	require.Equal(t, expected, replacePlaintextYoutubeURL(htmlData))
 }
