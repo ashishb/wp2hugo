@@ -2,9 +2,8 @@ package hugopage
 
 import (
 	"fmt"
-	"regexp"
-
 	"github.com/rs/zerolog/log"
+	"regexp"
 )
 
 // Example: Plain-text Youtube URLs on their own line in post content are turned by WP into embeds
@@ -26,6 +25,9 @@ var (
 func replacePlaintextYoutubeURL(htmlData string) string {
 	log.Debug().
 		Msg("Replacing Youtube URLs with embeds")
+
+	// Replace "[embed](.*)[/embed]" with $1, to remove the embed tags and leave the URL for the next regex to process
+	htmlData = regexp.MustCompile(`(?m)\[embed\](.*?)\[/embed\]`).ReplaceAllString(htmlData, "$1")
 
 	htmlData = replaceAllStringSubmatchFunc(_YoutubeGutenbergRegEx, htmlData, YoutubeReplacementFunction)
 	htmlData = replaceAllStringSubmatchFunc(_YoutubeRegEx, htmlData, YoutubeReplacementFunction)
