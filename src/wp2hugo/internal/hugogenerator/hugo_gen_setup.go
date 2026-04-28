@@ -2,6 +2,7 @@ package hugogenerator
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"maps"
@@ -15,6 +16,7 @@ import (
 	"time"
 
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugogenerator/hugopage"
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/mediacache"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/nginxgenerator"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/wpparser"
@@ -803,6 +805,15 @@ func downloadMedia(ctx context.Context, link string, outputMediaDirPath string, 
 	// Thus we register URL replacements as relative links.
 
 	if err != nil {
+		if errors.Is(err, mediacache.ErrMediaNotAcceptable) {
+			log.Error().
+				Err(err).
+				Str("mediaLink", link).
+				Str("pageLink", pageURL.String()).
+				Str("outputFilePath", outputFilePath).
+				Msg("server returned 406 Not Acceptable for media file, skipping")
+			return urlReplacement, nil
+		}
 		if g.continueOnMediaDownloadFailure {
 			log.Error().
 				Err(err).
