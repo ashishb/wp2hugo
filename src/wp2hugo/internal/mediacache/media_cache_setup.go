@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -15,6 +16,10 @@ import (
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
 	"github.com/rs/zerolog/log"
 )
+
+// ErrMediaNotAcceptable is returned when the server responds with 406 Not Acceptable.
+// The media file cannot be downloaded in this case.
+var ErrMediaNotAcceptable = errors.New("media not acceptable (HTTP 406)")
 
 type MediaCache struct {
 	cacheDirPath string
@@ -56,6 +61,12 @@ func waitOrStop(resp *http.Response) (int, bool) {
 	case http.StatusNotFound:
 		// HTTP error 404 = not found
 		// Useless to retry downloading
+		stop = true
+
+	case http.StatusNotAcceptable:
+		// HTTP error 406 = not acceptable
+		// The server cannot produce a response matching the request's Accept headers.
+		// Useless to retry downloading.
 		stop = true
 
 	default:
@@ -112,6 +123,9 @@ func (m MediaCache) GetReader(ctx context.Context, url string) (io.Reader, error
 
 	if httpErr != nil {
 		return nil, fmt.Errorf("error fetching media %s: %w", url, httpErr)
+	}
+	if resp.StatusCode == http.StatusNotAcceptable {
+		return nil, fmt.Errorf("error fetching media %s: %w", url, ErrMediaNotAcceptable)
 	}
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("error fetching media %s: %s", url, resp.Status)
