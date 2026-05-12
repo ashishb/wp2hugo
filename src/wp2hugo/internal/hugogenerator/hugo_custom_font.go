@@ -15,8 +15,10 @@ const _extendedHeaderData = `
 <link href="https://fonts.googleapis.com/css2?family=%s&display=swap" rel="stylesheet">
 `
 
-const _outputHeadFile = "themes/PaperMod/layouts/partials/extend_head.html"
-const _outputHeadFileFallback = "themes/PaperMod/layouts/_partials/extend_head.html"
+const (
+	_outputHeadFile         = "themes/PaperMod/layouts/partials/extend_head.html"
+	_outputHeadFileFallback = "themes/PaperMod/layouts/_partials/extend_head.html"
+)
 
 const _customFontCSS = `
 body {
