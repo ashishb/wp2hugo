@@ -15,7 +15,10 @@ const _extendedHeaderData = `
 <link href="https://fonts.googleapis.com/css2?family=%s&display=swap" rel="stylesheet">
 `
 
-const _outputHeadFile = "themes/PaperMod/layouts/partials/extend_head.html"
+const (
+	_outputHeadFile         = "themes/PaperMod/layouts/partials/extend_head.html"
+	_outputHeadFileFallback = "themes/PaperMod/layouts/_partials/extend_head.html"
+)
 
 const _customFontCSS = `
 body {
@@ -64,10 +67,25 @@ const _outputCssFile = "themes/PaperMod/assets/css/extended/blank.css"
 // Custom font for Hugo's papermod theme
 // Ref: https://forum.wildserver.ru/viewtopic.php?t=18
 func setupFont(siteDir string, fontName string) error {
-	err1 := appendFile(filepath.Join(siteDir, _outputHeadFile), fmt.Sprintf(_extendedHeaderData, fontName))
+	err1 := appendHeadFile(siteDir, fmt.Sprintf(_extendedHeaderData, fontName))
 	err2 := appendFile(filepath.Join(siteDir, _outputCssFile), fmt.Sprintf(_customFontCSS, fontName))
 	err3 := appendFile(filepath.Join(siteDir, _outputCssFile), _customCSS)
 	return errors.Join(err1, err2, err3)
+}
+
+func appendHeadFile(siteDir string, data string) error {
+	outputHeadFile := filepath.Join(siteDir, _outputHeadFile)
+	err := appendFile(outputHeadFile, data)
+	if err == nil || !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+
+	outputHeadFileFallback := filepath.Join(siteDir, _outputHeadFileFallback)
+	errFallback := appendFile(outputHeadFileFallback, data)
+	if errFallback == nil {
+		return nil
+	}
+	return errors.Join(err, errFallback)
 }
 
 func appendFile(outputFilePath string, data string) error {
