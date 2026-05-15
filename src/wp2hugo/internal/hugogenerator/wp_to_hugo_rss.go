@@ -17,9 +17,15 @@ func setupRssFeedFormat(siteDir string) error {
 	}
 	// Read from the paperMod theme and then generate a new rss.xml that will
 	// take precendece over the theme's rss.xml
-	data, err := os.ReadFile(path.Join(siteDir, "themes", "PaperMod", "layouts", "_default", "rss.xml"))
+	primaryPath := path.Join(siteDir, "themes", "PaperMod", "layouts", "_default", "rss.xml")
+	fallbackPath := path.Join(siteDir, "themes", "PaperMod", "layouts", "rss.xml")
+	data, err := os.ReadFile(primaryPath)
 	if err != nil {
-		return fmt.Errorf("error reading rss.xml from PaperMod theme: %w", err)
+		data, err = os.ReadFile(fallbackPath)
+		if err != nil {
+			return fmt.Errorf("error reading rss.xml from PaperMod theme (tried %q and %q): %w",
+				primaryPath, fallbackPath, err)
+		}
 	}
 	rssFile := path.Join(siteDir, "layouts", "rss.xml")
 	return writeFile(rssFile, getModifiedRSSXML(data))
