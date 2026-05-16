@@ -21,7 +21,7 @@ It handles several weird edge cases that I encountered while trying to migrate m
 While this primarily targets Hugo-based code generation, one can use it to convert WordPress blogs to Markdown-based files that can be used with other systems,
 for example, [Mkdocs](https://www.mkdocs.org/) or [Jekyll](https://jekyllrb.com/).
 
-## Following sites have migrated using `wp2hugo`
+## The following sites have migrated using `wp2hugo`
 
 1. [ashishb.net](https://ashishb.net/tech/wordpress-to-hugo/)
 1. [inliniac.net](https://inliniac.net/blog/posts/blog-moved-to-hugo/)
@@ -46,6 +46,7 @@ for example, [Mkdocs](https://www.mkdocs.org/) or [Jekyll](https://jekyllrb.com/
 1. [ITTY](https://itty.nl/converting-wordpress-to-hugo/)
 1. [Sean Graham](https://sean-graham.com/2025/08/01/wordpress-to-hugo/)
 1. [skyboo.net](https://skyboo.net/2026/02/hello-hugo/)
+1. [Tim's tech thoughts (tsmith.co)](https://tsmith.co/2026/migrating-15-years-of-wordpress-to-hugo-with-ai/)
 
 ## Commercial usage
 
@@ -56,12 +57,12 @@ Feel free to contact me if you want to license this commercially.
 
 ## What does wp2hugo do better than other migration tools
 
-- wp2hugo is distributed as a single and portable binary executable, requiring no installation and no dependence. The binary is compiled code (written in Go), which provides _much_ better performance than scripted tools.
-- It can run locally on your computer, or on server with shell access, and processes WordPress XML export file. This makes it able to migrate very large blogs in a matter of minutes, while other migration tools (e.g. those running server-side PHP code, as WordPress plugins) may time-out, overflow RAM, overload server and fail completely on shared hosting.
-- It migrates all post metadata like GUID, custom fields, taxonomies, and more, so you retain all of your original posts' information, even hidden from user front-end. _(Posts front-matters may need some manual cleanup after migration)_
+- wp2hugo is distributed as a single and portable binary executable, requiring no installation and no dependencies. The binary is compiled code (written in Go), which provides _much_ better performance than scripted tools.
+- It can run locally on your computer, or on a server with shell access, and process the WordPress XML export file. This makes it able to migrate very large blogs in a matter of minutes, while other migration tools (e.g., those running server-side PHP code, as WordPress plugins) may time out, overflow RAM, overload the server, and fail completely on shared hosting.
+- It migrates all post metadata like GUID, custom fields, taxonomies, and more, so you retain all of your original posts' information, even hidden from the user front-end. _(Posts front-matters may need some manual cleanup after migration)_
 - It converts a large range of native WordPress shortcodes and Gutenberg blocks to Hugo shortcodes.
-- It fully imports WordPress media library (files and metadata) and fully supports WordPress galeries (legacy and Gutenberg), which makes it particularly well-suited for photo blogs.
-- It supports translated pages and hierarchical pages and custom post types.
+- It fully imports WordPress media library (files and metadata) and fully supports WordPress galleries (legacy and Gutenberg), which makes it particularly well-suited for photo blogs.
+- It supports translated pages and hierarchical pages, and custom post types.
 
 ## Usage
 
