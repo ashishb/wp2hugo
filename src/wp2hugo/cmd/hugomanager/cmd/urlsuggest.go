@@ -22,8 +22,8 @@ func init() {
 		},
 	}
 
-	urlSuggestCmd.Flags().StringVarP(&hugoDir, "hugo-dir", "", "", "Hugo base directory or any directory containing Hugo markdown files")
-	urlSuggestCmd.Flags().BoolVarP(&updateInline, "in-place", "", false, "Update URLs in markdown files")
+	urlSuggestCmd.Flags().StringVarP(&hugoDir, "hugo-dir", "d", "", "Hugo base directory or any directory containing Hugo markdown files")
+	urlSuggestCmd.Flags().BoolVarP(&updateInline, "in-place", "i", false, "Update URLs in markdown files")
 	urlSuggestCmd.PersistentFlags().BoolVarP(&colorLogOutput, "color-log-output", "", true,
 		"enable colored log output, set false to structured JSON log")
 	rootCmd.AddCommand(urlSuggestCmd)

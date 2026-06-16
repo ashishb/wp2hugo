@@ -22,7 +22,7 @@ func init() {
 		},
 	}
 
-	siteSummaryCmd.Flags().StringVarP(&hugoDir, "hugo-dir", "", "", "Hugo base directory or any directory containing Hugo markdown files")
+	siteSummaryCmd.Flags().StringVarP(&hugoDir, "hugo-dir", "d", "", "Hugo base directory or any directory containing Hugo markdown files")
 	siteSummaryCmd.PersistentFlags().BoolVarP(&colorLogOutput, "color-log-output", "", true,
 		"enable colored log output, set false to structured JSON log")
 	rootCmd.AddCommand(siteSummaryCmd)

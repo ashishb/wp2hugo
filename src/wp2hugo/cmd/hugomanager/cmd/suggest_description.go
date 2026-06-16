@@ -25,7 +25,7 @@ func init() {
 			suggestDescription(cmd.Context(), hugoDir, updateInline, limit)
 		},
 	}
-	_suggestDescriptionCmd.Flags().StringVarP(&hugoDir, "hugo-dir", "", "", "Hugo base directory or any directory containing Hugo markdown files")
+	_suggestDescriptionCmd.Flags().StringVarP(&hugoDir, "hugo-dir", "d", "", "Hugo base directory or any directory containing Hugo markdown files")
 	_suggestDescriptionCmd.Flags().BoolVarP(&updateInline, "inline", "i", false, "Add description in markdown files")
 	_suggestDescriptionCmd.PersistentFlags().BoolVarP(&colorLogOutput, "color-log-output", "", true,
 		"enable colored log output, set false to structured JSON log")

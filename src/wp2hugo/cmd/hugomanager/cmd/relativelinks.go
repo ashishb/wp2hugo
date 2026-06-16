@@ -23,7 +23,7 @@ func init() {
 		},
 	}
 
-	relativeLinksCmd.Flags().StringVarP(&hugoDir, "hugo-dir", "", "", "Hugo base directory or any directory containing Hugo markdown files")
+	relativeLinksCmd.Flags().StringVarP(&hugoDir, "hugo-dir", "d", "", "Hugo base directory or any directory containing Hugo markdown files")
 	relativeLinksCmd.Flags().BoolVarP(&updateInline, "in-place", "", false, "Update URLs in in markdown files")
 	relativeLinksCmd.PersistentFlags().BoolVarP(&colorLogOutput, "color-log-output", "", true,
 		"enable colored log output, set false to structured JSON log")

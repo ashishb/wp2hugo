@@ -27,7 +27,7 @@ func init() {
 		},
 	}
 
-	suggestImageAltCmd.Flags().StringVarP(&hugoDir, "hugo-dir", "", "", "Hugo base directory or any directory containing Hugo markdown files")
+	suggestImageAltCmd.Flags().StringVarP(&hugoDir, "hugo-dir", "d", "", "Hugo base directory or any directory containing Hugo markdown files")
 	suggestImageAltCmd.Flags().BoolVarP(&updateInline, "inline", "i", false, "Add image alt in markdown files")
 	suggestImageAltCmd.PersistentFlags().BoolVarP(&colorLogOutput, "color-log-output", "", true,
 		"enable colored log output, set false to structured JSON log")

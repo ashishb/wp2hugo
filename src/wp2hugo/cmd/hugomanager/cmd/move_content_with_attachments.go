@@ -25,10 +25,10 @@ func init() {
 		},
 	}
 
-	moveContentWithAttachmentsCmd.Flags().StringVarP(&hugoDir, "hugo-dir", "", "", "Hugo base directory or any directory containing Hugo markdown files")
+	moveContentWithAttachmentsCmd.Flags().StringVarP(&hugoDir, "hugo-dir", "d", "", "Hugo base directory or any directory containing Hugo markdown files")
 	moveContentWithAttachmentsCmd.PersistentFlags().BoolVarP(&colorLogOutput, "color-log-output", "", true,
 		"enable colored log output, set false to structured JSON log")
-	moveContentWithAttachmentsCmd.Flags().BoolVarP(&updateInline, "in-place", "", false, "Update titles in in markdown files")
+	moveContentWithAttachmentsCmd.Flags().BoolVarP(&updateInline, "in-place", "i", false, "Update titles in in markdown files")
 	rootCmd.AddCommand(moveContentWithAttachmentsCmd)
 }
 
