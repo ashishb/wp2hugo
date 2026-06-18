@@ -1,3 +1,5 @@
+## add date prefix to posts (only year folders OR year and month folders).
+
 # WordPress to Hugo Static site migrator
 
 [![Featured on Hacker News](https://hackerbadge.now.sh/api?id=41377331)](https://news.ycombinator.com/item?id=41377331)
