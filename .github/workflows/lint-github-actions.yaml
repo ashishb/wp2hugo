@@ -64,8 +64,8 @@ jobs:
         with:
           persist-credentials: false
           sparse-checkout: |
-            .github/workflows
+            .github
           sparse-checkout-cone-mode: false
 
       - name: Run zizmor on GitHub Actions
-        run: docker run --rm --network none -v "$PWD":/work:ro  ghcr.io/woodruffw/zizmor:latest --offline /work/.github/workflows
+        run: docker run --rm --network none -v "$PWD":/work:ro  ghcr.io/woodruffw/zizmor:latest --offline --config /work/.github/zizmor_config.yaml /work/.github/workflows
