@@ -64,7 +64,7 @@ jobs:
         with:
           persist-credentials: false
           sparse-checkout: |
-            .github/workflows
+            .github
           sparse-checkout-cone-mode: false
 
       - name: Run zizmor on GitHub Actions
