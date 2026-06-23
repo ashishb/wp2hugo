@@ -65,14 +65,7 @@ jobs:
           persist-credentials: false
           sparse-checkout: |
             .github/workflows
-            .github/zizmor_config.yaml
           sparse-checkout-cone-mode: false
 
-      - name: Setup Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-
-      - name: Install zizmor
-        run: cargo install --locked zizmor
-
       - name: Run zizmor on GitHub Actions
-        run: zizmor --config .github/zizmor_config.yaml .github/workflows/*
+        run: docker run --rm --network none -v "$PWD":/work:ro  ghcr.io/woodruffw/zizmor:latest --offline /work/.github/workflows
