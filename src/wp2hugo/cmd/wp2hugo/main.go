@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"os"
 	"path"
 	"slices"
@@ -30,7 +31,8 @@ var (
 	font           = flag.String("font", "Lexend", "custom font for the output website")
 	colorLogOutput = flag.Bool("color-log-output", true, "enable colored log output, set false to structured JSON log")
 
-	customPostTypes = flag.String("custom-post-types", "", "CSV list of custom post types to import")
+	customPostTypes            = flag.String("custom-post-types", "", "CSV list of custom post types to import")
+	contentDateFolderStructure = flag.String("content-date-folder-structure", hugogenerator.ContentDateFolderStructureFlat, "organize posts/pages by publish date: flat, year, or year-month")
 )
 
 var _defaultCustomPosts = []string{"avada_portfolio", "avada_faq", "product", "product_variation"}
@@ -78,7 +80,16 @@ func getWebsiteInfo(filePath string) (*wpparser.WebsiteInfo, error) {
 
 func generate(ctx context.Context, info wpparser.WebsiteInfo, outputDirPath string) error {
 	log.Debug().Msgf("Output: %s", outputDirPath)
+	if !hugogenerator.IsValidContentDateFolderStructure(*contentDateFolderStructure) {
+		return fmt.Errorf("invalid content-date-folder-structure: %q (allowed: %s, %s, %s)",
+			*contentDateFolderStructure,
+			hugogenerator.ContentDateFolderStructureFlat,
+			hugogenerator.ContentDateFolderStructureYear,
+			hugogenerator.ContentDateFolderStructureYearMonth)
+	}
+
 	generator := hugogenerator.NewGenerator(outputDirPath, *font, mediacache.New(*mediaCacheDir),
-		*downloadMedia, *downloadAll, *continueOnMediaDownloadFailure, *generateNgnixConfig, info)
+		*downloadMedia, *downloadAll, *continueOnMediaDownloadFailure, *generateNgnixConfig,
+		*contentDateFolderStructure, info)
 	return generator.Generate(ctx)
 }

@@ -46,11 +46,18 @@ placeholder: "placeholder text in search input box"
 // Find image media thumbnails resized by WP, like `some-file-1920x1080.jpg`
 var _resizedMedia = regexp.MustCompile(`(.*)-\d+x\d+\.(jpg|jpeg|png|webp|gif)`)
 
+const (
+	ContentDateFolderStructureFlat      = "flat"
+	ContentDateFolderStructureYear      = "year"
+	ContentDateFolderStructureYearMonth = "year-month"
+)
+
 type Generator struct {
-	fontName         string
-	imageURLProvider hugopage.ImageURLProvider
-	outputDirPath    string
-	wpInfo           wpparser.WebsiteInfo
+	fontName                   string
+	imageURLProvider           hugopage.ImageURLProvider
+	outputDirPath              string
+	wpInfo                     wpparser.WebsiteInfo
+	contentDateFolderStructure string
 
 	// Media related
 	mediaProvider                  MediaProvider
@@ -69,17 +76,18 @@ type MediaProvider interface {
 
 func NewGenerator(outputDirPath string, fontName string,
 	mediaProvider MediaProvider, downloadMedia bool, downloadAll bool, continueOnMediaDownloadFailure bool,
-	generateNgnixConfig bool, info wpparser.WebsiteInfo,
+	generateNgnixConfig bool, contentDateFolderStructure string, info wpparser.WebsiteInfo,
 ) *Generator {
 	var ngnixConfig *nginxgenerator.Config
 	if generateNgnixConfig {
 		ngnixConfig = nginxgenerator.NewConfig()
 	}
 	return &Generator{
-		fontName:         fontName,
-		imageURLProvider: newImageURLProvider(info),
-		outputDirPath:    outputDirPath,
-		wpInfo:           info,
+		fontName:                   fontName,
+		imageURLProvider:           newImageURLProvider(info),
+		outputDirPath:              outputDirPath,
+		wpInfo:                     info,
+		contentDateFolderStructure: contentDateFolderStructure,
 
 		// Media related
 		mediaProvider:                  mediaProvider,
@@ -90,6 +98,30 @@ func NewGenerator(outputDirPath string, fontName string,
 		// Nginx related
 		generateNgnixConfig: generateNgnixConfig,
 		ngnixConfig:         ngnixConfig,
+	}
+}
+
+func IsValidContentDateFolderStructure(contentDateFolderStructure string) bool {
+	switch contentDateFolderStructure {
+	case ContentDateFolderStructureFlat, ContentDateFolderStructureYear, ContentDateFolderStructureYearMonth:
+		return true
+	default:
+		return false
+	}
+}
+
+func getDateBasedContentDir(baseDir string, publishDate *time.Time, contentDateFolderStructure string) string {
+	if publishDate == nil {
+		return baseDir
+	}
+
+	switch contentDateFolderStructure {
+	case ContentDateFolderStructureYear:
+		return path.Join(baseDir, fmt.Sprintf("%04d", publishDate.Year()))
+	case ContentDateFolderStructureYearMonth:
+		return path.Join(baseDir, fmt.Sprintf("%04d", publishDate.Year()), fmt.Sprintf("%02d", int(publishDate.Month())))
+	default:
+		return baseDir
 	}
 }
 
@@ -284,7 +316,9 @@ func (g Generator) downloadAllMedia(ctx context.Context, outputDirPath string, i
 	return nil
 }
 
-func getPagePath(outputDirPath string, page wpparser.CommonFields, posts []wpparser.CommonFields) (string, error) {
+func getPagePath(outputDirPath string, page wpparser.CommonFields, posts []wpparser.CommonFields,
+	contentDateFolderStructure string,
+) (string, error) {
 	pagePath := ""
 
 	if page.PostParentID != nil {
@@ -296,7 +330,10 @@ func getPagePath(outputDirPath string, page wpparser.CommonFields, posts []wppar
 			// post type than their parent product. All in all, that seems generic enough.
 			if parent.PostID == *page.PostParentID {
 				parentFileName := parent.GetFileInfo().FileNameNoLanguage()
-				pagesDir := path.Join(outputDirPath, "content", *parent.PostType+"s", parentFileName)
+				pagesBaseDir := path.Join(outputDirPath, "content", *parent.PostType+"s")
+				pagesDir := path.Join(
+					getDateBasedContentDir(pagesBaseDir, parent.PublishDate, contentDateFolderStructure),
+					parentFileName)
 				if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
 					return pagePath, err
 				}
@@ -316,7 +353,10 @@ func getPagePath(outputDirPath string, page wpparser.CommonFields, posts []wppar
 	if pagePath == "" {
 		// Create a branch page bundle using using a dynamic posttype subfolder
 		lang := page.GetFileInfo().Language()
-		pagesDir := path.Join(outputDirPath, "content", *page.PostType+"s", page.GetFileInfo().FileNameNoLanguage())
+		pagesBaseDir := path.Join(outputDirPath, "content", *page.PostType+"s")
+		pagesDir := path.Join(
+			getDateBasedContentDir(pagesBaseDir, page.PublishDate, contentDateFolderStructure),
+			page.GetFileInfo().FileNameNoLanguage())
 		if err := utils.CreateDirIfNotExist(pagesDir); err != nil {
 			return pagePath, err
 		}
@@ -445,7 +485,7 @@ func (g Generator) writePages(ctx context.Context, outputDirPath string, info wp
 		for i, p := range info.Pages() {
 			pages[i] = p.CommonFields
 		}
-		if pagePath, err := getPagePath(outputDirPath, page.CommonFields, pages); err != nil {
+		if pagePath, err := getPagePath(outputDirPath, page.CommonFields, pages, g.contentDateFolderStructure); err != nil {
 			return err
 		} else {
 			if err := g.writePage(ctx, outputDirPath, pagePath, page.CommonFields, info); err != nil {
@@ -479,7 +519,7 @@ func (g Generator) writeCustomPosts(ctx context.Context, outputDirPath string, i
 		for i, cp := range info.CustomPosts() {
 			customPosts[i] = cp.CommonFields
 		}
-		if pagePath, err := getPagePath(outputDirPath, page.CommonFields, customPosts); err != nil {
+		if pagePath, err := getPagePath(outputDirPath, page.CommonFields, customPosts, ContentDateFolderStructureFlat); err != nil {
 			return err
 		} else {
 			if err := g.writePage(ctx, outputDirPath, pagePath, page.CommonFields, info); err != nil {
@@ -576,13 +616,17 @@ func (g Generator) writePosts(ctx context.Context, outputDirPath string, info wp
 		return nil
 	}
 
-	postsDir := path.Join(outputDirPath, "content", "posts")
-	if err := utils.CreateDirIfNotExist(postsDir); err != nil {
+	postsBaseDir := path.Join(outputDirPath, "content", "posts")
+	if err := utils.CreateDirIfNotExist(postsBaseDir); err != nil {
 		return err
 	}
 
 	// Write posts
 	for _, post := range info.Posts() {
+		postsDir := getDateBasedContentDir(postsBaseDir, post.PublishDate, g.contentDateFolderStructure)
+		if err := utils.CreateDirIfNotExist(postsDir); err != nil {
+			return err
+		}
 		filename := post.GetFileInfo().FileNameWithLanguage()
 		postPath := getFilePath(postsDir, filename)
 		if err := g.writePage(ctx, outputDirPath, postPath, post.CommonFields, info); err != nil {

@@ -82,6 +82,8 @@ Usage of wp2hugo:
     enable colored log output, set false to structured JSON log (default true)
   --continue-on-media-download-error
     continue processing even if one or more media downloads fail
+  --content-date-folder-structure string
+    organize posts/pages by publish date: flat, year, or year-month (default "flat")
   --download-media
     download media files embedded in the WordPress content
   --download-all
