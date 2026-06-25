@@ -23,7 +23,7 @@ func TestFootnote(t *testing.T) {
 	require.Len(t, post.Footnotes, 1)
 	require.NotNil(t, post.CommonFields)
 
-	generator := NewGenerator("/tmp", "", nil, false, false, false, true, *websiteInfo)
+	generator := NewGenerator("/tmp", "", nil, false, false, false, true, ContentDateFolderStructureFlat, *websiteInfo)
 	url1, err := url.Parse(post.GUID.Value)
 	require.NoError(t, err)
 	hugoPage, err := generator.newHugoPage(url1, post.CommonFields)
