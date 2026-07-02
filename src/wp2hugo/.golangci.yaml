@@ -30,7 +30,7 @@ linters:
 #    - gocognit
     - gocritic
     - gocyclo
-    - gomodguard
+    - gomodguard_v2
     - goprintffuncname
     - gosec
     - grouper
@@ -95,13 +95,12 @@ linters:
           minThreshold: 4
         underef:
           skipRecvDeref: false
-    gomodguard:
+    gomodguard_v2:
       blocked:
-        modules:
-          - github.com/golang/protobuf:
-              recommendations:
-                - google.golang.org/protobuf
-              reason: see https://developers.google.com/protocol-buffers/docs/reference/go/faq#modules
+        - module: github.com/golang/protobuf
+          recommendations:
+            - google.golang.org/protobuf
+          reason: see https://developers.google.com/protocol-buffers/docs/reference/go/faq#modules
     gosec:
       includes:
         - G101
