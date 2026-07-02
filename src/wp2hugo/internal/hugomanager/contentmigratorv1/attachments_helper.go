@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"regexp"
 
+	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/frontmatterhelper"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
 	"github.com/rs/zerolog/log"
 	"github.com/samber/lo"
@@ -54,6 +55,19 @@ func getAllImageAttachmentURLs(path string) ([]string, error) {
 	matches = regEx3.FindAllStringSubmatch(string(data), -1)
 	for _, match := range matches {
 		images = append(images, match[1])
+	}
+
+	// Get cover.image from the frontmatter
+	fm, err := frontmatterhelper.GetSelectiveFrontMatter(path)
+	if err != nil {
+		return nil, fmt.Errorf("error getting frontmatter for file '%s': %w", path, err)
+	}
+	if fm.Cover.Image != "" {
+		images = append(images, fm.Cover.Image)
+		log.Info().
+			Str("path", path).
+			Str("coverImage", fm.Cover.Image).
+			Msg("Found cover image in frontmatter")
 	}
 
 	return lo.Uniq(images), nil
