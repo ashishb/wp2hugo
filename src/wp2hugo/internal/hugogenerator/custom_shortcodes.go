@@ -114,6 +114,13 @@ const _audioShortCode = `
 </audio>
 `
 
+const _videoShortCode = `
+<video controls preload="metadata">
+  <source src="{{ .Get "src" }}" type="video/{{ replace (path.Ext (.Get "src")) "." ""}}">
+  Your browser does not support the video element.
+</video>
+`
+
 const _galleryShortCode = `
 {{ $p := .Page }}
 <div class="gallery gallery-cols-{{ .Get "cols" | default 1 }}">
@@ -126,6 +133,7 @@ func WriteCustomShortCodes(siteDir string) error {
 		writeSelectedPostsShortCode(siteDir),
 		writeParallaxBlurShortCode(siteDir),
 		writeAudioShortCode(siteDir),
+		writeVideoShortCode(siteDir),
 		writeGalleryShortCode(siteDir))
 }
 
@@ -143,6 +151,10 @@ func writeParallaxBlurShortCode(siteDir string) error {
 
 func writeAudioShortCode(siteDir string) error {
 	return writeShortCode(siteDir, "audio", _audioShortCode)
+}
+
+func writeVideoShortCode(siteDir string) error {
+	return writeShortCode(siteDir, "video", _videoShortCode)
 }
 
 func writeGalleryShortCode(siteDir string) error {

@@ -76,6 +76,10 @@ var _hugoFigureLinks = regexp.MustCompile(`{{< figure.*?src="([^\"]+?)".*? >}}`)
 // {{< audio src="/wp-content/uploads/2023/01/session.mp3" alt="" >}}
 var _hugoAudioLinks = regexp.MustCompile(`{{< audio.*?src="([^\"]+?)".*? >}}`)
 
+// Extracts "src" from Hugo video shortcode
+// {{< video src="/wp-content/uploads/2026/05/video.mp4" >}}
+var _hugoVideoLinks = regexp.MustCompile(`{{< video.*?src="([^\"]+?)".*? >}}`)
+
 // {{< parallaxblur src="/wp-content/uploads/2018/12/bora%5Fbora%5F5%5Fresized.jpg" >}}
 var _hugoParallaxBlurLinks = regexp.MustCompile(`{{< parallaxblur.*?src="([^\"]+?)".*? >}}`)
 
@@ -132,8 +136,9 @@ func (page *Page) WPMediaLinks() []string {
 	arr3 := getMarkdownLinks(_hugoParallaxBlurLinks, page.markdown)
 	arr4 := getMarkdownLinks(_hugoAudioLinks, page.markdown)
 	arr5 := getPDFLinks([]byte(page.markdown))
+	arr6 := getMarkdownLinks(_hugoVideoLinks, page.markdown)
 	coverImageURL := page.getCoverImageURL()
-	result := append(append(append(append(arr1, arr2...), arr3...), arr4...), arr5...)
+	result := append(append(append(append(append(arr1, arr2...), arr3...), arr4...), arr5...), arr6...)
 	if coverImageURL != nil {
 		result = append(result, *coverImageURL)
 	}
@@ -344,6 +349,7 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 	htmlContent = replaceCaptionWithFigure(htmlContent)
 	htmlContent = replaceImageBlockWithFigure(htmlContent)
 	htmlContent = replaceAudioShortCode(htmlContent)
+	htmlContent = replaceVideoShortCode(htmlContent)
 	htmlContent = replaceGutembergGalleryWithFigure(htmlContent)
 	htmlContent = replaceGalleryWithFigure(provider, attachmentIDs, htmlContent)
 	htmlContent = replaceAWBWithParallaxBlur(provider, htmlContent)
