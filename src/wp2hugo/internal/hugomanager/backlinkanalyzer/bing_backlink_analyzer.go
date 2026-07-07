@@ -106,6 +106,14 @@ func (a BingBacklinkAnalyzer) AnalyzeBacklinks() (Result, error) {
 
 		if err != nil {
 			fmt.Println("Error reading record:", err)
+			if errors.Is(err, csv.ErrFieldCount) {
+				log.Warn().
+					Str("backlinksFilepath", a.backlinksFilepath).
+					Str("record", fmt.Sprintf("%v", record)).
+					Msg("Skipping record due to field count mismatch")
+				continue // Skip this record and continue with the next one
+			}
+
 			return nil, fmt.Errorf("failed to read record from backlinks file: %w", err)
 		}
 

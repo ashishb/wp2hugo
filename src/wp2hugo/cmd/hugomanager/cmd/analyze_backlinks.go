@@ -32,7 +32,7 @@ func init() {
 		},
 	}
 
-	cmd.Flags().StringVarP(&bingBacklinksFilepath, "file", "", "", "Path to the Bing backlinks file"+_downloadInstructions)
+	cmd.Flags().StringVarP(&bingBacklinksFilepath, "file", "f", "", "Path to the Bing backlinks file"+_downloadInstructions)
 	cmd.PersistentFlags().BoolVarP(&colorLogOutput, "color-log-output", "", true,
 		"enable colored log output, set false to structured JSON log")
 	numDomains = cmd.PersistentFlags().IntP("num-domains", "n", 10, "number of top domains to show in the output")
