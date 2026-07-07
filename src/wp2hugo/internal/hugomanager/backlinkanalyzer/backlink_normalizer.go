@@ -18,12 +18,15 @@ var _randomAggregators = []string{
 	"android.libhunt.com",
 	"biggo.com",
 	"brandonkaz.com",
+	"bubbles.town",
 	"brutalist.report",
 	"cipha.net",
 	"discovery.cooperpress.com",
 	"duesenklipper.de",
+	"explore.market.dev",
 	"follow.it", // Feed reader
 	"geek.ds3783.com",
+	"getlucit.com", // Feed reader
 	"gitea.treehouse.systems",
 	"gitlibrary.club",
 	"goblgobl.com",
@@ -47,10 +50,12 @@ var _randomAggregators = []string{
 	"r.genit.al",                 // Reddit aggregator
 	"reddit.ny4.dev",             // Reddit aggregator
 	"redlib.private.coffee",      // Reddit aggregator
+	"rss.social",                 // Feed reader
 	"ser2.dastresanart.com",      // Hacker News clone
 	"salondemassagebordeaux.com", // Spam website
 	"stage.androidweekly.net",    // Clone of androidweekly.net
 	"telegra.ph",
+	"tourmentine.com",
 	"uocat.com",
 	"upstract.com",
 	"vercel.app",
