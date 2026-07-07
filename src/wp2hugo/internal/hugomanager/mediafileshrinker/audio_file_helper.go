@@ -32,21 +32,18 @@ func GetAudioBitrate(filePath string) (*int, error) {
 		return nil, fmt.Errorf("error reading metadata for file %s: %w", filePath, metadata.Err)
 	}
 
-	bitRateAny, ok := metadata.Fields["AudioBitrate"]
-	if !ok {
-		bitrateAny2, ok2 := metadata.Fields["AvgBitrate"] // For .m4a files
-		if ok2 {
-			bitRateAny = bitrateAny2
-		} else {
-			log.Debug().
-				Str("filePath", filePath).
-				Interface("metadataFields", lo.Keys(metadata.Fields)).
-				Msg("Available metadata fields")
-			return nil, fmt.Errorf("AudioBitrate field not found in metadata for file: %s", filePath)
+	var bitRateStr string
+	for _, field := range []string{"AudioBitrate", "AvgBitrate", "Avg Bitrate"} {
+		bitRateAny, ok := metadata.Fields[field]
+		if ok {
+			bitRateStr = fmt.Sprintf("%v", bitRateAny)
 		}
 	}
 
-	bitRateStr := fmt.Sprintf("%v", bitRateAny)
+	if bitRateStr == "" {
+		return nil, fmt.Errorf("AudioBitrate field not found in metadata for file: %s", filePath)
+	}
+
 	bitRateStr = strings.ReplaceAll(bitRateStr, " kbps", "000")
 	bitRateStr = strings.ReplaceAll(bitRateStr, " mbps", "000000")
 	// Average bit rate is usually in bps, so we need to parse as a float
