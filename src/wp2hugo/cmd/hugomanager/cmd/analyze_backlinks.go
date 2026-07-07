@@ -1,9 +1,13 @@
 package cmd
 
 import (
+	"fmt"
+	"slices"
+
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/backlinkanalyzer"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/logger"
 	"github.com/rs/zerolog/log"
+	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 )
 
@@ -74,9 +78,14 @@ func analyzeBacklinks(bingBacklinksFilepath string, numDomainsToOutput int) {
 			Msg("Domain frequency")
 	}
 
-	// for webURL, backlinks := range result {
-	//	for backlink, _ := range backlinks {
-	//		fmt.Printf("%s, %s\n", webURL, backlink)
-	//	}
-	//}
+	webURLs := lo.Keys(result)
+	slices.Sort(webURLs)
+	for _, webURL := range webURLs {
+		for backlink := range result[webURL] {
+			fmt.Printf("%s <- %s\n", webURL, backlink)
+		}
+		if len(result[webURL]) > 0 {
+			fmt.Printf("\n")
+		}
+	}
 }

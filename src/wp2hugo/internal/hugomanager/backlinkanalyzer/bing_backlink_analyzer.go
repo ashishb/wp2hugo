@@ -146,7 +146,7 @@ func (a BingBacklinkAnalyzer) AnalyzeBacklinks() (Result, error) {
 		}
 
 		if !result[record[2]][*backlinkURL] {
-			log.Debug().
+			log.Trace().
 				Any("sourceURL", *backlinkURL).
 				Str("targetURL", record[2]).
 				Msg("Adding backlink record")
