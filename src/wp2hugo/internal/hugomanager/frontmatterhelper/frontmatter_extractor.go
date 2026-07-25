@@ -22,10 +22,10 @@ type FrontMatter struct {
 	Draft      string   `yaml:"draft"`
 	Tags       []string `yaml:"tag"`
 
-	Layout      *string  `yaml:"layout,omitempty"`      // Used by Hugo papermod theme
-	Placeholder *string  `yaml:"placeholder,omitempty"` // Used by Hugo papermod theme for search page
-	GUID        string   `yaml:"guid"`                  // For RSS and Atom feeds
-	Author      []string `yaml:"author"`
+	Layout      *string `yaml:"layout,omitempty"`      // Used by Hugo papermod theme
+	Placeholder *string `yaml:"placeholder,omitempty"` // Used by Hugo papermod theme for search page
+	GUID        string  `yaml:"guid"`                  // For RSS and Atom feeds
+	Author      any     `yaml:"author"`                // Either "string" or "[]string"
 	Cover       struct {
 		Alt     *string `yaml:"alt,omitempty"`
 		Caption *string `yaml:"caption,omitempty"`
