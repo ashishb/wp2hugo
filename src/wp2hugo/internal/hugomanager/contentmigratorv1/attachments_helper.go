@@ -34,7 +34,7 @@ func getAllImageAttachmentURLs(path string) ([]string, error) {
 
 	// Regex 1 for figure shortcodes
 	// {{< figure align=aligncenter width=740 src="image.png" alt="" >}}
-	regEx1 := regexp.MustCompile(`{{< figure .* src="(.*?)"`)
+	regEx1 := regexp.MustCompile(`{{< figure\s* src="(.*?)"`)
 	matches := regEx1.FindAllStringSubmatch(string(data), -1)
 	images := make([]string, 0)
 	for _, match := range matches {
@@ -43,7 +43,7 @@ func getAllImageAttachmentURLs(path string) ([]string, error) {
 
 	// Regex 2 for cover images
 	//   image: "image.jpg"
-	regEx2 := regexp.MustCompile(`image: "(.*?)"`)
+	regEx2 := regexp.MustCompile(`image:\s"(.*?)"`)
 	matches = regEx2.FindAllStringSubmatch(string(data), -1)
 	for _, match := range matches {
 		images = append(images, match[1])
@@ -70,6 +70,12 @@ func getAllImageAttachmentURLs(path string) ([]string, error) {
 			Msg("Found cover image in frontmatter")
 	}
 
+	if len(images) > 0 {
+		log.Debug().
+			Str("path", path).
+			Strs("images", images).
+			Msg("Found image attachments in file")
+	}
 	return lo.Uniq(images), nil
 }
 
