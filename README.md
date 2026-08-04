@@ -8,15 +8,14 @@
 [![Build wp2hugo](https://github.com/ashishb/wp2hugo/actions/workflows/build-go.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/build-go.yaml)
 [![Validate Go code formatting](https://github.com/ashishb/wp2hugo/actions/workflows/format-go.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/format-go.yaml)
 [![Lint and Test Go](https://github.com/ashishb/wp2hugo/actions/workflows/lint-and-test-go.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/lint-and-test-go.yaml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/ashishb/wp2hugo/src/wp2hugo)](https://goreportcard.com/report/github.com/ashishb/wp2hugo/src/wp2hugo)
 
 [![Lint Markdown](https://github.com/ashishb/wp2hugo/actions/workflows/lint-markdown.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/lint-markdown.yaml)
 [![Lint YAML](https://github.com/ashishb/wp2hugo/actions/workflows/lint-yaml.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/lint-yaml.yaml)
 [![Lint GitHub Actions](https://github.com/ashishb/wp2hugo/actions/workflows/lint-github-actions.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/lint-github-actions.yaml)
 [![Validate Release config](https://github.com/ashishb/wp2hugo/actions/workflows/check-goreleaser-config.yaml/badge.svg)](https://github.com/ashishb/wp2hugo/actions/workflows/check-goreleaser-config.yaml)
 
-This is the best migrator for migrating WordPress export to Hugo.
-It handles several weird edge cases that I encountered while trying to migrate my [personal website](https://v1.ashishb.net) to [Hugo-based site](https://v2.ashishb.net/).
+This is the best migrator for migrating a WordPress export to Hugo.
+It handles several weird edge cases that I encountered while trying to migrate my [personal website](https://v1.ashishb.net) to a [Hugo-based site](https://v2.ashishb.net/).
 
 While this primarily targets Hugo-based code generation, one can use it to convert WordPress blogs to Markdown-based files that can be used with other systems,
 for example, [Mkdocs](https://www.mkdocs.org/) or [Jekyll](https://jekyllrb.com/).
@@ -106,7 +105,7 @@ Usage of wp2hugo:
 $ git clone git@github.com:ashishb/wp2hugo.git
 $ cd wp2hugo/src/wp2hugo
 $ make build_prod
-# `./bin/wp2hugo` will contain the binary and you can use it as `$ ./bin/wp2hugo --source wordpress-export.xml --download-media`
+# `./bin/wp2hugo` will contain the binary, and you can use it as `$ ./bin/wp2hugo --source wordpress-export.xml --download-media`
 ```
 
 ### Installation via Package Managers
@@ -126,19 +125,21 @@ More details on [the documentation](https://github.com/ashishb/wp2hugo/tree/main
 1. [x] Migrate tags, categories and [custom taxonomies](https://learn.wordpress.org/lesson/custom-taxonomies/) for all types of posts,
 1. [x] Set the WordPress homepage correctly
 1. [x] Create WordPress author page
-1. [x] Migrate [WPML](https://wpml.org/) translated posts, pages, and custom post types that use the [URL parameter scheme](https://wpml.org/documentation/getting-started-guide/language-setup/language-url-options/#language-name-added-as-a-parameter) (switch the WPML language URL option prior to exporting your blog content to XML),
+1. [x] Migrate [WPML](https://wpml.org/) translated posts, pages, and custom post types that use the [URL parameter scheme](https://wpml.org/documentation/getting-started-guide/language-setup/language-url-options/#language-name-added-as-a-parameter) (switch the WPML language URL option before exporting your blog content to XML),
 1. [x] Migrate any arbitrary WordPress [custom post type](https://learn.wordpress.org/lesson/custom-post-types/) and store them into their own `/content/post-type` subfolder (hierarchical custom posts are fully supported):
   - [Avada](https://themeforest.net/item/avada-responsive-multipurpose-theme/2833226) FAQ and Portfolios types are supported natively,
-  - [Woocommerce](https://woocommerce.com/) products and product variations types are supported natively,
+  - [WooCommerce](https://woocommerce.com/) products and product variation types are supported natively,
   - user can specify a CSV list of arbitrary post types, using the `--custom-post-types` argument when calling the executable. Only post types that have a publishing status (`<wp:status>` in export XML) matching one of the [values of native posts](https://wordpress.org/documentation/article/post-status/) are supported.
 
 ### Migrate comments
 
-Provided you don't want to accept new comments, old comments are automatically migrated for all post types (posts, pages and custom). You will need to insert the provided snippet into your relevant theme's `single.html` template. See the [documentation](https://github.com/ashishb/wp2hugo/blob/main/doc/comments.md).
+Provided you don't want to accept new comments, old comments are automatically migrated for all post types (posts, pages, and custom).
+You will need to insert the provided snippet into your relevant theme's `single.html` template.
+See the [documentation](https://github.com/ashishb/wp2hugo/blob/main/doc/comments.md).
 
 ### Migrate permalinks
 
-1. [x] Migrate all the URLs, including media URL,s correctly
+1. [x] Migrate all the URLs, including media URLs, correctly
 1. [x] Generate Nginx config containing GUID -> relative URL mapping
 1. [x] Migrate the RSS feed with existing UUIDs, so that entries appear the same - this is important for anyone with a significant feed following, see more details of a [failed migration](https://theorangeone.net/posts/rss-guids/)
 1. [x] Map WordPress's RSS `feed.xml` to Hugo's RSS `feed.xml`
@@ -160,10 +161,10 @@ Provided you don't want to accept new comments, old comments are automatically m
 1. Migrate WordPress shortcodes:
     1. [x] Migrate [WordPress [caption] shortcode](https://codex.wordpress.org/Caption_Shortcode) to [Hugo's {{< figure >}}](https://codex.wordpress.org/Caption_Shortcode))
     1. [x] Migrate [WordPress [audio] shortcode](https://wordpress.org/documentation/article/audio-shortcode/))
-    1. [x] Migrate Wordpress [gallery] shortcode, including [empty Gallery](https://github.com/ashishb/wp2hugo/issues/68)
+    1. [x] Migrate WordPress [gallery] shortcode, including [empty Gallery](https://github.com/ashishb/wp2hugo/issues/68)
 1. Migrate Gutenberg blocks and features:
     1. [x] Migrate WordPress [footnotes](https://github.com/ashishb/wp2hugo/issues/24)
-    1. [x] Migrate Youtube embed Gutenberg blocks
+    1. [x] Migrate YouTube embed Gutenberg blocks
     1. [x] Migrate image and gallery Gutenberg blocks
 
 More details on [the documentation](https://github.com/ashishb/wp2hugo/tree/main/doc/shortcodes.md).
