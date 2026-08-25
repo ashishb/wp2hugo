@@ -182,7 +182,7 @@ func (i CommonFields) GetFileInfo() FileInfo {
 		file = strings.TrimSuffix(file, "-")
 	}
 	if len(file) == 0 {
-		file = titleToFilename((i.Title))
+		file = titleToFilename(i.Title)
 	}
 
 	// Append language suffix if found in link

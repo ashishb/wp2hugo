@@ -30,7 +30,7 @@ func ResizeImage(srcPath string, destPath string, newWidth int) error {
 		return fmt.Errorf("decoded image is nil for source image %s", srcPath)
 	}
 
-	ratio := (float64)(src.Bounds().Max.Y) / (float64)(src.Bounds().Max.X)
+	ratio := float64(src.Bounds().Max.Y) / float64(src.Bounds().Max.X)
 	newHeight := int(math.Round(float64(newWidth) * ratio))
 	dst := image.NewRGBA(image.Rect(0, 0, newWidth, newHeight))
 	draw.NearestNeighbor.Scale(dst, dst.Rect, src, src.Bounds(), draw.Over, nil)
