@@ -46,6 +46,7 @@ for example, [Mkdocs](https://www.mkdocs.org/) or [Jekyll](https://jekyllrb.com/
 1. [Sean Graham](https://sean-graham.com/2025/08/01/wordpress-to-hugo/)
 1. [skyboo.net](https://skyboo.net/2026/02/hello-hugo/)
 1. [Tim's tech thoughts (tsmith.co)](https://tsmith.co/2026/migrating-15-years-of-wordpress-to-hugo-with-ai/)
+1. [Mike Whiskey](https://mike-whiskey.de/1/01/hello-hugo/)
 
 ## Commercial usage
 
