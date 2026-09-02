@@ -1,4 +1,4 @@
-# WordPress to Hugo Static site migrator
+# WordPress to Hugo Static Site Migrator
 
 [![Featured on Hacker News](https://hackerbadge.now.sh/api?id=41377331)](https://news.ycombinator.com/item?id=41377331)
 
@@ -47,6 +47,7 @@ for example, [Mkdocs](https://www.mkdocs.org/) or [Jekyll](https://jekyllrb.com/
 1. [skyboo.net](https://skyboo.net/2026/02/hello-hugo/)
 1. [Tim's tech thoughts (tsmith.co)](https://tsmith.co/2026/migrating-15-years-of-wordpress-to-hugo-with-ai/)
 1. [Mike Whiskey](https://mike-whiskey.de/1/01/hello-hugo/)
+1. [Java & Moi](https://javaetmoi.com/2026/07/migration-blog-de-wordpress-vers-hugo/)
 
 ## Commercial usage
 
@@ -61,7 +62,7 @@ Feel free to contact me if you want to license this commercially.
 - It can run locally on your computer, or on a server with shell access, and process the WordPress XML export file. This makes it able to migrate very large blogs in a matter of minutes, while other migration tools (e.g., those running server-side PHP code, as WordPress plugins) may time out, overflow RAM, overload the server, and fail completely on shared hosting.
 - It migrates all post metadata like GUID, custom fields, taxonomies, and more, so you retain all of your original posts' information, even hidden from the user front-end. _(Posts front-matters may need some manual cleanup after migration)_
 - It converts a large range of native WordPress shortcodes and Gutenberg blocks to Hugo shortcodes.
-- It fully imports WordPress media library (files and metadata) and fully supports WordPress galleries (legacy and Gutenberg), which makes it particularly well-suited for photo blogs.
+- It fully imports the WordPress media library (files and metadata) and fully supports WordPress galleries (legacy and Gutenberg), which makes it particularly well-suited for photo blogs.
 - It supports translated pages and hierarchical pages, and custom post types.
 
 ## Usage
