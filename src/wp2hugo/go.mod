@@ -12,7 +12,7 @@ require (
 	github.com/gomarkdown/markdown v0.0.0-20260824154242-13c5cf49db8d
 	github.com/leeqvip/gophp v1.2.0
 	github.com/mergestat/timediff v0.0.4
-	github.com/mmcdole/gofeed v1.4.2
+	github.com/mmcdole/gofeed v1.5.0
 	github.com/openai/openai-go v1.12.0
 	github.com/rs/zerolog v1.35.1
 	github.com/samber/lo v1.53.0
