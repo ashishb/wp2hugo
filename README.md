@@ -114,6 +114,8 @@ $ make build_prod
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/wp2hugo.svg)](https://repology.org/project/wp2hugo/versions)
 
+For `hugomanager`, a Homebrew cask definition is available at `/Casks/hugomanager.rb`.
+
 ## Documentation
 
 More details on [the documentation](https://github.com/ashishb/wp2hugo/tree/main/doc).
