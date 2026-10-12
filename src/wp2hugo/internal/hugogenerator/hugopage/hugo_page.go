@@ -384,7 +384,7 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 	}
 	if strings.Contains(markdown, _customMoreTag) {
 		// Ref: https://gohugo.io/content-management/summaries/#manual-summary-splitting
-		summary := strings.Split(markdown, _customMoreTag)[0]
+		summary, _, _ := strings.Cut(markdown, _customMoreTag)
 		markdown = strings.Replace(markdown, _customMoreTag, "", 1)
 		// Remove short codes from summary
 		// Ref: https://github.com/ashishb/wp2hugo/issues/13

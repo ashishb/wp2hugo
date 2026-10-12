@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog/log"
-	"github.com/samber/lo"
 )
 
 var _randomAggregators = []string{
@@ -104,7 +103,7 @@ func (b BacklinkURL) Normalize() (*BacklinkURL, error) {
 		u1.Host = "tldr.tech"
 	}
 
-	return lo.ToPtr(BacklinkURL(u1.String())), nil
+	return new(BacklinkURL(u1.String())), nil
 }
 
 func (b BacklinkURL) ShouldSkip() (*bool, error) {
@@ -115,12 +114,12 @@ func (b BacklinkURL) ShouldSkip() (*bool, error) {
 
 	// Skip bad domains
 	if slices.Contains(_randomAggregators, strings.TrimPrefix(u1.Host, "www.")) {
-		return lo.ToPtr(true), nil
+		return new(true), nil
 	}
 
 	// low-quality Hacker news copies
 	if strings.HasSuffix(u1.Host, ".netlify.app") {
-		return lo.ToPtr(true), nil
+		return new(true), nil
 	}
 
 	// Skip if path seems to imply some sort of list page
@@ -128,7 +127,7 @@ func (b BacklinkURL) ShouldSkip() (*bool, error) {
 		strings.Contains(u1.Path, "/tags/") ||
 		strings.Contains(u1.Path, "/page/") ||
 		strings.Contains(u1.Path, "/k/") {
-		return lo.ToPtr(true), nil
+		return new(true), nil
 	}
 
 	if u1.Query().Has("page") {
@@ -137,7 +136,7 @@ func (b BacklinkURL) ShouldSkip() (*bool, error) {
 		if err == nil {
 			// If the value is a number then this is a random page of blog listings
 			// and not a blog post, skip this URL
-			return lo.ToPtr(true), nil
+			return new(true), nil
 		}
 	}
 
@@ -149,47 +148,47 @@ func (b BacklinkURL) ShouldSkip() (*bool, error) {
 		log.Trace().
 			Str("path", u1.Path).
 			Msg("BacklinkURL: skipping paginated list URL")
-		return lo.ToPtr(true), nil
+		return new(true), nil
 	}
 
 	// Skip if path contains "/dislike_post/", this seems to be some sort of a low-quality aggregator
 	if strings.Contains(u1.Path, "/like_post/") || strings.Contains(u1.Path, "/dislike_post/") {
-		return lo.ToPtr(true), nil
+		return new(true), nil
 	}
 
 	// Skip Lobste.rs comments
 	if strings.HasPrefix(u1.Path, "/c/") && strings.HasSuffix(u1.Host, "lobste.rs") {
-		return lo.ToPtr(true), nil
+		return new(true), nil
 	}
 
 	// Skip https://lobste.rs/domains/<domain>
 	if strings.HasPrefix(u1.Path, "/domains/") && strings.HasSuffix(u1.Host, "lobste.rs") {
-		return lo.ToPtr(true), nil
+		return new(true), nil
 	}
 
 	// Skip rss feeds
 	if strings.Contains(u1.Path, "/feed.xml") {
-		return lo.ToPtr(true), nil
+		return new(true), nil
 	}
 
 	// Skip rss feeds
 	if strings.HasSuffix(u1.Path, ".rss") {
-		return lo.ToPtr(true), nil
+		return new(true), nil
 	}
 
 	// Low-quality links like hn.cho.sh, https://hn-tldr.com/posts/44214835 and https://hn-grep.rednafi.com/dev/test.php
 	if strings.Contains(u1.Host, "hn.") ||
 		strings.Contains(u1.Host, "hn-") ||
 		strings.Contains(u1.Host, "links-yc.") {
-		return lo.ToPtr(true), nil
+		return new(true), nil
 	}
 
 	if u1.Host == "play.google.com" || u1.Path == "/store/apps/details" {
 		// Skip Google Play Store links
-		return lo.ToPtr(true), nil
+		return new(true), nil
 	}
 
-	return lo.ToPtr(false), nil
+	return new(false), nil
 }
 
 func (b BacklinkURL) Host() (*string, error) {
@@ -202,5 +201,5 @@ func (b BacklinkURL) Host() (*string, error) {
 		return nil, fmt.Errorf("backlink URL %q has no host", b)
 	}
 
-	return lo.ToPtr(strings.TrimPrefix(u1.Host, "www.")), nil
+	return new(strings.TrimPrefix(u1.Host, "www.")), nil
 }

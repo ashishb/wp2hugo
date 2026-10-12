@@ -16,7 +16,6 @@ import (
 	"github.com/disintegration/imaging"
 	"github.com/openai/openai-go"
 	"github.com/rs/zerolog/log"
-	"github.com/samber/lo"
 )
 
 const _imageAltSystemPrompt = `
@@ -266,8 +265,8 @@ func getAlt(ctx context.Context, imgPath string, textAroundImage string) (*strin
 		return nil, fmt.Errorf("failed to get alt text for image %s: %w", imgPath, err)
 	}
 
-	altText = lo.ToPtr(strings.ReplaceAll(*altText, `"`, `'`))
-	altText = lo.ToPtr(strings.ReplaceAll(*altText, "  ", " "))
+	altText = new(strings.ReplaceAll(*altText, `"`, `'`))
+	altText = new(strings.ReplaceAll(*altText, "  ", " "))
 	log.Debug().
 		Str("imgPath", imgPath).
 		Str("altText", *altText).

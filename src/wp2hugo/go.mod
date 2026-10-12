@@ -9,7 +9,7 @@ require (
 	github.com/barasher/go-exiftool v1.10.0
 	github.com/disintegration/imaging v1.6.2
 	github.com/go-enry/go-enry/v2 v2.9.6
-	github.com/gomarkdown/markdown v0.0.0-20260824154242-13c5cf49db8d
+	github.com/gomarkdown/markdown v0.0.0-20261011113952-f83953680332
 	github.com/leeqvip/gophp v1.2.0
 	github.com/mergestat/timediff v0.0.4
 	github.com/mmcdole/gofeed v1.5.0
@@ -19,21 +19,21 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.12.1
-	golang.org/x/image v0.46.0
-	golang.org/x/net v0.59.0
-	golang.org/x/text v0.42.0
+	golang.org/x/image v0.47.0
+	golang.org/x/net v0.61.0
+	golang.org/x/text v0.43.0
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
 	github.com/BurntSushi/toml v1.6.0 // indirect
-	github.com/andybalholm/cascadia v1.3.4 // indirect
+	github.com/andybalholm/cascadia v1.3.5 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/go-enry/go-oniguruma v1.2.1 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/mattn/go-colorable v0.1.15 // indirect
+	github.com/mattn/go-colorable v0.1.16 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/mmcdole/goxpp/v2 v2.0.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.4.3 // indirect
@@ -43,10 +43,10 @@ require (
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
-	github.com/tidwall/gjson v1.19.0 // indirect
+	github.com/tidwall/gjson v1.20.0 // indirect
 	github.com/tidwall/match v1.2.0 // indirect
-	github.com/tidwall/pretty v1.2.1 // indirect
+	github.com/tidwall/pretty v1.2.2 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/sys v0.48.0 // indirect
+	golang.org/x/sys v0.49.0 // indirect
 )

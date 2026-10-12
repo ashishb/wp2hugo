@@ -19,7 +19,7 @@ func UpdateFrontmatter(path string, key string, value string) error {
 	if !strings.Contains(key, ".") {
 		fullmatter[key] = value
 	} else if strings.Count(key, ".") == 1 {
-		key0 := strings.Split(key, ".")[0]
+		key0, _, _ := strings.Cut(key, ".")
 		key1 := strings.Split(key, ".")[1]
 		if fullmatter[key0] == nil {
 			log.Fatal().

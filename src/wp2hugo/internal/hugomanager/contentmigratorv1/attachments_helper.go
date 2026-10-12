@@ -23,7 +23,7 @@ func hasImageAttachments(path string) (*bool, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error getting image attachment URLs for file '%s': %w", path, err)
 	}
-	return lo.ToPtr(len(urls) > 0), nil
+	return new(len(urls) > 0), nil
 }
 
 func getAllImageAttachmentURLs(path string) ([]string, error) {

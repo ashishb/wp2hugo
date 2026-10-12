@@ -16,7 +16,6 @@ import (
 	ext "github.com/mmcdole/gofeed/extensions"
 	"github.com/mmcdole/gofeed/rss"
 	"github.com/rs/zerolog/log"
-	"github.com/samber/lo"
 	"golang.org/x/text/runes"
 	"golang.org/x/text/transform"
 	"golang.org/x/text/unicode/norm"
@@ -190,7 +189,7 @@ func (i CommonFields) GetFileInfo() FileInfo {
 	langMatch := langRegex.FindStringSubmatch(params)
 	var lang *string
 	if len(langMatch) > 1 {
-		lang = lo.ToPtr(langMatch[1])
+		lang = new(langMatch[1])
 	}
 
 	return FileInfo{

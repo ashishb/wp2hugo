@@ -11,7 +11,6 @@ import (
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/hugomanager/imageshrinker"
 	"github.com/barasher/go-exiftool"
 	"github.com/rs/zerolog/log"
-	"github.com/samber/lo"
 )
 
 func GetAudioBitrate(filePath string) (*int, error) {
@@ -52,7 +51,7 @@ func GetAudioBitrate(filePath string) (*int, error) {
 		return nil, fmt.Errorf("unable to convert bitrate to int for file %s: %w", filePath, err)
 	}
 
-	return lo.ToPtr(int(bitRateFloat)), nil
+	return new(int(bitRateFloat)), nil
 }
 
 // ReduceAudioBitrate processes a media file to reduce its audio bitrate

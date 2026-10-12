@@ -10,33 +10,32 @@ import (
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/gitutils"
 	"github.com/ashishb/wp2hugo/src/wp2hugo/internal/utils"
 	"github.com/rs/zerolog/log"
-	"github.com/samber/lo"
 )
 
 func ProcessFile(ctx context.Context, path string, updateInline bool) (*bool, error) {
 	// Ignore all non-markdown files
 	if !strings.HasSuffix(path, ".md") {
-		return lo.ToPtr(false), nil
+		return new(false), nil
 	}
 
 	// Ignore all non-content paths
 	if !strings.Contains(path, "content") {
-		return lo.ToPtr(false), nil
+		return new(false), nil
 	}
 
 	// Ignore files that are already in the right location that is named "index.md" under some directory
 	if strings.HasSuffix(path, "/index.md") {
-		return lo.ToPtr(false), nil
+		return new(false), nil
 	}
 
 	// Ignore all files without attachments
 	hasAttachments, err := hasAttachments(path)
 	if err != nil {
-		return lo.ToPtr(false), fmt.Errorf("error checking attachments for file '%s': %w", path, err)
+		return new(false), fmt.Errorf("error checking attachments for file '%s': %w", path, err)
 	}
 
 	if !*hasAttachments {
-		return lo.ToPtr(false), nil
+		return new(false), nil
 	}
 
 	log.Debug().
@@ -45,10 +44,10 @@ func ProcessFile(ctx context.Context, path string, updateInline bool) (*bool, er
 		Msg("Processing file")
 
 	if updateInline {
-		return lo.ToPtr(true), moveFileAndAttachmentIntoSameDir(ctx, path)
+		return new(true), moveFileAndAttachmentIntoSameDir(ctx, path)
 	}
 
-	return lo.ToPtr(false), nil
+	return new(false), nil
 }
 
 func moveFileAndAttachmentIntoSameDir(ctx context.Context, path string) error {
