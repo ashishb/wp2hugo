@@ -41,6 +41,7 @@ func moveContentNextToAttachments(ctx context.Context, hugoDir string, updateInl
 		if err != nil {
 			return err
 		}
+
 		if *processedFile {
 			modifiedCount++
 		}

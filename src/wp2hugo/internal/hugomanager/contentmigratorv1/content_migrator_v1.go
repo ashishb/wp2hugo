@@ -69,7 +69,7 @@ func moveFileAndAttachmentIntoSameDir(ctx context.Context, path string) error {
 	// Step 1: move file "./content/posts/filename.md" -> "./content/posts/filename/index.md"
 	blogPostDirPath, err := moveFileToIndexMd(ctx, path)
 	if err != nil {
-		return fmt.Errorf("error moving file '%s' to index: %w", path, err)
+		return fmt.Errorf("error moving file to index: %s %w", path, err)
 	}
 	newBlogPostMdPath := filepath.Join(*blogPostDirPath, "index.md")
 
@@ -108,7 +108,7 @@ func moveFileAndAttachmentIntoSameDir(ctx context.Context, path string) error {
 func moveFileToIndexMd(ctx context.Context, path string) (*string, error) {
 	// Step 1: move file "./content/posts/filename.md" -> "./content/posts/filename/index.md"
 	if !strings.HasSuffix(path, ".md") {
-		return nil, fmt.Errorf("path '%s' is not a markdown file", path)
+		return nil, fmt.Errorf("path is not a markdown file: '%s'", path)
 	}
 
 	// Get the directory path
@@ -116,12 +116,13 @@ func moveFileToIndexMd(ctx context.Context, path string) (*string, error) {
 	dirPath := filepath.Join(filepath.Dir(path), fileNameNoExt)
 	newFilePath := filepath.Join(dirPath, "index.md")
 	if utils.FileExists(newFilePath) {
-		return nil, fmt.Errorf("file '%s' already exists", newFilePath)
+		return nil, fmt.Errorf("file already exists: '%s'", newFilePath)
 	}
 
 	if err := os.MkdirAll(dirPath, 0o755); err != nil {
 		return nil, fmt.Errorf("error creating directory '%s': %w", dirPath, err)
 	}
+
 	log.Debug().
 		Str("path", path).
 		Str("newFilePath", newFilePath).

@@ -12,11 +12,22 @@ import (
 
 func GitMove(ctx context.Context, path string, newFilePath string) error {
 	if !utils.FileExists(path) {
-		return fmt.Errorf("file '%s' does not exist", path)
+		return fmt.Errorf("file does not exist: '%s'", path)
+	}
+
+	// Convert path to absolute path
+	path, err := filepath.Abs(path)
+	if err != nil {
+		return fmt.Errorf("error getting absolute path for '%s': %w", path, err)
+	}
+
+	newFilePath, err = filepath.Abs(newFilePath)
+	if err != nil {
+		return fmt.Errorf("error getting absolute path for '%s': %w", newFilePath, err)
 	}
 
 	if utils.FileExists(newFilePath) {
-		return fmt.Errorf("file '%s' already exists", newFilePath)
+		return fmt.Errorf("file already exists: '%s'", newFilePath)
 	}
 
 	cmd := exec.CommandContext(ctx, "git", "mv", path, newFilePath)
