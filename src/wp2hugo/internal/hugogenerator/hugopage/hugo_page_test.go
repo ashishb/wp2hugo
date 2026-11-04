@@ -67,6 +67,44 @@ func TestListExtractor(t *testing.T) {
 	testMarkdownExtractor(t, _sampleHTMLInput3, _sampleMarkdownOutput3)
 }
 
+func TestListWithStartAttributeKeepsNumbers(t *testing.T) {
+	t.Parallel()
+	const htmlInput = `<ol><li>One</li><li>Two</li></ol><p>Picture here</p>` +
+		`<ol start="4"><li>Four</li><li>Five<ol><li>Sub a</li><li>Sub b</li></ol></li><li>Six</li></ol>`
+	const markdownOutput = "1. One\n1. Two\n\nPicture here\n\n4. Four\n5. Five\n   1. Sub a\n   1. Sub b\n6. Six"
+	testMarkdownExtractor(t, htmlInput, markdownOutput)
+}
+
+func TestListNumbersInsideCodeBlockAreUntouched(t *testing.T) {
+	t.Parallel()
+	const htmlInput = "<pre><code>version: 3\n2. second line\n10. tenth line</code></pre><ol><li>Item</li><li>Item</li></ol>"
+	const markdownOutput = "```\nversion: 3\n2. second line\n10. tenth line\n```\n\n1. Item\n1. Item"
+	testMarkdownExtractor(t, htmlInput, markdownOutput)
+}
+
+func TestReplaceOrderedListNumbers(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{"list starting at 1", "1. a\n2. b\n3. c", "1. a\n1. b\n1. c"},
+		{"list starting at 3", "3. a\n4. b", "3. a\n4. b"},
+		{"loose list", "1. a\n\n2. b", "1. a\n\n1. b"},
+		{"continuation paragraph", "1. a\n\n   more text\n\n2. b", "1. a\n\n   more text\n\n1. b"},
+		{"paragraph ends the list", "5. a\n6. b\n\ntext\n\n1. c\n2. d", "5. a\n6. b\n\ntext\n\n1. c\n1. d"},
+		{"tilde fence", "~~~\n2. x\n~~~\n2. y\n3. z", "~~~\n2. x\n~~~\n2. y\n3. z"},
+		{"backtick fence", "```go\n7. x\n```\n1. y\n2. z", "```go\n7. x\n```\n1. y\n1. z"},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			require.Equal(t, tc.expected, replaceOrderedListNumbers(tc.input))
+		})
+	}
+}
+
 func TestConsecutiveNewlines(t *testing.T) {
 	t.Parallel()
 	testMarkdownExtractor(t, _sampleHTMLInput4, _sampleMarkdownOutput4)

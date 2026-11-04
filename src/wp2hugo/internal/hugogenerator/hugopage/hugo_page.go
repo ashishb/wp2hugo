@@ -521,11 +521,63 @@ func getLanguageCode(code string) string {
 	return languageCodes[slices.Index(possibleLanguages, language)]
 }
 
+var (
+	_orderedListItemRegex = regexp.MustCompile(`^([ \t]*)(\d+)\.([ \t]|$)`)
+	_codeFenceRegex       = regexp.MustCompile("^[ \t]*(```+|~~~+)")
+)
+
+// replaceOrderedListNumbers rewrites ordered list items to use "1." as the prefix.
+// Ref: https://github.com/markdownlint/markdownlint/blob/main/docs/RULES.md#md029---ordered-list-item-prefix
+//
+// Lines inside fenced code blocks are left untouched, and lists that do not start
+// at 1 (e.g. `<ol start="4">`) keep their original numbers, since the first item's
+// number determines where the rendered list starts.
 func replaceOrderedListNumbers(markdown string) string {
-	// Ref: https://github.com/markdownlint/markdownlint/blob/main/docs/RULES.md#md029---ordered-list-item-prefix
-	// Find all the ordered list items starting with optional whitespaces followed by \d. and replace with 1.
-	reg1 := regexp.MustCompile(`(?m)^(\s*)(\d+)\.(\s)`)
-	return reg1.ReplaceAllString(markdown, `${1}1.$3`)
+	lines := strings.Split(markdown, "\n")
+	fence := ""
+	// Indentation width of each currently open ordered list -> whether that list starts at 1
+	openLists := make(map[int]bool)
+
+	for i, line := range lines {
+		if fence != "" {
+			if strings.HasPrefix(strings.TrimLeft(line, " \t"), fence) {
+				fence = ""
+			}
+			continue
+		}
+		if match := _codeFenceRegex.FindStringSubmatch(line); match != nil {
+			fence = match[1]
+			continue
+		}
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
+
+		indent := len(line) - len(strings.TrimLeft(line, " \t"))
+		// Any line closes the lists nested deeper than itself
+		for listIndent := range openLists {
+			if listIndent > indent {
+				delete(openLists, listIndent)
+			}
+		}
+
+		match := _orderedListItemRegex.FindStringSubmatch(line)
+		if match == nil {
+			// A non-list line at this indentation ends the list at this level as well
+			delete(openLists, indent)
+			continue
+		}
+
+		startsAtOne, ok := openLists[indent]
+		if !ok {
+			startsAtOne = match[2] == "1"
+			openLists[indent] = startsAtOne
+		}
+		if startsAtOne {
+			lines[i] = match[1] + "1." + match[3] + line[len(match[0]):]
+		}
+	}
+	return strings.Join(lines, "\n")
 }
 
 func replaceConsecutiveNewlines(markdown string) string {
