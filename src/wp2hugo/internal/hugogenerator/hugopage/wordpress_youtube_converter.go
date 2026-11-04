@@ -3,6 +3,7 @@ package hugopage
 import (
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 )
@@ -10,7 +11,12 @@ import (
 // Example: Plain-text Youtube URLs on their own line in post content are turned by WP into embeds
 // The YouTube Lyte plug-in additionally uses "httpa://" for audio and "httpv://" for video embeds:
 // https://wordpress.com/plugins/wp-youtube-lyte
-var _YoutubeRegEx = regexp.MustCompile(`(?m)(^|\s)http[sav]?://(?:m\.|www\.)?(?:youtu\.be|youtube\.com)/(?:watch|w)\?v=([^&\s]+)`)
+// Both long (youtube.com/watch?v=ID) and short (youtu.be/ID) URLs are supported.
+// Any query parameters after the video ID (e.g. "&t=30s", "?si=...") are consumed so that
+// they don't remain as stray text next to the shortcode. Punctuation right after the URL
+// (e.g. a sentence-ending "." or ",") is not part of the query and is kept.
+// Note: this runs on Markdown, where "_" in the video ID may have been escaped as "\_".
+var _YoutubeRegEx = regexp.MustCompile(`(?m)(^|\s)http[sav]?://(?:m\.|www\.)?(?:youtu\.be/|youtube\.com/(?:watch|w)\?v=)((?:[A-Za-z0-9-]|\\?_)+)(?:[?&][\w=&%.\\-]*[\w=&%-])?`)
 
 // Gutenberg Youtube embed into figure:
 // <!-- wp:embed {"url":"https://www.youtube.com/watch?v=7l6FjphZXsk","type":"video","providerNameSlug":"youtube","responsive":true,"align":"full","className":"wp-embed-aspect-16-9 wp-has-aspect-ratio"} -->
@@ -19,7 +25,7 @@ var _YoutubeRegEx = regexp.MustCompile(`(?m)(^|\s)http[sav]?://(?:m\.|www\.)?(?:
 // </div></figure>
 // <!-- /wp:embed -->
 var (
-	_YoutubeGutenbergRegEx = regexp.MustCompile(`(?ms)(^|\s)<!-- wp:embed {"url":"[^"]+v=([^"]+)".*?<!-- /wp:embed -->`)
+	_YoutubeGutenbergRegEx = regexp.MustCompile(`(?ms)(^|\s)<!-- wp:embed {"url":"[^"]*?(?:youtu\.be/|v=)([A-Za-z0-9_-]+)[^"]*".*?<!-- /wp:embed -->`)
 	_YoutubeEmbedRegEx     = regexp.MustCompile(`(?m)(^|\s)(?:[embed])http[sav]?://(?:m\.|www\.)?(?:youtu\.be|youtube\.com)/(?:watch|w)\?v=([^&\s]+)(?:[/embed])`)
 )
 
@@ -41,5 +47,6 @@ func replacePlaintextYoutubeURL(htmlData string) string {
 }
 
 func YoutubeReplacementFunction(groups []string) string {
-	return fmt.Sprintf(`%s{{< youtube %s >}}`, groups[1], groups[2])
+	videoID := strings.ReplaceAll(groups[2], `\_`, "_")
+	return fmt.Sprintf(`%s{{< youtube %s >}}`, groups[1], videoID)
 }
