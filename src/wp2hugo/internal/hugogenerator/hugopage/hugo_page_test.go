@@ -82,6 +82,13 @@ func TestListNumbersInsideCodeBlockAreUntouched(t *testing.T) {
 	testMarkdownExtractor(t, htmlInput, markdownOutput)
 }
 
+func TestListItemWithLineBreak(t *testing.T) {
+	t.Parallel()
+	const htmlInput = `<ol><li>First<br>second line</li><li>Third</li></ol>`
+	const markdownOutput = "1. First  \nsecond line\n1. Third"
+	testMarkdownExtractor(t, htmlInput, markdownOutput)
+}
+
 func TestReplaceOrderedListNumbers(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
@@ -93,6 +100,8 @@ func TestReplaceOrderedListNumbers(t *testing.T) {
 		{"list starting at 3", "3. a\n4. b", "3. a\n4. b"},
 		{"loose list", "1. a\n\n2. b", "1. a\n\n1. b"},
 		{"continuation paragraph", "1. a\n\n   more text\n\n2. b", "1. a\n\n   more text\n\n1. b"},
+		{"lazy continuation line", "1. a  \nsecond line\n2. b\n3. c", "1. a  \nsecond line\n1. b\n1. c"},
+		{"lazy continuation in list starting at 4", "4. a\nlazy\n5. b", "4. a\nlazy\n5. b"},
 		{"paragraph ends the list", "5. a\n6. b\n\ntext\n\n1. c\n2. d", "5. a\n6. b\n\ntext\n\n1. c\n1. d"},
 		{"tilde fence", "~~~\n2. x\n~~~\n2. y\n3. z", "~~~\n2. x\n~~~\n2. y\n3. z"},
 		{"backtick fence", "```go\n7. x\n```\n1. y\n2. z", "```go\n7. x\n```\n1. y\n1. z"},

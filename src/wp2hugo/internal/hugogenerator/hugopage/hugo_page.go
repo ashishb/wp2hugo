@@ -537,8 +537,13 @@ func replaceOrderedListNumbers(markdown string) string {
 	fence := ""
 	// Indentation width of each currently open ordered list -> whether that list starts at 1
 	openLists := make(map[int]bool)
+	previousLineBlank := true
 
 	for i, line := range lines {
+		isBlank := strings.TrimSpace(line) == ""
+		lazyContinuation := !previousLineBlank
+		previousLineBlank = isBlank
+
 		if fence != "" {
 			if strings.HasPrefix(strings.TrimLeft(line, " \t"), fence) {
 				fence = ""
@@ -549,7 +554,14 @@ func replaceOrderedListNumbers(markdown string) string {
 			fence = match[1]
 			continue
 		}
-		if strings.TrimSpace(line) == "" {
+		if isBlank {
+			continue
+		}
+
+		match := _orderedListItemRegex.FindStringSubmatch(line)
+		if match == nil && lazyContinuation {
+			// A non-list line directly after a list item (e.g. "1. first  \nsecond", produced
+			// for `<li>first<br>second</li>`) is a lazy continuation of that item and does not end the list
 			continue
 		}
 
@@ -561,7 +573,6 @@ func replaceOrderedListNumbers(markdown string) string {
 			}
 		}
 
-		match := _orderedListItemRegex.FindStringSubmatch(line)
 		if match == nil {
 			// A non-list line at this indentation ends the list at this level as well
 			delete(openLists, indent)
