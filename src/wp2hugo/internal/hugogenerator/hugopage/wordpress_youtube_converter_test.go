@@ -80,6 +80,10 @@ func TestReplaceYoutubeURLWithQueryParameters(t *testing.T) {
 		{"short URL with share id", "https://youtu.be/gJ7AAJXHeeg?si=AbC_123", "{{< youtube gJ7AAJXHeeg >}}"},
 		{"short URL with timestamp", "https://youtu.be/gJ7AAJXHeeg?t=42 whatever", "{{< youtube gJ7AAJXHeeg >}} whatever"},
 		{"trailing period", "See https://youtu.be/gJ7AAJXHeeg.", "See {{< youtube gJ7AAJXHeeg >}}."},
+		{"query then period", "See https://youtu.be/gJ7AAJXHeeg?si=abc.", "See {{< youtube gJ7AAJXHeeg >}}."},
+		{"query then comma", "Watch https://www.youtube.com/watch?v=gJ7AAJXHeeg&t=30s, then", "Watch {{< youtube gJ7AAJXHeeg >}}, then"},
+		{"dot inside query", "https://www.youtube.com/watch?v=gJ7AAJXHeeg&feature=youtu.be", "{{< youtube gJ7AAJXHeeg >}}"},
+		{"escaped underscore in query", `https://www.youtube.com/watch?v=gJ7AAJXHeeg&list=PL\_x&index=2`, "{{< youtube gJ7AAJXHeeg >}}"},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
