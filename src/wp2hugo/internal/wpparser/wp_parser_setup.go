@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 	"unicode"
+	"unicode/utf8"
 
 	ext "github.com/mmcdole/gofeed/extensions"
 	"github.com/mmcdole/gofeed/rss"
@@ -25,8 +26,9 @@ const _filenameSizeLimit = 200
 
 var (
 	errTrashItem = errors.New("item is in trash")
-	// \p{L} matches any letter from any language while \w matches only ASCII letters
-	nonAlphanumericRegex = regexp.MustCompile(`[^\p{L}]+`)
+	// \p{L} matches any letter and \p{Nd} any decimal digit from any language,
+	// while \w matches only ASCII letters and digits
+	nonAlphanumericRegex = regexp.MustCompile(`[^\p{L}\p{Nd}]+`)
 )
 
 type Parser struct{}
@@ -114,11 +116,26 @@ func titleToFilename(title string) string {
 	if len(str1) > _filenameSizeLimit {
 		log.Warn().
 			Str("title", title).
-			Msgf("Filename is too long, truncating to %d characters", _filenameSizeLimit)
-		str1 = str1[:_filenameSizeLimit]
+			Msgf("Filename is too long, truncating to %d bytes", _filenameSizeLimit)
+		str1 = truncateUTF8(str1, _filenameSizeLimit)
+		str1 = strings.TrimSuffix(str1, "-")
 	}
 
 	return str1
+}
+
+// truncateUTF8 truncates s to at most maxBytes bytes without splitting a multibyte character.
+// Titles in non-Latin scripts (e.g. Korean, Japanese, Cyrillic) use 2-4 bytes per character,
+// so cutting at an arbitrary byte offset can produce invalid UTF-8.
+func truncateUTF8(s string, maxBytes int) string {
+	if len(s) <= maxBytes {
+		return s
+	}
+	cut := maxBytes
+	for cut > 0 && !utf8.RuneStart(s[cut]) {
+		cut--
+	}
+	return s[:cut]
 }
 
 func findSlugAndParams(parts []string) (string, string) {
