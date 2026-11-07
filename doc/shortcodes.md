@@ -1,6 +1,6 @@
 # Migration of shortcodes from WordPress to Hugo
 
-[Hugo](https://gohugo.io/content-management/shortcodes/) and [WordPress](https://codex.wordpress.org/Shortcode) both support shortcodes, which are text macros allowing to insert dynamic content or formatting blocks into the text. WordPress uses a bracket-based shortcode syntax, like `[gallery ids="1,2,3"]`, while Hugo uses Go templates, like `{{< youtube id="xxxx" >}}`.
+[Hugo](https://gohugo.io/content-management/shortcodes/) and [WordPress](https://codex.wordpress.org/Shortcode) both support shortcodes, which are text macros that allow inserting dynamic content or formatting blocks into the text. WordPress uses a bracket-based shortcode syntax, like `[gallery ids="1,2,3"]`, while Hugo uses Go templates, like `{{< youtube id="xxxx" >}}`.
 
 Both can have inline shortcodes (like the ones displayed above), or enclosing shortcodes, like `[embed]...content...[/embed]` for WordPress, or `{{< details summary="more" >}}...content...{{< /details >}}` for Hugo. Both allow nesting enclosed shortcodes within each other, though it might create edge cases if you nest more than 2 shortcodes in Hugo.
 
@@ -25,4 +25,4 @@ WP2Hugo will detect and automatically convert the following shortcodes:
 | SyntaxHighlighter Evolved Gutenberg block | `<!-- wp:syntaxhighlighter/code {"language":"python"} -->` | Fenced code block with the language, e.g. `` ```python `` | Third-party plugin, no shortcode needed |
 
 [^1]: Native Hugo shortcode,
-[^2]: Custom shortcode provided by WP2Hugo, found into the `/layouts/` subfolder of your imported website.
+[^2]: Custom shortcode provided by WP2Hugo, found in the `/layouts/` subfolder of your imported website.
