@@ -21,6 +21,8 @@ WP2Hugo will detect and automatically convert the following shortcodes:
 | Google Maps iframe | `<iframe src="https://www.google.com/maps/d/u/0/embed?mid=1lcjyzfxxXcdDP3XkrikfqIJryfFi4ZA" width="640" height="480"></iframe>` | `{{< googlemaps src="1lcjyzfxxXcdDP3XkrikfqIJryfFi4ZA" width=640 height=480 >}}` | Native HTML[^2] |
 | [List category posts](https://fr.wordpress.org/plugins/list-category-posts/) | `[catlist name="foo" catlink="yes" numberpost="9"]` | `{{< catlist category="foo" catlink=true count=9 >}}` | Third-party plugin[^2] |
 | [Advanced WordPress Backgrounds](https://wordpress.org/plugins/advanced-backgrounds/) | `[nk_awb awb_type="image" awb_image="4256"] ... [/nk_abw]` | `{{< parallaxblur src="%s" >}}... {{< /parallaxblar >}}` | Third-party plugin[^2] |
+| [SyntaxHighlighter Evolved](https://wordpress.org/plugins/syntaxhighlighter/) shortcodes | `[code language="python"]...[/code]`, `[sourcecode lang="bash"]...[/sourcecode]`, `[python]...[/python]` | Fenced code block with the language, e.g. `` ```python `` | Third-party plugin, no shortcode needed |
+| SyntaxHighlighter Evolved Gutenberg block | `<!-- wp:syntaxhighlighter/code {"language":"python"} -->` | Fenced code block with the language, e.g. `` ```python `` | Third-party plugin, no shortcode needed |
 
 [^1]: Native Hugo shortcode,
 [^2]: Custom shortcode provided by WP2Hugo, found into the `/layouts/` subfolder of your imported website.

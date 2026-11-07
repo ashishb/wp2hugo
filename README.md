@@ -152,7 +152,7 @@ See the [documentation](https://github.com/ashishb/wp2hugo/blob/main/doc/comment
 1. [x] Migrate ["Show more..." of WordPress](https://wordpress.com/support/wordpress-editor/blocks/more-block/) -> `Summary` in Hugo
 1. [x] Migrate [List Category posts(catlist)](https://wordpress.com/plugins/list-category-posts)
 1. [x] Migrate [WordPress table of content](https://wordpress.com/support/wordpress-editor/blocks/table-of-contents-block/) -> Hugo
-1. [x] Migrate code blocks correctly - migrate existing code class information if available
+1. [x] Migrate code blocks correctly - migrate existing code class information if available, including [SyntaxHighlighter Evolved](https://wordpress.org/plugins/syntaxhighlighter/) shortcodes and blocks
 1. Migrate embeds:
     1. [x] Migrate iframe(s) like YouTube embeds
     1. [x] Migrate [YouTube embeds](https://support.google.com/youtube/answer/171780)
