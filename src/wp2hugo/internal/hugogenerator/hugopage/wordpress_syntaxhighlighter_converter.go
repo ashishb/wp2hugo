@@ -62,7 +62,7 @@ var (
 	// Note: the attributes group always participates in the match (possibly empty), since
 	// replaceAllStringSubmatchFunc does not support optional groups that don't match
 	_syntaxHighlighterGutenbergBlock = regexp.MustCompile(`(?s)<!-- wp:syntaxhighlighter/code\s*((?:\{.*?\})?)\s*-->\s*` +
-		`<pre class="wp-block-syntaxhighlighter-code"[^>]*>(.*?)</pre>\s*` +
+		`<pre class="wp-block-syntaxhighlighter-code(?:\s[^"]*)?"[^>]*>(.*?)</pre>\s*` +
 		`<!-- /wp:syntaxhighlighter/code -->`)
 )
 
@@ -116,6 +116,28 @@ func replaceSyntaxHighlighterShortcodes(htmlData string) string {
 		// The closing tag must use the same name as the opening tag
 		closingTag := regexp.MustCompile(`(?i)\[/` + regexp.QuoteMeta(tagName) + `\]`)
 		closingLoc := closingTag.FindStringIndex(htmlData[loc[1]:])
+
+		// WordPress displays a shortcode wrapped in an extra pair of brackets as text instead of running it,
+		// e.g. "[[code]]" or "[[code]...[/code]]". Keep it as text without the extra brackets.
+		// Ref: "Allow [[foo]] syntax for escaping a tag" in https://developer.wordpress.org/reference/functions/do_shortcode_tag/
+		if loc[0] > 0 && htmlData[loc[0]-1] == '[' {
+			escapedEnd := -1
+			if loc[1] < len(htmlData) && htmlData[loc[1]] == ']' {
+				escapedEnd = loc[1]
+			} else if closingLoc != nil {
+				closingEnd := loc[1] + closingLoc[1]
+				if closingEnd < len(htmlData) && htmlData[closingEnd] == ']' {
+					escapedEnd = closingEnd
+				}
+			}
+			if escapedEnd >= 0 {
+				sb.WriteString(htmlData[:loc[0]-1])
+				sb.WriteString(htmlData[loc[0]:escapedEnd])
+				htmlData = htmlData[escapedEnd+1:]
+				continue
+			}
+		}
+
 		if closingLoc == nil {
 			// Not a SyntaxHighlighter shortcode (e.g. "[c]" in regular text), keep it as is
 			sb.WriteString(htmlData[:loc[1]])
@@ -145,7 +167,8 @@ func getSyntaxHighlighterLanguage(tagName string, attributes string) string {
 
 // normalizeSyntaxHighlighterLanguage maps a SyntaxHighlighter brush name to the language name used by Hugo
 func normalizeSyntaxHighlighterLanguage(language string) string {
-	language = strings.ToLower(strings.TrimSpace(language))
+	// A code fence's language can't contain spaces, e.g. "Objective C" -> "objective-c"
+	language = strings.ToLower(strings.Join(strings.Fields(language), "-"))
 	if alias, ok := _syntaxHighlighterLanguageAliases[language]; ok {
 		return alias
 	}

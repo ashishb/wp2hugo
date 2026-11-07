@@ -79,6 +79,21 @@ func TestReplaceSyntaxHighlighterShortcodes(t *testing.T) {
 			expected: "Use the [c] and [cpp] tags or [code]x[/sourcecode]",
 		},
 		{
+			name:     "escaped shortcode with content is kept as text",
+			input:    "Example: [[code language=\"php\"]echo 1;[/code]] renders as code.",
+			expected: "Example: [code language=\"php\"]echo 1;[/code] renders as code.",
+		},
+		{
+			name:     "escaped opening tag is kept as text",
+			input:    "Wrap your code in [[python]] and [/python]: [python]x = 1[/python]",
+			expected: "Wrap your code in [python] and [/python]: <pre><code class=\"language-python\">x = 1</code></pre>",
+		},
+		{
+			name:     "single bracket before a shortcode is not an escape",
+			input:    "[[code]x[/code]",
+			expected: "[<pre><code>x</code></pre>",
+		},
+		{
 			name:     "other shortcodes are not touched",
 			input:    "[caption id=\"1\"]x[/caption] [codepen id=\"2\"] [python_docs]",
 			expected: "[caption id=\"1\"]x[/caption] [codepen id=\"2\"] [python_docs]",
@@ -124,6 +139,20 @@ func TestReplaceSyntaxHighlighterGutenbergBlock(t *testing.T) {
 			expected: "<pre><code class=\"language-javascript\">a()</code></pre>\n<pre><code>text</code></pre>",
 		},
 		{
+			name: "with an additional CSS class",
+			input: "<!-- wp:syntaxhighlighter/code {\"language\":\"python\",\"className\":\"my-code\"} -->\n" +
+				"<pre class=\"wp-block-syntaxhighlighter-code my-code\">pass</pre>\n" +
+				"<!-- /wp:syntaxhighlighter/code -->",
+			expected: "<pre><code class=\"language-python\">pass</code></pre>",
+		},
+		{
+			name: "language with a space",
+			input: "<!-- wp:syntaxhighlighter/code {\"language\":\"Objective C\"} -->\n" +
+				"<pre class=\"wp-block-syntaxhighlighter-code\">x</pre>\n" +
+				"<!-- /wp:syntaxhighlighter/code -->",
+			expected: "<pre><code class=\"language-objective-c\">x</code></pre>",
+		},
+		{
 			name: "with other attributes",
 			input: "<!-- wp:syntaxhighlighter/code {\"language\":\"bash\",\"highlightLines\":\"2\"} -->\n" +
 				"<pre class=\"wp-block-syntaxhighlighter-code\">echo hi</pre>\n" +
@@ -155,6 +184,11 @@ func TestSyntaxHighlighterCodeInPageContent(t *testing.T) {
 			name:         "HTML code is kept as code",
 			htmlInput:    "[sourcecode lang=\"html\"]\n&lt;div&gt;&amp;&lt;/div&gt;\n[/sourcecode]",
 			expectedBody: "```html\n<div>&</div>\n```",
+		},
+		{
+			name:         "escaped shortcode is shown as text",
+			htmlInput:    "Example: [[code language=\"php\"]echo 1;[/code]] renders as code.",
+			expectedBody: "Example: \\[code language=\"php\"\\]echo 1;\\[/code\\] renders as code.",
 		},
 		{
 			name:         "shortcodes inside the code are not converted",
