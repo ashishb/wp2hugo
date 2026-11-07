@@ -345,6 +345,7 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 	}
 
 	converter := getMarkdownConverter()
+	htmlContent = replaceSyntaxHighlighterCode(htmlContent)
 	htmlContent = improvePreTagsWithCode(htmlContent)
 	htmlContent = replaceCaptionWithFigure(htmlContent)
 	htmlContent = replaceImageBlockWithFigure(htmlContent)
