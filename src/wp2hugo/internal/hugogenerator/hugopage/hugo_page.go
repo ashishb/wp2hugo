@@ -368,6 +368,7 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 		page.metadata["ShowToc"] = true
 		page.metadata["TocOpen"] = true
 	}
+	htmlContent = protectBlankLinesInPre(htmlContent)
 	markdown, err := converter.ConvertString(htmlContent)
 	log.Debug().
 		Str("htmlContent", htmlContent).
@@ -377,6 +378,7 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 	if err != nil {
 		return nil, fmt.Errorf("error converting HTML to Markdown: %w", err)
 	}
+	markdown = restoreBlankLinesInCode(markdown)
 	if len(strings.TrimSpace(markdown)) == 0 {
 		// The page contains no markdown. Warn the user, but keep going.
 		log.Warn().
@@ -395,14 +397,17 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 	}
 
 	markdown = strings.ReplaceAll(markdown, _doubleSpaceWithNewline, "  \n")
-	markdown = ReplaceAbsoluteLinksWithRelative(page.absoluteURL.Host, markdown)
-	markdown = replaceCatlistWithShortcode(markdown)
 	// Disabled for now, as it does not work well
 	if false {
 		markdown = highlightCode(markdown)
 	} else {
 		log.Debug().Msg("Auto-detecting languages of code blocks is disabled for now")
 	}
+
+	// The following steps must not modify code samples
+	markdown, protectedCodeSpans := protectCode(markdown)
+	markdown = ReplaceAbsoluteLinksWithRelative(page.absoluteURL.Host, markdown)
+	markdown = replaceCatlistWithShortcode(markdown)
 
 	// Replace footnote links with actual Hugo-style footnotes
 	// Ref: https://geekthis.net/post/hugo-footnotes-and-citations
@@ -424,6 +429,7 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 	markdown = removeTrailingSpaces(markdown)
 	// Workaround for https://github.com/ashishb/wp2hugo/issues/11
 	markdown = removeExtraSpaceBeforeLinks(markdown)
+	markdown = restoreCode(markdown, protectedCodeSpans)
 
 	return &markdown, nil
 }
