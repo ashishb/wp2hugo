@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"slices"
 
@@ -25,6 +26,7 @@ Alternatively, go to https://www.bing.com/webmasters/backlinks?activeTab=pages a
 func init() {
 	var bingBacklinksFilepath string // See _downloadInstructions
 	var colorLogOutput bool
+	var checkLinks bool
 	var numDomains *int
 	cmd := &cobra.Command{
 		Use:   "analyze-backlinks",
@@ -32,18 +34,20 @@ func init() {
 		Long:  "Analyzes backlinks and shows good quality backlinks.\n" + _downloadInstructions,
 		Run: func(cmd *cobra.Command, args []string) {
 			logger.ConfigureLogging(colorLogOutput)
-			analyzeBacklinks(bingBacklinksFilepath, *numDomains)
+			analyzeBacklinks(cmd.Context(), bingBacklinksFilepath, *numDomains, checkLinks)
 		},
 	}
 
 	cmd.Flags().StringVarP(&bingBacklinksFilepath, "file", "f", "", "Path to the Bing backlinks file"+_downloadInstructions)
 	cmd.PersistentFlags().BoolVarP(&colorLogOutput, "color-log-output", "", true,
 		"enable colored log output, set false to structured JSON log")
+	cmd.Flags().BoolVarP(&checkLinks, "check-links", "", true,
+		"check that every backlink is alive (returns HTTP 200) and log redirects with their final URL")
 	numDomains = cmd.PersistentFlags().IntP("num-domains", "n", 10, "number of top domains to show in the output")
 	rootCmd.AddCommand(cmd)
 }
 
-func analyzeBacklinks(bingBacklinksFilepath string, numDomainsToOutput int) {
+func analyzeBacklinks(ctx context.Context, bingBacklinksFilepath string, numDomainsToOutput int, checkLinks bool) {
 	if bingBacklinksFilepath == "" {
 		log.Fatal().Msg("Bing backlinks file path is required")
 	}
@@ -65,6 +69,10 @@ func analyzeBacklinks(bingBacklinksFilepath string, numDomainsToOutput int) {
 		Int("numBacklinks", len(result)).
 		Int("numReferringPages", result.NumReferringPages()).
 		Msg("Backlinks analysis completed")
+
+	if checkLinks {
+		result.CheckLinksAlive(ctx)
+	}
 
 	domainFrequency, err := result.HostAndFrequency(numDomainsToOutput)
 	if err != nil {

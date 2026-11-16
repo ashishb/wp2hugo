@@ -16,7 +16,7 @@ var _randomAggregators = []string{
 	"ainews.lucasprim.org", // Random news aggregator
 	"android.libhunt.com",
 	"biggo.com",
-	"bit.jus365.com",       // Lobste.rs clone
+	"bit.jus365.com", // Lobste.rs clone
 	"bookmarks.syslinux.info",
 	"brandonkaz.com",
 	"brew-watch.msaglietto.workers.dev",
