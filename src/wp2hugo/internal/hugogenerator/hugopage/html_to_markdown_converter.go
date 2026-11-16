@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
+	"github.com/JohannesKaufmann/html-to-markdown/plugin"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/rs/zerolog/log"
 )
@@ -19,12 +20,59 @@ var (
 
 func getMarkdownConverter() *md.Converter {
 	converter := md.NewConverter("", true, nil)
+	// Convert <table> into a Markdown (GFM) table, otherwise the cells are concatenated into a single line of text.
+	// Hugo supports GFM tables by default.
+	// Note: tables without a header row get an empty header row, since Markdown tables require one.
+	converter.Use(plugin.Table())
+	converter.Use(escapePipesInTableCellCode())
 	converter.Use(getYouTubeForHugoConverter())
 	converter.Use(getGoogleMapsEmbedForHugoConverter())
 	converter.Use(convertCustomBRToNewline())
 	converter.Use(convertBrToNewline())
 	converter.Use(convertGistURLsToShortcodes())
 	return converter
+}
+
+// escapePipesInTableCellCode handles inline code inside a table cell. In a GFM table, an unescaped "|"
+// ends the cell even inside a code span, so it has to be written as "\|".
+// Ref: "Include a pipe in a cell's content by escaping it, including inside other inline spans"
+// https://github.github.com/gfm/#example-200
+// Other <code> elements are left to the default rule.
+func escapePipesInTableCellCode() md.Plugin {
+	return func(c *md.Converter) []md.Rule {
+		return []md.Rule{
+			{
+				Filter: []string{"code"},
+				Replacement: func(content string, selec *goquery.Selection, opt *md.Options) *string {
+					if selec.ParentsFiltered("td, th").Length() == 0 || selec.ParentsFiltered("pre").Length() > 0 {
+						return nil
+					}
+
+					code := strings.ReplaceAll(selec.Text(), "|", `\|`)
+					fence := strings.Repeat("`", longestBacktickRun(code)+1)
+					// A code span can't start or end with a backtick next to the fence
+					if strings.HasPrefix(code, "`") || strings.HasSuffix(code, "`") {
+						code = " " + code + " "
+					}
+					text := md.AddSpaceIfNessesary(selec, fence+code+fence)
+					return &text
+				},
+			},
+		}
+	}
+}
+
+func longestBacktickRun(s string) int {
+	longest, current := 0, 0
+	for _, r := range s {
+		if r == '`' {
+			current++
+			longest = max(longest, current)
+		} else {
+			current = 0
+		}
+	}
+	return longest
 }
 
 // Ref: https://github.com/JohannesKaufmann/html-to-markdown/blob/master/plugin/iframe_youtube.go
