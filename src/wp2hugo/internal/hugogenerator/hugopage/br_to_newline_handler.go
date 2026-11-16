@@ -54,6 +54,13 @@ func convertBrToNewline() md.Plugin {
 			{
 				Filter: []string{"br"},
 				Replacement: func(content string, selec *goquery.Selection, opt *md.Options) *string {
+					if selec.ParentsFiltered("td, th").Length() > 0 {
+						// A newline would end the row of a Markdown table, so keep the HTML line break.
+						// The generated Hugo config allows raw HTML (markup.goldmark.renderer.unsafe).
+						text := "<br>"
+						return &text
+					}
+
 					// Ref: https://github.com/ashishb/wp2hugo/issues/12
 					log.Info().
 						Str("content", content).
