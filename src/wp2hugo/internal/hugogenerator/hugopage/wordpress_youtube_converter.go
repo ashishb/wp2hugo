@@ -41,9 +41,24 @@ func replacePlaintextYoutubeURL(htmlData string) string {
 	htmlData = regexp.MustCompile(`(?m)\[youtube (.*?)]`).ReplaceAllString(htmlData, "$1")
 
 	htmlData = replaceAllStringSubmatchFunc(_YoutubeGutenbergRegEx, htmlData, YoutubeReplacementFunction)
-	htmlData = replaceAllStringSubmatchFunc(_YoutubeRegEx, htmlData, YoutubeReplacementFunction)
-	htmlData = replaceAllStringSubmatchFunc(_YoutubeEmbedRegEx, htmlData, YoutubeReplacementFunction)
+	// WordPress does not embed a plain-text URL that is inside a table, and an embed would break the table row
+	htmlData = replaceOutsideOfTableRows(htmlData, func(line string) string {
+		line = replaceAllStringSubmatchFunc(_YoutubeRegEx, line, YoutubeReplacementFunction)
+		return replaceAllStringSubmatchFunc(_YoutubeEmbedRegEx, line, YoutubeReplacementFunction)
+	})
 	return htmlData
+}
+
+// replaceOutsideOfTableRows applies replace to every line that is not a row of a Markdown table
+func replaceOutsideOfTableRows(markdown string, replace func(line string) string) string {
+	lines := strings.Split(markdown, "\n")
+	for i, line := range lines {
+		// Table rows start with "|", possibly inside a blockquote ("> |")
+		if !strings.HasPrefix(strings.TrimLeft(line, " \t>"), "|") {
+			lines[i] = replace(line)
+		}
+	}
+	return strings.Join(lines, "\n")
 }
 
 func YoutubeReplacementFunction(groups []string) string {

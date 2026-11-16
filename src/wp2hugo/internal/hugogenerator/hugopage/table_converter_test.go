@@ -49,6 +49,16 @@ func TestTableConversion(t *testing.T) {
 			expectedBody: "| Command |\n| --- |\n| Run `ls \\| wc -l` now |",
 		},
 		{
+			name:         "YouTube URLs in a cell are not embedded",
+			htmlInput:    "<table><tr><th>Video</th></tr><tr><td>https://www.youtube.com/watch?v=gJ7AAJXHeeg</td></tr></table><p>https://youtu.be/gJ7AAJXHeeg</p>",
+			expectedBody: "| Video |\n| --- |\n| https://www.youtube.com/watch?v=gJ7AAJXHeeg |\n\n{{< youtube gJ7AAJXHeeg >}}",
+		},
+		{
+			name:         "table in a list item and in a blockquote",
+			htmlInput:    "<ul><li>Item<table><tr><th>A</th></tr><tr><td>1</td></tr></table></li><li>Next</li></ul><blockquote><table><tr><th>B</th></tr><tr><td>https://youtu.be/gJ7AAJXHeeg</td></tr></table></blockquote>",
+			expectedBody: "- Item\n\n  | A |\n  | --- |\n  | 1 |\n\n- Next\n\n> | B |\n> | --- |\n> | https://youtu.be/gJ7AAJXHeeg |",
+		},
+		{
 			name:         "line breaks and inline code outside of a table are unchanged",
 			htmlInput:    "<p>one<br>two <code>a | b</code></p>",
 			expectedBody: "one  \ntwo `a | b`",
