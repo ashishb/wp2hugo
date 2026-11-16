@@ -1,6 +1,6 @@
 module github.com/ashishb/wp2hugo/src/wp2hugo
 
-go 1.27.0
+go 1.27.4
 
 require (
 	github.com/JohannesKaufmann/html-to-markdown v1.6.0

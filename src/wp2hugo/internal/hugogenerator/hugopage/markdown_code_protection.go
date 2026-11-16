@@ -3,6 +3,7 @@ package hugopage
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 )
 
@@ -62,8 +63,8 @@ func protectCode(markdown string) (string, protectedCode) {
 func restoreCode(markdown string, code protectedCode) string {
 	// Restore in reverse order: inline code spans are protected after the fenced code blocks,
 	// so the text of a span may contain the placeholder of a fenced code block, but not the other way around
-	for i := len(code) - 1; i >= 0; i-- {
-		markdown = strings.Replace(markdown, fmt.Sprintf(_codePlaceholderFormat, i), code[i], 1)
+	for i, c := range slices.Backward(code) {
+		markdown = strings.Replace(markdown, fmt.Sprintf(_codePlaceholderFormat, i), c, 1)
 	}
 	return markdown
 }
