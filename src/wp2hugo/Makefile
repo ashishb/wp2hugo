@@ -21,7 +21,7 @@ go_format:
 	go mod tidy
 	golangci-lint run --fix
 
-format: go_format g
+format: go_format go_modernize_code_base
 	
 	
 go_modernize_code_base:
