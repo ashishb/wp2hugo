@@ -16,11 +16,15 @@ var _randomAggregators = []string{
 	"ainews.lucasprim.org", // Random news aggregator
 	"android.libhunt.com",
 	"biggo.com",
+	"bookmarks.syslinux.info",
 	"brandonkaz.com",
-	"bubbles.town",
+	"brew-watch.msaglietto.workers.dev",
 	"brutalist.report",
+	"bubbles.town",
 	"cipha.net",
+	"codehub.bot",
 	"discovery.cooperpress.com",
+	"droidspy.ai",
 	"duesenklipper.de",
 	"explore.market.dev",
 	"follow.it", // Feed reader
@@ -29,36 +33,42 @@ var _randomAggregators = []string{
 	"gitea.treehouse.systems",
 	"gitlibrary.club",
 	"goblgobl.com",
+	"hackernews.betacat.io",
 	"hackurls.com",
 	"hckrnews.com", // Hacker News clone
 	"hnsummary.ai",
+	"href.ninja",
 	"illuping24.tistory.com", // A Korean blog aggregator
 	"isthistechdead.com",
 	"jimmyr.com",
-	"href.ninja",
 	"libhunt.com",
+	"libs.tech",
 	"minifeed.net", // A feed reader
+	"news.mcan.sh", // Hacker News clone
 	"news.routley.io",
 	"news.starmorph.com",
-	"news.mcan.sh",        // Hacker News clone
 	"nilaykhandelwal.com", // Hacker News clone
 	"old.programming.dev", // Reddit aggregator
 	"pandia.org",
+	"programming.dev", // Reddit aggregator
 	"progscrape.com",
-	"programming.dev",            // Reddit aggregator
 	"r.genit.al",                 // Reddit aggregator
 	"reddit.ny4.dev",             // Reddit aggregator
 	"redlib.private.coffee",      // Reddit aggregator
 	"rss.social",                 // Feed reader
-	"ser2.dastresanart.com",      // Hacker News clone
 	"salondemassagebordeaux.com", // Spam website
+	"ser2.dastresanart.com",      // Hacker News clone
 	"stage.androidweekly.net",    // Clone of androidweekly.net
 	"telegra.ph",
 	"tourmentine.com",
+	"trendshift.io",
 	"uocat.com",
 	"upstract.com",
 	"vercel.app",
+	"verstracker.com",
+	"vybing.dev",
 	"webtagr.com",
+	"xianz.ai",
 	"xn--r1a.website",
 }
 
