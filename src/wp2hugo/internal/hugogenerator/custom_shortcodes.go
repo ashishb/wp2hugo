@@ -128,13 +128,22 @@ const _galleryShortCode = `
 </div>
 `
 
+// Hugo removed its built-in "gist" shortcode in v0.156.0, and a site using it fails to build.
+// wp2hugo converts GitHub Gist embeds to "{{< gist user id >}}", so we provide our own
+// implementation, which takes precedence over Hugo's built-in one.
+// The optional third parameter selects a single file from the gist.
+// Ref: https://gohugo.io/shortcodes/gist/
+const _gistShortCode = `<script src="https://gist.github.com/{{ index .Params 0 }}/{{ index .Params 1 }}.js{{ if eq (len .Params) 3 }}?file={{ index .Params 2 }}{{ end }}"></script>
+`
+
 func WriteCustomShortCodes(siteDir string) error {
 	return errors.Join(writeGoogleMapsShortCode(siteDir),
 		writeSelectedPostsShortCode(siteDir),
 		writeParallaxBlurShortCode(siteDir),
 		writeAudioShortCode(siteDir),
 		writeVideoShortCode(siteDir),
-		writeGalleryShortCode(siteDir))
+		writeGalleryShortCode(siteDir),
+		writeGistShortCode(siteDir))
 }
 
 func writeGoogleMapsShortCode(siteDir string) error {
@@ -159,6 +168,10 @@ func writeVideoShortCode(siteDir string) error {
 
 func writeGalleryShortCode(siteDir string) error {
 	return writeShortCode(siteDir, "gallery", _galleryShortCode)
+}
+
+func writeGistShortCode(siteDir string) error {
+	return writeShortCode(siteDir, "gist", _gistShortCode)
 }
 
 func writeShortCode(siteDir string, shortCodeName string, fileContent string) error {
