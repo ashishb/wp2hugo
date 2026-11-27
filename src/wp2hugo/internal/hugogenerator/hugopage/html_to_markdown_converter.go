@@ -15,7 +15,7 @@ var (
 	youtubeID    = regexp.MustCompile(`youtube\.com/embed/([^\&\?\/]+)`)
 	googleMapsID = regexp.MustCompile(`google\.com/maps/d/.*embed\?mid=([0-9A-Za-z-_]+)`)
 	gistUrl      = regexp.MustCompile(`gist\.github\.com/([^/]+)/([0-9a-f]+)`)
-	gistMarkdown = regexp.MustCompile(`\\\[gist .*\]`)
+	gistMarkdown = regexp.MustCompile(`\\\[gist .*?\]`)
 )
 
 func getMarkdownConverter() *md.Converter {
@@ -164,9 +164,7 @@ func convertGistURLsToShortcodes() md.Plugin {
 			{
 				Filter: []string{"body"},
 				Replacement: func(content string, selec *goquery.Selection, opt *md.Options) *string {
-					text := gistMarkdown.ReplaceAllStringFunc(content, func(s string) string {
-						return extractShortcodeFromGistUrl(content)
-					})
+					text := gistMarkdown.ReplaceAllStringFunc(content, extractShortcodeFromGistUrl)
 					return &text
 				},
 			},

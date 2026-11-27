@@ -59,3 +59,12 @@ func TestMarkdownGist(t *testing.T) {
 	require.NoError(t, err)
 	require.Contains(t, result, `{{< gist lawrencegripper 6bee7de123bea1936359 >}}`)
 }
+
+// Each "[gist ...]" shortcode must be converted to its own gist, not to the first one of the post
+func TestMarkdownGistMultiple(t *testing.T) {
+	t.Parallel()
+	testMarkdownExtractor(t,
+		"<p>[gist https://gist.github.com/aaa/1111111111] and [gist https://gist.github.com/bbb/2222222222]</p>\n"+
+			"<p>[gist https://gist.github.com/ccc/3333333333]</p>",
+		"{{< gist aaa 1111111111 >}} and {{< gist bbb 2222222222 >}}\n\n{{< gist ccc 3333333333 >}}")
+}
