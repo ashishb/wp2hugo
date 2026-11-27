@@ -53,6 +53,8 @@ var (
 	_preTagExtractor2 = regexp.MustCompile(`<pre class=".*?lang:([^" ]+).*?>([\s\S]*?)</pre>`)
 
 	_hugoShortCodeMatcher = regexp.MustCompile(`{{<.*?>}}`)
+	// Iframes that are not converted to a shortcode are kept as raw HTML
+	_iframeMatcher = regexp.MustCompile(`(?is)<iframe\b.*?</iframe>`)
 
 	// Ref: https://github.com/markdownlint/markdownlint/blob/main/docs/RULES.md#md012---multiple-consecutive-blank-lines
 	// Replace multiple consecutive newlines with just two newlines
@@ -389,8 +391,9 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 		// Ref: https://gohugo.io/content-management/summaries/#manual-summary-splitting
 		summary, _, _ := strings.Cut(markdown, _customMoreTag)
 		markdown = strings.Replace(markdown, _customMoreTag, "", 1)
-		// Remove short codes from summary
+		// Remove short codes and embedded iframes from summary
 		// Ref: https://github.com/ashishb/wp2hugo/issues/13
+		summary = _iframeMatcher.ReplaceAllString(summary, " ")
 		page.metadata["summary"] = strings.TrimSpace(removeAllHugoShortcodes(summary))
 		log.Warn().
 			Msgf("Manual summary splitting is not supported: %s", page.metadata)

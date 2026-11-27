@@ -1,7 +1,10 @@
 package hugopage
 
 import (
+	"net/url"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestEmbedConversion(t *testing.T) {
@@ -94,4 +97,19 @@ https://www.instagram.com/p/Cx_OWiQNP2MO/
 			testMarkdownExtractor(t, tc.html, tc.expected)
 		})
 	}
+}
+
+func TestIframesAreRemovedFromSummary(t *testing.T) {
+	t.Parallel()
+	const htmlInput = "<p>Watch this</p>\n" +
+		`<p><iframe src="https://www.dailymotion.com/embed/video/x8abcde" width="640" height="360"></iframe></p>` +
+		"\n<!--more-->\n<p>Rest</p>"
+	pageURL, err := url.Parse("https://example.com")
+	require.NoError(t, err)
+	page, err := NewPage(nil, *pageURL, "author", "Title", nil, false, nil, nil, nil, nil, htmlInput, nil, nil, nil, nil, nil, "0", nil)
+	require.NoError(t, err)
+	markdown, err := page.getMarkdown(nil, htmlInput, nil)
+	require.NoError(t, err)
+	require.Contains(t, *markdown, `<iframe src="https://www.dailymotion.com/embed/video/x8abcde"`)
+	require.Equal(t, "Watch this", page.metadata["summary"])
 }
