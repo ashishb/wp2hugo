@@ -426,6 +426,7 @@ func (page *Page) getMarkdown(provider ImageURLProvider, htmlContent string, foo
 	markdown = replaceOrderedListNumbers(markdown)
 	markdown = replaceConsecutiveNewlines(markdown)
 	markdown = replacePlaintextYoutubeURL(markdown)
+	markdown = replacePlaintextVimeoAndInstagramURLs(markdown)
 	markdown = removeTrailingSpaces(markdown)
 	// Workaround for https://github.com/ashishb/wp2hugo/issues/11
 	markdown = removeExtraSpaceBeforeLinks(markdown)

@@ -34,7 +34,7 @@ func replacePlaintextYoutubeURL(htmlData string) string {
 		Msg("Replacing Youtube URLs with embeds")
 
 	// Replace "[embed](.*)[/embed]" with $1, to remove the embed tags and leave the URL for the next regex to process
-	htmlData = regexp.MustCompile(`(?m)\[embed](.*?)\[/embed]`).ReplaceAllString(htmlData, "$1")
+	htmlData = unwrapEmbedShortcodes(htmlData)
 
 	// Replace [youtube http://www.youtube.com/watch?v=1cNDSPutas8] with just the URL for the next regex to process
 	// Ref: https://github.com/ashishb/wp2hugo/issues/268

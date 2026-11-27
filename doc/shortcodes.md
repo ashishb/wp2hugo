@@ -19,10 +19,15 @@ WP2Hugo will detect and automatically convert the following shortcodes:
 | YouTube iframe | `<iframe src="https://www.youtube.com/embed/gJ7AAJXHeeg width="640" height"480"></iframe>` | `{{< youtube gJ7AAJXHeeg >}}` | Native WordPress[^1] |
 | YouTube Gutenberg embed block | | `{{< youtube gJ7AAJXHeeg >}}` | Native WordPress[^1] |
 | Google Maps iframe | `<iframe src="https://www.google.com/maps/d/u/0/embed?mid=1lcjyzfxxXcdDP3XkrikfqIJryfFi4ZA" width="640" height="480"></iframe>` | `{{< googlemaps src="1lcjyzfxxXcdDP3XkrikfqIJryfFi4ZA" width=640 height=480 >}}` | Native HTML[^2] |
+| Vimeo embed | `https://vimeo.com/76979871` on its own line (also as Gutenberg embed block or `[embed]...[/embed]`), `<iframe src="https://player.vimeo.com/video/76979871"></iframe>` | `{{< vimeo 76979871 >}}` | Native WordPress[^1] |
+| Instagram embed | `https://www.instagram.com/p/CxOWiQNP2MO/` on its own line (also as Gutenberg embed block or `[embed]...[/embed]`) | `{{< instagram CxOWiQNP2MO >}}` | Native WordPress[^1] |
 | [List category posts](https://fr.wordpress.org/plugins/list-category-posts/) | `[catlist name="foo" catlink="yes" numberpost="9"]` | `{{< catlist category="foo" catlink=true count=9 >}}` | Third-party plugin[^2] |
 | [Advanced WordPress Backgrounds](https://wordpress.org/plugins/advanced-backgrounds/) | `[nk_awb awb_type="image" awb_image="4256"] ... [/nk_abw]` | `{{< parallaxblur src="%s" >}}... {{< /parallaxblar >}}` | Third-party plugin[^2] |
 | [SyntaxHighlighter Evolved](https://wordpress.org/plugins/syntaxhighlighter/) shortcodes | `[code language="python"]...[/code]`, `[sourcecode lang="bash"]...[/sourcecode]`, `[python]...[/python]` | Fenced code block with the language, e.g. `` ```python `` | Third-party plugin, no shortcode needed |
 | SyntaxHighlighter Evolved Gutenberg block | `<!-- wp:syntaxhighlighter/code {"language":"python"} -->` | Fenced code block with the language, e.g. `` ```python `` | Third-party plugin, no shortcode needed |
+
+Other iframes (for example, Dailymotion or SoundCloud players, or unlisted Vimeo videos that need the `h` parameter) are kept as raw HTML.
+URLs of other providers in `[embed]...[/embed]` are kept as plain links.
 
 [^1]: Native Hugo shortcode,
 [^2]: Custom shortcode provided by WP2Hugo, found in the `/layouts/` subfolder of your imported website.
